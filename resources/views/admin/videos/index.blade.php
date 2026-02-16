@@ -5,14 +5,10 @@
         {{-- Header Section --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
             <div>
-                <a href="{{ route('admin.songs.variants', $song_variant->song_id) }}"
-                    class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO VARIANTS
-                </a>
                 <h1 class="text-3xl font-bold text-white tracking-tight">Manage Video</h1>
                 <p class="text-zinc-400 mt-1">Video configuration for <span
-                        class="text-blue-400 font-semibold">{{ $song_variant->song->song_romaji }}
-                        ({{ $song_variant->slug }})</span></p>
+                        class="text-blue-400 font-semibold">{{ $songVariant->song->name }} {{ $songVariant->song->slug }}
+                        {{ $songVariant->slug }}</span></p>
             </div>
         </div>
 
@@ -33,7 +29,7 @@
                     </thead>
                     <tbody class="divide-y divide-zinc-800/50">
                         @php
-                            $video = $song_variant->video;
+                            $video = $songVariant->video;
                         @endphp
                         @if ($video)
                             <tr class="hover:bg-zinc-800/30 transition-colors group">

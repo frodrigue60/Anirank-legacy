@@ -91,7 +91,7 @@
             @endauth
         </main>
 
-        @include('layouts.footer.footer-v1')
+        @include('layouts.footer')
 
         <x-toast />
     </div>

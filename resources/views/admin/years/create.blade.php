@@ -1,15 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {{-- Header Section --}}
         <div class="mb-8">
-            <a href="{{ route('admin.years.index') }}"
-                class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO TIMELINE
-            </a>
-            <h1 class="text-3xl font-bold text-white tracking-tight">Add Year Entry</h1>
-            <p class="text-zinc-400 mt-1">Register a new broadcast year in the system.</p>
+            <h1 class="text-3xl font-bold text-white tracking-tight">Create Year</h1>
+            <p class="text-zinc-400 mt-1">Creating a new year for <span class="text-blue-400 font-semibold">Anirank</span>
+            </p>
         </div>
 
         {{-- Form Card --}}

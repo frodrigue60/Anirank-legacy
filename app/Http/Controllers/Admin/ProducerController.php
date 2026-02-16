@@ -16,8 +16,11 @@ class ProducerController extends Controller
      */
     public function index()
     {
+        $breadcrumb = [
+            ['name' => 'Producers', 'url' => route('admin.producers.index')],
+        ];
         $producers = Producer::paginate(15);
-        return view('admin.producers.index', compact('producers'));
+        return view('admin.producers.index', compact('producers', 'breadcrumb'));
     }
 
     /**
@@ -27,7 +30,11 @@ class ProducerController extends Controller
      */
     public function create()
     {
-        return view('admin.producers.create');
+        $breadcrumb = [
+            ['name' => 'Producers', 'url' => route('admin.producers.index')],
+            ['name' => 'Create', 'url' => route('admin.producers.create')],
+        ];
+        return view('admin.producers.create', compact('breadcrumb'));
     }
 
     /**
@@ -58,8 +65,12 @@ class ProducerController extends Controller
      */
     public function edit($id)
     {
+        $breadcrumb = [
+            ['name' => 'Producers', 'url' => route('admin.producers.index')],
+            ['name' => 'Edit', 'url' => route('admin.producers.edit', $id)],
+        ];
         $producer = Producer::findOrFail($id);
-        return view('admin.producers.edit', compact('producer'));
+        return view('admin.producers.edit', compact('producer', 'breadcrumb'));
     }
 
     /**

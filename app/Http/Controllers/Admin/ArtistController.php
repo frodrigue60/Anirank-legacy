@@ -22,10 +22,16 @@ class ArtistController extends Controller
      */
     public function index()
     {
+        $breadcrumb = [
+            [
+                'name' => 'Artists',
+                'url' => route('admin.artists.index'),
+            ]
+        ];
         $artists =  Artist::all();
         $artists = $artists->sortByDesc('created_at');
         $artists = $this->paginate($artists, 15);
-        return view('admin.artists.index', compact('artists'));
+        return view('admin.artists.index', compact('artists', 'breadcrumb'));
     }
 
     /**
@@ -35,7 +41,17 @@ class ArtistController extends Controller
      */
     public function create()
     {
-        return view('admin.artists.create');
+        $breadcrumb = [
+            [
+                'name' => 'Artists',
+                'url' => route('admin.artists.index'),
+            ],
+            [
+                'name' => 'Create',
+                'url' => '',
+            ]
+        ];
+        return view('admin.artists.create', compact('breadcrumb'));
     }
 
     /**
@@ -105,8 +121,18 @@ class ArtistController extends Controller
      */
     public function edit($id)
     {
+        $breadcrumb = [
+            [
+                'name' => 'Artists',
+                'url' => route('admin.artists.index'),
+            ],
+            [
+                'name' => 'Edit',
+                'url' => '',
+            ]
+        ];
         $artist = Artist::find($id);
-        return view('admin.artists.edit')->with('artist', $artist);
+        return view('admin.artists.edit', compact('artist', 'breadcrumb'));
     }
 
     /**

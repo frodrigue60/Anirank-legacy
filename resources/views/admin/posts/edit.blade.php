@@ -1,15 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {{-- Header Section --}}
         <div class="mb-8">
-            <a href="{{ route('admin.posts.index') }}"
-                class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO POSTS
-            </a>
             <h1 class="text-3xl font-bold text-white tracking-tight">Edit Post</h1>
-            <p class="text-zinc-400 mt-1">Updating entry for <span
+            <p class="text-zinc-400 mt-1">Updating post for <span
                     class="text-blue-400 font-semibold">{{ $post->title }}</span></p>
         </div>
 

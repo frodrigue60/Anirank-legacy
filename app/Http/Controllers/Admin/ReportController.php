@@ -20,10 +20,13 @@ class ReportController extends Controller
      */
     public function index()
     {
+        $breadcrumb = [
+            ['name' => 'Reports', 'url' => route('admin.reports.index')],
+        ];
         $reports = Report::all();
         $reports = $reports->sortByDesc('created_at');
         $reports = $this->paginate($reports);
-        return view('admin.reports.index', compact('reports'));
+        return view('admin.reports.index', compact('reports', 'breadcrumb'));
     }
 
     /**
@@ -55,8 +58,12 @@ class ReportController extends Controller
      */
     public function show($id)
     {
+        $breadcrumb = [
+            ['name' => 'Reports', 'url' => route('admin.reports.index')],
+            ['name' => 'Show', 'url' => route('admin.reports.show', $id)],
+        ];
         $report = Report::find($id);
-        return view('admin.reports.show', compact('report'));
+        return view('admin.reports.show', compact('report', 'breadcrumb'));
     }
 
     /**
@@ -92,10 +99,11 @@ class ReportController extends Controller
     {
         $report = Report::findOrFail($id);
         $report->delete();
-        return redirect(route('admin.reports.index'))->with('warning', 'Report '.$report->id.' deleted');
+        return redirect(route('admin.reports.index'))->with('warning', 'Report ' . $report->id . ' deleted');
     }
 
-    public function toggleStatus($id){
+    public function toggleStatus($id)
+    {
         $report = Report::find($id);
 
         if ($report->status == 'fixed') {

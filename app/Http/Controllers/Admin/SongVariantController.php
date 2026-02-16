@@ -190,7 +190,7 @@ class SongVariantController extends Controller
             ],
         ]);
 
-        return view("admin.videos.index", compact("song_variant", 'breadcrumb'));
+        return view("admin.videos.index", compact("songVariant", 'breadcrumb'));
     }
 
     public function addVideos($variantId)

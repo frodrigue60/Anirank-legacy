@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header --}}
-        <div class="mb-8">
-            <a href="{{ route('admin.variants.videos', $video->song_variant_id ?? '#') }}"
-                class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO VIDEO MANAGEMENT
-            </a>
-            <h1 class="text-3xl font-bold text-white tracking-tight">Edit Video Source</h1>
-            <p class="text-zinc-400 mt-1">Updating video entry <span
-                    class="text-blue-400 font-mono">#{{ $video->id }}</span></p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {{-- Header Section --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Edit Video Source</h1>
+                <p class="text-zinc-400 mt-1">Video configuration for <span
+                        class="text-blue-400 font-semibold">{{ $video->songVariant->song->name }}
+                        {{ $video->songVariant->song->slug }}
+                        {{ $video->songVariant->slug }}</span></p>
+            </div>
         </div>
 
         {{-- Form Card --}}

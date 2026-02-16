@@ -3,29 +3,18 @@
 @section('content')
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {{-- Header Section --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+        <div class="mb-8 flex justify-between items-center">
             <div>
-                <a href="{{ route('admin.posts.index') }}"
-                    class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO POSTS
-                </a>
                 <h1 class="text-3xl font-bold text-white tracking-tight">Manage Songs</h1>
-                @isset($post)
-                    <p class="text-zinc-400 mt-1">Manage themes for <span
-                            class="text-blue-400 font-semibold">{{ $post->title }}</span></p>
-                @endisset
+                <p class="text-zinc-400 mt-1">Managing songs for <span
+                        class="text-blue-400 font-semibold">{{ $post->title }}</span></p>
             </div>
-            <div class="flex flex-wrap gap-3">
-                @isset($post)
-                    <a href="{{ route('admin.posts.songs.add', $post->id) }}"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/20 hover:scale-105 active:scale-95">
-                        <i class="fa-solid fa-plus mr-2"></i> ADD SONG
-                    </a>
-                @endisset
-            </div>
+            <a href="{{ route('admin.posts.songs.add', $post->id) }}"
+                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/20 hover:scale-105 active:scale-95">
+                <i class="fa-solid fa-plus mr-2"></i> ADD SONG
+            </a>
         </div>
 
-        {{-- Table Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">

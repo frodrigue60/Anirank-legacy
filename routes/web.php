@@ -108,7 +108,7 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
         Route::get('/{post}/songs/add', 'addSong')->name('songs.add');
         Route::get('/{post}/songs', 'songs')->name('songs');
         Route::post('/search-animes', 'searchInAnilist')->name('search.animes');
-        Route::get('/by-id/{id}', 'getById')->name('by-id');
+        Route::get('/by-id/{id}', 'getById')->name('by.id');
         Route::post('/seasonal-animes', 'getSeasonalAnimes')->name('seasonal.animes');
         Route::get('/{post}/force-update', 'forceUpdate')->name('force.update');
         Route::post('/sync-all', 'syncAllFromAnilist')->name('sync.all');

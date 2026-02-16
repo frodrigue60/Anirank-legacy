@@ -34,7 +34,7 @@ class PostController extends Controller
 
         $breadcrumb = Breadcrumb::generate([
             [
-                'name' => 'Index',
+                'name' => 'Posts',
                 'url' => route('admin.posts.index'),
             ],
         ]);
@@ -140,16 +140,15 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Post $post)
     {
         if (Auth::check() && Auth::user()->isStaff()) {
 
-            $post = Post::findOrFail($id);
             $score_format = Auth::user()->score_format;
 
             $breadcrumb = Breadcrumb::generate([
                 [
-                    'name' => 'Index',
+                    'name' => 'Posts',
                     'url' => route('admin.posts.index'),
                 ],
                 [
@@ -176,9 +175,8 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Post $post)
     {
-        $post = Post::find($id);
         $artists = Artist::all();
         $seasons = Season::all();
         $years = Year::all();
@@ -197,7 +195,7 @@ class PostController extends Controller
 
         $breadcrumb = Breadcrumb::generate([
             [
-                'name' => 'Index',
+                'name' => 'Posts',
                 'url' => route('admin.posts.index'),
             ],
             [
@@ -306,9 +304,18 @@ class PostController extends Controller
 
     public function searchInAnilist(Request $request)
     {
+        $breadcrumb = [
+            [
+                'name' => 'Posts',
+                'url' => route('admin.posts.index'),
+            ],
+            [
+                'name' => 'Search Animes',
+                'url' => '',
+            ],
+        ];
         $q = $request->q;
         $type = $request->type;
-
 
         $variables = [
             'search' => $q,
@@ -334,7 +341,7 @@ class PostController extends Controller
             array_push($posts, $item);
         }
 
-        return view('admin.posts.select', compact('posts'));
+        return view('admin.posts.select', compact('posts', 'breadcrumb'));
     }
     public function getById($anilist_id)
     {
@@ -824,9 +831,8 @@ class PostController extends Controller
         Storage::disk('public')->put($path, $imageContent);
     }
 
-    public function addSong($post_id)
+    public function addSong(Post $post)
     {
-        $post = Post::find($post_id);
         $seasons = Season::all();
         $years = Year::all();
         $types = [
@@ -836,8 +842,6 @@ class PostController extends Controller
             ['name' => 'Other', 'value' => 'OTH']
         ];
         $artists = Artist::all();
-
-        $post = Post::with('songs')->find($post_id);
 
         $breadcrumb = Breadcrumb::generate([
             [

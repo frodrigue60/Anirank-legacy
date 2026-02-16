@@ -1,16 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {{-- Header Section --}}
-        <div class="mb-8">
-            <a href="{{ route('admin.requests.index') }}"
-                class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO REQUESTS
-            </a>
-            <h1 class="text-3xl font-bold text-white tracking-tight">Request Details</h1>
-            <p class="text-zinc-400 mt-1">Submitted by <span
-                    class="text-blue-400 font-bold">{{ $userRequest->user->name }}</span></p>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Request Details</h1>
+                <p class="text-zinc-400 mt-1">Request details <span
+                        class="text-blue-400 font-mono">#{{ $userRequest->id }}</span></p>
+            </div>
+
         </div>
 
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden shadow-xl">

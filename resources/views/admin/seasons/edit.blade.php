@@ -1,16 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {{-- Header Section --}}
         <div class="mb-8">
-            <a href="{{ route('admin.seasons.index') }}"
-                class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO SEASONS
-            </a>
             <h1 class="text-3xl font-bold text-white tracking-tight">Edit Season</h1>
-            <p class="text-zinc-400 mt-1">Updating broadcast period <span
-                    class="text-blue-400 font-semibold">{{ $season->name }}</span></p>
+            <p class="text-zinc-400 mt-1">Updating season <span class="text-blue-400 font-semibold">{{ $season->name }}</span>
+            </p>
         </div>
 
         {{-- Form Card --}}

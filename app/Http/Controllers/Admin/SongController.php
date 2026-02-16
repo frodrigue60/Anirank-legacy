@@ -151,9 +151,26 @@ class SongController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Song $song)
     {
-        $song = Song::find($id);
+        $breadcrumb = Breadcrumb::generate([
+            [
+                'name' => 'Posts',
+                'url' => route('admin.posts.index')
+            ],
+            [
+                'name' => $song->post->title,
+                'url' => route('admin.posts.show', $song->post_id)
+            ],
+            [
+                'name' => 'Songs',
+                'url' => route('admin.posts.songs', $song->post_id)
+            ],
+            [
+                'name' => 'Edit',
+                'url' => route('admin.songs.edit', $song->id)
+            ]
+        ]);
         /* $artists = Artist::all(); */
         $seasons = Season::all();
         $years = Year::all();
@@ -164,7 +181,7 @@ class SongController extends Controller
             ['name' => 'Other', 'value' => 'OTH']
         ];
 
-        return view('admin.songs.edit', compact('song', /* 'artists', */ 'types', 'seasons', 'years'));
+        return view('admin.songs.edit', compact('song', /* 'artists', */ 'types', 'seasons', 'years', 'breadcrumb'));
     }
 
     /**

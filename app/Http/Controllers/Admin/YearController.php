@@ -16,8 +16,11 @@ class YearController extends Controller
      */
     public function index()
     {
+        $breadcrumb = [
+            ['name' => 'Years', 'url' => route('admin.years.index')],
+        ];
         $years = Year::all();
-        return view('admin.years.index', compact('years'));
+        return view('admin.years.index', compact('years', 'breadcrumb'));
     }
 
     /**
@@ -27,7 +30,11 @@ class YearController extends Controller
      */
     public function create()
     {
-        return view('admin.years.create');
+        $breadcrumb = [
+            ['name' => 'Years', 'url' => route('admin.years.index')],
+            ['name' => 'Create', 'url' => route('admin.years.create')],
+        ];
+        return view('admin.years.create', compact('breadcrumb'));
     }
 
     /**
@@ -64,8 +71,12 @@ class YearController extends Controller
      */
     public function show($id)
     {
+        $breadcrumb = [
+            ['name' => 'Years', 'url' => route('admin.years.index')],
+            ['name' => 'Show', 'url' => route('admin.years.show', $id)],
+        ];
         $year = Year::find($id);
-        dd($year);
+        return view('admin.years.show', compact('year', 'breadcrumb'));
     }
 
     /**
@@ -76,8 +87,12 @@ class YearController extends Controller
      */
     public function edit($id)
     {
+        $breadcrumb = [
+            ['name' => 'Years', 'url' => route('admin.years.index')],
+            ['name' => 'Edit', 'url' => route('admin.years.edit', $id)],
+        ];
         $year = Year::find($id);
-        return view('admin.years.edit', compact('year'));
+        return view('admin.years.edit', compact('year', 'breadcrumb'));
     }
 
     /**

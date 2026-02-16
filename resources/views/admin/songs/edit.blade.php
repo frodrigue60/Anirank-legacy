@@ -1,16 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header --}}
-        <div class="mb-8">
-            <a href="{{ route('admin.posts.songs', $song->post_id) }}"
-                class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO MANAGE SONGS
-            </a>
-            <h1 class="text-3xl font-bold text-white tracking-tight">Edit Song</h1>
-            <p class="text-zinc-400 mt-1">Updating entry for <span
-                    class="text-blue-400 font-semibold">{{ $song->song_romaji ?? ($song->song_en ?? 'Theme') }}</span></p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {{-- Header Section --}}
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Edit Song</h1>
+                <p class="text-zinc-400 mt-1">Editing song <span
+                        class="text-blue-400 font-semibold">{{ $song->name }}</span></p>
+            </div>
         </div>
 
         {{-- Form Card --}}

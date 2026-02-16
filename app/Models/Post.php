@@ -50,13 +50,6 @@ class Post extends Model
         return $this->hasMany(Report::class);
     }
 
-    public function getUrlAttribute()
-    {
-        return route('post.show', [
-            'slug' => $this->slug,
-        ]);
-    }
-
     public function year()
     {
         return $this->belongsTo(Year::class);

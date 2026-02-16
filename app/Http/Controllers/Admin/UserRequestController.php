@@ -21,9 +21,12 @@ class UserRequestController extends Controller
      */
     public function index()
     {
+        $breadcrumb = [
+            ['name' => 'Requests', 'url' => route('admin.requests.index')],
+        ];
         $requests = UserRequest::all();
-        $requests = $this->paginate($requests,$perPage=10);
-        return view('admin.requests.index', compact('requests'));
+        $requests = $this->paginate($requests, $perPage = 10);
+        return view('admin.requests.index', compact('requests', 'breadcrumb'));
     }
 
     /**
@@ -55,11 +58,15 @@ class UserRequestController extends Controller
      */
     public function show($id)
     {
+        $breadcrumb = [
+            ['name' => 'Requests', 'url' => route('admin.requests.index')],
+            ['name' => 'Show', 'url' => route('admin.requests.show', $id)],
+        ];
         $userRequest = UserRequest::find($id);
-        $userRequest -> attended_by = Auth::user()->id;
+        $userRequest->attended_by = Auth::user()->id;
         $userRequest->status = 'attended';
         $userRequest->update();
-        return view('admin.requests.show',compact('userRequest'));
+        return view('admin.requests.show', compact('userRequest', 'breadcrumb'));
     }
 
     /**
@@ -96,7 +103,7 @@ class UserRequestController extends Controller
         $userRequest = UserRequest::find($id);
         //dd($userRequest);
         $userRequest->delete();
-        return redirect(route('admin.requests.index'))->with('success','Request deleted successfully');
+        return redirect(route('admin.requests.index'))->with('success', 'Request deleted successfully');
     }
     public function paginate($posts, $perPage, $page = null, $options = [])
     {

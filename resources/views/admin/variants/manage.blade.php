@@ -5,13 +5,8 @@
         {{-- Header Section --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
             <div>
-                <a href="{{ route('admin.posts.songs', $song->post_id) }}"
-                    class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO SONGS
-                </a>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Song Variants</h1>
-                <p class="text-zinc-400 mt-1">Manage versions for <span
-                        class="text-blue-400 font-semibold">{{ $song->song_romaji ?? 'this song' }}</span></p>
+                <h1 class="text-3xl font-bold text-white tracking-tight"><span
+                        class="text-blue-400 font-semibold">{{ $song->name ?? 'this song' }}</span> Variants</h1>
             </div>
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('admin.songs.variants.add', $song->id) }}"
@@ -38,8 +33,8 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-zinc-800/50">
-                        @isset($song_variants)
-                            @foreach ($song_variants as $variant)
+                        @isset($songVariants)
+                            @foreach ($songVariants as $variant)
                                 <tr class="hover:bg-zinc-800/30 transition-colors group">
                                     <td class="px-6 py-4 text-sm font-mono text-zinc-500 text-center">#{{ $variant->id }}</td>
                                     <td class="px-6 py-4">

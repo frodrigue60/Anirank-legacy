@@ -1,24 +1,22 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header --}}
-        <div class="mb-8">
-            <a href="{{ route('admin.variants.videos', $song_variant->id) }}"
-                class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO VIDEO MANAGEMENT
-            </a>
-            <h1 class="text-3xl font-bold text-white tracking-tight">Add Video Source</h1>
-            <p class="text-zinc-400 mt-1">Configuring video for <span
-                    class="text-blue-400 font-semibold">{{ $song_variant->song->song_romaji }}
-                    ({{ $song_variant->slug }})</span></p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {{-- Header Section --}}
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Add Video Source</h1>
+                <p class="text-zinc-400 mt-1">Managing videos for <span
+                        class="text-blue-400 font-semibold">{{ $songVariant->name }}
+                        {{ $songVariant->slug }}</span></p>
+            </div>
         </div>
 
         {{-- Form Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8">
             <form method="post" action="{{ route('admin.videos.store') }}" enctype="multipart/form-data" class="space-y-8">
                 @csrf
-                <input type="hidden" name="song_variant_id" value="{{ $song_variant->id }}">
+                <input type="hidden" name="song_variant_id" value="{{ $songVariant->id }}">
 
                 {{-- Source Options --}}
                 <div class="space-y-6">

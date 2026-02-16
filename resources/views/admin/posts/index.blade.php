@@ -68,7 +68,7 @@
                                 </form>
 
                                 {{-- Seasonal API --}}
-                                <form action="{{ route('admin.posts.get.seasonal.animes') }}" method="POST"
+                                <form action="{{ route('admin.posts.seasonal.animes') }}" method="POST"
                                     class="bg-zinc-950/30 p-4 rounded-2xl border border-zinc-800/50">
                                     @csrf
                                     <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Batch Import

@@ -17,8 +17,11 @@ class SeasonController extends Controller
      */
     public function index()
     {
+        $breadcrumb = [
+            ['name' => 'Seasons', 'url' => route('admin.seasons.index')],
+        ];
         $seasons = Season::all();
-        return view('admin.seasons.index', compact('seasons'));
+        return view('admin.seasons.index', compact('seasons', 'breadcrumb'));
     }
 
     /**
@@ -28,7 +31,11 @@ class SeasonController extends Controller
      */
     public function create()
     {
-        return view('admin.seasons.create');
+        $breadcrumb = [
+            ['name' => 'Seasons', 'url' => route('admin.seasons.index')],
+            ['name' => 'Create', 'url' => route('admin.seasons.create')],
+        ];
+        return view('admin.seasons.create', compact('breadcrumb'));
     }
 
     /**
@@ -68,7 +75,12 @@ class SeasonController extends Controller
      */
     public function show($id)
     {
-        //
+        $breadcrumb = [
+            ['name' => 'Seasons', 'url' => route('admin.seasons.index')],
+            ['name' => 'Show', 'url' => route('admin.seasons.show', $id)],
+        ];
+        $season = Season::find($id);
+        return view('admin.seasons.show', compact('season', 'breadcrumb'));
     }
 
     /**
@@ -79,8 +91,12 @@ class SeasonController extends Controller
      */
     public function edit($id)
     {
+        $breadcrumb = [
+            ['name' => 'Seasons', 'url' => route('admin.seasons.index')],
+            ['name' => 'Edit', 'url' => route('admin.seasons.edit', $id)],
+        ];
         $season = Season::find($id);
-        return view('admin.seasons.edit', compact('season'));
+        return view('admin.seasons.edit', compact('season', 'breadcrumb'));
     }
 
     /**

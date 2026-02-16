@@ -62,14 +62,14 @@
                                             <div
                                                 class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700 overflow-hidden">
                                                 @if ($user->image)
-                                                    <img src="{{ $user->image }}" alt=""
+                                                    <img src="{{ asset('storage/' . $user->image) }}" alt=""
                                                         class="w-full h-full object-cover">
                                                 @else
                                                     <i class="fa-solid fa-user text-xs"></i>
                                                 @endif
                                             </div>
                                             <div class="flex flex-col">
-                                                <a href="{{ route('user.list', $user->slug) }}"
+                                                <a href="{{ route('users.list', $user->slug) }}"
                                                     class="text-sm font-bold text-white hover:text-blue-400 transition-colors">
                                                     {{ $user->name }}
                                                 </a>

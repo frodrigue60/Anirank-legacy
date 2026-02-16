@@ -23,10 +23,13 @@ class UserController extends Controller
      */
     public function index()
     {
+        $breadcrumb = [
+            ['name' => 'Users', 'url' => route('admin.users.index')],
+        ];
         $users =  User::all();
         $users = $users->sortByDesc('created_at');
-        $users = $this->paginate($users,$perPage=5);
-        return view('admin.users.index', compact('users'));
+        $users = $this->paginate($users, $perPage = 5);
+        return view('admin.users.index', compact('users', 'breadcrumb'));
     }
 
     /**
@@ -36,13 +39,17 @@ class UserController extends Controller
      */
     public function create()
     {
+        $breadcrumb = [
+            ['name' => 'Users', 'url' => route('admin.users.index')],
+            ['name' => 'Create', 'url' => route('admin.users.create')],
+        ];
         $type = [
             ['name' => 'User', 'value' => 'user'],
             ['name' => 'Admin', 'value' => 'admin'],
             ['name' => 'Editor', 'value' => 'editor'],
             ['name' => 'Creator', 'value' => 'creator']
         ];
-        return view('admin.users.create', compact('type'));
+        return view('admin.users.create', compact('type', 'breadcrumb'));
     }
 
     /**
@@ -98,6 +105,10 @@ class UserController extends Controller
      */
     public function edit($id)
     {
+        $breadcrumb = [
+            ['name' => 'Users', 'url' => route('admin.users.index')],
+            ['name' => 'Edit', 'url' => route('admin.users.edit', $id)],
+        ];
         $user = User::find($id);
         $type = [
             ['name' => 'User', 'value' => 'user'],
@@ -105,7 +116,7 @@ class UserController extends Controller
             ['name' => 'Editor', 'value' => 'editor'],
             ['name' => 'Creator', 'value' => 'creator']
         ];
-        return view('admin.users.edit', compact('user', 'type'));
+        return view('admin.users.edit', compact('user', 'type', 'breadcrumb'));
     }
 
     /**
@@ -163,12 +174,12 @@ class UserController extends Controller
     public function searchUser(Request $request)
     {
         $users = User::query()
-            ->where('name', 'LIKE', '%'.$request->input('q').'%')
+            ->where('name', 'LIKE', '%' . $request->input('q') . '%')
             ->paginate(10);
 
         return view('admin.users.index', compact('users'));
     }
-    
+
     public function paginate($posts, $perPage = null, $page = null, $options = [])
     {
         $page = Paginator::resolveCurrentPage();

@@ -1,16 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header --}}
-        <div class="mb-8">
-            <a href="{{ route('admin.posts.songs', $post->id) }}"
-                class="text-blue-500 hover:text-blue-400 text-sm font-bold flex items-center mb-2 transition-colors">
-                <i class="fa-solid fa-arrow-left mr-2"></i> BACK TO MANAGE SONGS
-            </a>
-            <h1 class="text-3xl font-bold text-white tracking-tight">Add New Song</h1>
-            <p class="text-zinc-400 mt-1">Creating a new theme entry for <span
-                    class="text-blue-400 font-semibold">{{ $post->title }}</span></p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {{-- Header Section --}}
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Add New Song</h1>
+                <p class="text-zinc-400 mt-1">Adding new song for <span
+                        class="text-blue-400 font-semibold">{{ $post->title }}</span></p>
+            </div>
         </div>
 
         {{-- Form Card --}}
@@ -18,6 +16,15 @@
             <form method="post" action="{{ route('admin.songs.store') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 <input type="hidden" name="post_id" value="{{ $post->id }}">
+
+                {{--  POST  --}}
+                <div>
+                    <label for="post_id" class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Post
+                        ID</label>
+                    <input type="text" name="post_id" id="post_id" value="{{ old('post_id') ?? ($post->id ?? '') }}"
+                        class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12"
+                        placeholder="e.g. 1" readonly>
+                </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {{-- OP/ED Number --}}

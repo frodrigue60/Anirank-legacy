@@ -16,8 +16,11 @@ class StudioController extends Controller
      */
     public function index()
     {
+        $breadcrumb = [
+            ['name' => 'Studios', 'url' => route('admin.studios.index')],
+        ];
         $studios = Studio::paginate(15);
-        return view('admin.studios.index', compact('studios'));
+        return view('admin.studios.index', compact('studios', 'breadcrumb'));
     }
 
     /**
@@ -27,7 +30,11 @@ class StudioController extends Controller
      */
     public function create()
     {
-        return view('admin.studios.create');
+        $breadcrumb = [
+            ['name' => 'Studios', 'url' => route('admin.studios.index')],
+            ['name' => 'Create', 'url' => route('admin.studios.create')],
+        ];
+        return view('admin.studios.create', compact('breadcrumb'));
     }
 
     /**
@@ -58,8 +65,12 @@ class StudioController extends Controller
      */
     public function edit($id)
     {
+        $breadcrumb = [
+            ['name' => 'Studios', 'url' => route('admin.studios.index')],
+            ['name' => 'Edit', 'url' => route('admin.studios.edit', $id)],
+        ];
         $studio = Studio::findOrFail($id);
-        return view('admin.studios.edit', compact('studio'));
+        return view('admin.studios.edit', compact('studio', 'breadcrumb'));
     }
 
     /**
