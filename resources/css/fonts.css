@@ -93,7 +93,7 @@
     font-family: "Material Symbols Outlined";
     font-style: normal;
     font-weight: 100 700;
-    font-display: block; /* Important: prevents showing the icon name as text */
+    font-display: swap;
     src: url("../fonts/material-symbols/material-symbols-outlined.ttf")
         format("truetype");
 }
@@ -102,7 +102,7 @@
     font-family: "Material Symbols Outlined";
     font-weight: normal;
     font-style: normal;
-    font-size: 1em; /* Critical: scales with the element's actual font-size (Tailwind utilities) */
+    font-size: 24px;
     line-height: 1;
     display: inline-block;
     text-transform: none !important;
@@ -114,18 +114,7 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     font-feature-settings: "liga";
-
-    /* Fine-tune optical alignment */
     vertical-align: middle;
-
-    /* Pre-rendering protection */
-    color: transparent;
-}
-
-/* Ensure color from Tailwind wins */
-.material-symbols-outlined {
-    color: inherit;
-    transition: color 0.1s;
 }
 
 .material-symbols-outlined.filled {

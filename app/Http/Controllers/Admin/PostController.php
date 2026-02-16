@@ -341,7 +341,7 @@ class PostController extends Controller
             array_push($posts, $item);
         }
 
-        return view('admin.posts.select', compact('posts', 'breadcrumb'));
+        return view('admin.posts.select', compact('posts', 'breadcrumb', 'q'));
     }
     public function getById($anilist_id)
     {
@@ -831,6 +831,7 @@ class PostController extends Controller
         Storage::disk('public')->put($path, $imageContent);
     }
 
+    /* Unused */
     public function addSong(Post $post)
     {
         $seasons = Season::all();
@@ -861,10 +862,8 @@ class PostController extends Controller
         return view('admin.songs.create', compact('artists', 'types', 'post', 'seasons', 'years', 'breadcrumb'));
     }
 
-    public function songs($post_id)
+    public function songs(Post $post)
     {
-        //dd(true);
-        $post = Post::with('songs')->find($post_id);
 
         $breadcrumb = Breadcrumb::generate([
             [
@@ -876,7 +875,6 @@ class PostController extends Controller
                 'url' => route('admin.posts.songs', $post->id),
             ],
         ]);
-
 
         return view('admin.songs.manage', compact('post', 'breadcrumb'));
     }

@@ -59,7 +59,7 @@
                                     </div>
                                 @endif
                                 <div
-                                    class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                                    class="absolute inset-0 bg-linear-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                                 </div>
                             </div>
                             <div class="text-center">

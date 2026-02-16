@@ -1,12 +1,15 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'User Requests')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Content Requests</h1>
-                <p class="text-zinc-400 mt-1">Manage user-submitted requests for additions or updates.</p>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Inbound Requests</h1>
+                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">User Contributions & Feature
+                    Requests</p>
             </div>
         </div>
 

@@ -20,7 +20,7 @@
                     <span
                         class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors">search</span>
                     <input wire:model.live.debounce.300ms="name" type="text" placeholder="Search themes..."
-                        class="w-full !bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm !text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
+                        class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm !text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
                 </div>
             </div>
 
@@ -105,7 +105,7 @@
                             style="background-image: url('{{ Storage::url($song->post->thumbnail) }}'); filter: brightness(0.5);">
                         </div>
                         <div
-                            class="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/80 to-transparent">
+                            class="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/80 to-transparent">
                         </div>
                         <div class="relative h-full p-6 flex items-center justify-between">
                             <div class="space-y-1">

@@ -1,18 +1,24 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Manage Songs')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="mb-8 flex justify-between items-center">
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Manage Songs</h1>
-                <p class="text-zinc-400 mt-1">Managing songs for <span
-                        class="text-blue-400 font-semibold">{{ $post->title }}</span></p>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Song Management</h1>
+                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">Themes for {{ $post->title }}
+                </p>
             </div>
-            <a href="{{ route('admin.posts.songs.add', $post->id) }}"
-                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/20 hover:scale-105 active:scale-95">
-                <i class="fa-solid fa-plus mr-2"></i> ADD SONG
-            </a>
+
+            <div class="flex flex-wrap gap-3">
+                <a href="{{ route('admin.songs.create', $post->id) }}"
+                    class="inline-flex items-center px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">
+                    <span class="material-symbols-outlined mr-2">add</span>
+                    ADD NEW SONG
+                </a>
+            </div>
         </div>
 
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden">

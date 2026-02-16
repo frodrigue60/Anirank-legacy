@@ -1,13 +1,17 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Edit Post')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-white tracking-tight">Edit Post</h1>
-            <p class="text-zinc-400 mt-1">Updating post for <span
-                    class="text-blue-400 font-semibold">{{ $post->title }}</span></p>
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="flex flex-col md:flex-row md::items-center md:justify-between gap-6">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Edit Entry</h1>
+                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">{{ $post->title }}</p>
+            </div>
         </div>
+
 
         {{-- Form Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8">

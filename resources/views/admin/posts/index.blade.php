@@ -1,26 +1,22 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Manage Posts')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Post Management</h1>
-                <p class="text-zinc-400 mt-1">Manage and curate your anime directory.</p>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Post Inventory</h1>
+                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">Imported & Manual Anime
+                    Entries</p>
             </div>
+
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('admin.posts.create') }}"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/20 hover:scale-105 active:scale-95">
-                    <i class="fa-solid fa-plus mr-2"></i> CREATE POST
-                </a>
-                <a href="{{ route('admin.posts.sync.all') }}"
-                    onclick="return confirm('This will update all posts with AniList data. It may take some time. Continue?')"
-                    class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-900/20 hover:scale-105 active:scale-95">
-                    <i class="fa-solid fa-sync mr-2"></i> BULK SYNC ANILIST
-                </a>
-                <a href="{{ route('admin.posts.wipe') }}"
-                    class="inline-flex items-center px-4 py-2 bg-zinc-800 hover:bg-red-600 text-zinc-300 hover:text-white text-sm font-semibold rounded-xl transition-all shadow-lg hover:scale-105 active:scale-95 border border-zinc-700 hover:border-red-500">
-                    <i class="fa-solid fa-trash-can mr-2"></i> WIPE ALL
+                    class="inline-flex items-center px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-zinc-800 hover:border-zinc-700 shadow-xl">
+                    <span class="material-symbols-outlined mr-2">add</span>
+                    CREATE MANUAL
                 </a>
             </div>
         </div>
@@ -151,7 +147,7 @@
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <div
-                                                class="w-10 h-14 bg-zinc-800 rounded-md overflow-hidden flex-shrink-0 border border-zinc-700">
+                                                class="w-10 h-14 bg-zinc-800 rounded-md overflow-hidden shrink-0 border border-zinc-700">
                                                 <img src="{{ Storage::url($post->thumbnail) }}" alt=""
                                                     class="w-full h-full object-cover">
                                             </div>
@@ -219,15 +215,23 @@
                                             <div class="flex items-center justify-end gap-2 shrink-0">
                                                 <a href="{{ route('admin.posts.edit', $post->id) }}"
                                                     class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500">
-                                                    <i class="fa-solid fa-pencil"></i>
+                                                    <span class="material-symbols-outlined">edit</span>
                                                 </a>
-                                                <a href="{{ route('admin.posts.songs', $post->id) }}"
-                                                    class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700">
-                                                    <i class="fa-solid fa-list"></i>
-                                                </a>
+                                                <div class="flex items-center gap-2">
+                                                    <a href="{{ route('admin.songs.create', ['post_id' => $post->id]) }}"
+                                                        class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500"
+                                                        title="Add Song">
+                                                        <span class="material-symbols-outlined">playlist_add</span>
+                                                    </a>
+                                                    <a href="{{ route('admin.posts.songs', $post->id) }}"
+                                                        class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700"
+                                                        title="List Songs">
+                                                        <span class="material-symbols-outlined">list</span>
+                                                    </a>
+                                                </div>
                                                 <a href="{{ route('admin.posts.show', $post->id) }}"
                                                     class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700">
-                                                    <i class="fa-solid fa-eye"></i>
+                                                    <span class="material-symbols-outlined">visibility</span>
                                                 </a>
                                                 <form action="{{ route('admin.posts.destroy', $post->id) }}"
                                                     method="post" class="inline">
@@ -236,7 +240,7 @@
                                                     <button type="submit"
                                                         onclick="return confirm('Are you sure you want to delete this post?')"
                                                         class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500">
-                                                        <i class="fa-solid fa-trash-can"></i>
+                                                        <span class="material-symbols-outlined">delete</span>
                                                     </button>
                                                 </form>
                                             </div>

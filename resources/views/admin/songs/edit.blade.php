@@ -1,14 +1,13 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Edit Song')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="mb-8 flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Edit Song</h1>
-                <p class="text-zinc-400 mt-1">Editing song <span
-                        class="text-blue-400 font-semibold">{{ $song->name }}</span></p>
-            </div>
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white tracking-tight">Edit Theme</h1>
+            <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">{{ $song->title }}</p>
         </div>
 
         {{-- Form Card --}}
@@ -18,6 +17,19 @@
                 @method('put')
                 @csrf
 
+                {{-- Post --}}
+                <div class="space-y-2">
+                    <label for="post_id"
+                        class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Post</label>
+                    <select name="post_id" id="post_id"
+                        class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12">
+                        @foreach ($posts as $post)
+                            <option value="{{ $post->id }}" {{ $song->post_id == $post->id ? 'selected' : '' }}>
+                                {{ $post->title }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {{-- OP/ED Number --}}
                     <div class="space-y-2">

@@ -11,6 +11,7 @@ use App\Models\SongVariant;
 use App\Models\Year;
 use Illuminate\Support\Str;
 use Illuminate\Support\Arr;
+use App\Models\Post;
 
 use App\Services\Breadcrumb;
 
@@ -21,16 +22,68 @@ class SongController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {}
+    public function index(Request $request)
+    {
+        $query = Song::query()->with('post', 'artists');
+
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($query) use ($q) {
+                $query->where('song_romaji', 'like', "%{$q}%")
+                    ->orWhere('song_en', 'like', "%{$q}%")
+                    ->orWhere('song_jp', 'like', "%{$q}%")
+                    ->orWhere('slug', 'like', "%{$q}%")
+                    ->orWhereHas('post', function ($query) use ($q) {
+                        $query->where('title', 'like', "%{$q}%");
+                    });
+            });
+        }
+
+        $songs = $query->latest()->paginate(20);
+        return view('admin.songs.index', compact('songs'));
+    }
 
     /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $selectedPostId = $request->post_id;
+        $currentPost = null;
+        if ($selectedPostId) {
+            $currentPost = Post::find($selectedPostId);
+        }
+
+        $breadcrumb = Breadcrumb::generate([
+            [
+                'name' => 'Posts',
+                'url' => route('admin.posts.index')
+            ],
+            [
+                'name' => 'Songs',
+                'url' => route('admin.songs.index')
+            ],
+            [
+                'name' => 'Create',
+                'url' => route('admin.songs.create')
+            ]
+        ]);
+
+        $types = [
+            ['name' => 'Opening', 'value' => 'OP'],
+            ['name' => 'Ending', 'value' => 'ED'],
+            ['name' => 'Insert', 'value' => 'INS'],
+            ['name' => 'Other', 'value' => 'OTH']
+        ];
+
+        $seasons = Season::all();
+        $years = Year::all();
+
+        $posts = Post::orderBy('title')->get(['id', 'title']);
+
+        return view('admin.songs.create', compact('breadcrumb', 'posts', 'types', 'seasons', 'years', 'selectedPostId', 'currentPost'));
     }
 
     /**
@@ -172,6 +225,7 @@ class SongController extends Controller
             ]
         ]);
         /* $artists = Artist::all(); */
+        $posts = Post::all('id', 'title');
         $seasons = Season::all();
         $years = Year::all();
         $types = [
@@ -181,7 +235,7 @@ class SongController extends Controller
             ['name' => 'Other', 'value' => 'OTH']
         ];
 
-        return view('admin.songs.edit', compact('song', /* 'artists', */ 'types', 'seasons', 'years', 'breadcrumb'));
+        return view('admin.songs.edit', compact('song', /* 'artists', */ 'types', 'seasons', 'years', 'breadcrumb', 'posts'));
     }
 
     /**

@@ -1,12 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Add Year')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-white tracking-tight">Create Year</h1>
-            <p class="text-zinc-400 mt-1">Creating a new year for <span class="text-blue-400 font-semibold">Anirank</span>
-            </p>
+            <h1 class="text-3xl font-bold text-white tracking-tight">Add Year</h1>
+            <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">Define a new broadcast year for
+                the timeline</p>
         </div>
 
         {{-- Form Card --}}

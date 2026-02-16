@@ -1,14 +1,13 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Report Details')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Report Details</h1>
-                <p class="text-zinc-400 mt-1">Audit report <span class="text-blue-400 font-mono">#{{ $report->id }}</span>
-                </p>
-            </div>
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white tracking-tight">Report #{{ $report->id }}</h1>
+            <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">Audit & Resolution Details</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

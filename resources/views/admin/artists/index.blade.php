@@ -1,20 +1,25 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Manage Artists')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Artists Management</h1>
-                <p class="text-zinc-400 mt-1">Manage music performers and their theme contributions.</p>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Artist Registry</h1>
+                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">Performers & Music Groups</p>
             </div>
+
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('admin.artists.create') }}"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/20 hover:scale-105 active:scale-95">
-                    <i class="fa-solid fa-plus mr-2"></i> CREATE ARTIST
+                    class="inline-flex items-center px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">
+                    <span class="material-symbols-outlined mr-2">person_add</span>
+                    ADD NEW ARTIST
                 </a>
             </div>
         </div>
+
 
         <div class="space-y-6">
             {{-- Search Bar --}}

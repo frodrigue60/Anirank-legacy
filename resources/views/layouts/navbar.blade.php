@@ -56,7 +56,7 @@
                 <span class="text-sm">Search anime, songs...</span>
             </button>
 
-            <div class="h-8 w-[1px] bg-white/10 hidden sm:block"></div>
+            <div class="h-8 w-px bg-white/10 hidden sm:block"></div>
 
             {{-- User Toggle --}}
             <div class="relative">
@@ -151,7 +151,7 @@
 </header>
 
 {{-- Mobile Menu Drawer --}}
-<div id="mobile-menu-drawer" class="fixed inset-0 z-[100] hidden">
+<div id="mobile-menu-drawer" class="fixed inset-0 z-100 hidden">
     {{-- Backdrop --}}
     <div id="mobile-menu-backdrop"
         class="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
@@ -194,7 +194,7 @@
                 <span class="font-medium text-sm">Rankings</span>
             </a>
 
-            <div class="h-[1px] bg-white/5 my-4"></div>
+            <div class="h-px bg-white/5 my-4"></div>
             <div class="px-4 mb-2 text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Discover</div>
 
             <a href="{{ route('posts.animes') }}"

@@ -1,13 +1,17 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Select Theme')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-white tracking-tight">Select Post</h1>
-            <p class="text-zinc-400 mt-1">Select a post to add to <span class="text-blue-400 font-semibold">Anirank
-                    Platform</span></p>
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">Theme Selection</h1>
+                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">Query: {{ $q }}</p>
+            </div>
         </div>
+
 
         {{-- Grid --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">

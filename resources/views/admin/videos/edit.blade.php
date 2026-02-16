@@ -1,16 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Edit Video Asset')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Edit Video Source</h1>
-                <p class="text-zinc-400 mt-1">Video configuration for <span
-                        class="text-blue-400 font-semibold">{{ $video->songVariant->song->name }}
-                        {{ $video->songVariant->song->slug }}
-                        {{ $video->songVariant->slug }}</span></p>
-            </div>
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white tracking-tight">Edit Video Asset</h1>
+            <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">
+                {{ $video->songVariant->song->title }} ({{ $video->label }})</p>
         </div>
 
         {{-- Form Card --}}

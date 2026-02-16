@@ -1,14 +1,18 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Issue Reports')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">System Reports</h1>
-                <p class="text-zinc-400 mt-1">Review community flags, content issues, and broken links.</p>
+                <h1 class="text-3xl font-bold text-white tracking-tight">System Audits</h1>
+                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">User Reports & Bug Tracking
+                </p>
             </div>
         </div>
+        <p class="text-zinc-400 mt-1">Review community flags, content issues, and broken links.</p>
 
         {{-- Table Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden">

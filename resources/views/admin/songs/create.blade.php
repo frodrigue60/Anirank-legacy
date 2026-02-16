@@ -1,29 +1,40 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Add Song')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="mb-8 flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Add New Song</h1>
-                <p class="text-zinc-400 mt-1">Adding new song for <span
-                        class="text-blue-400 font-semibold">{{ $post->title }}</span></p>
-            </div>
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white tracking-tight">Add Theme Song</h1>
+            <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">
+                @if ($currentPost)
+                    Register a new opening or ending for {{ $currentPost->title }}
+                @else
+                    Register a new opening or ending entry
+                @endif
+            </p>
         </div>
 
         {{-- Form Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8">
             <form method="post" action="{{ route('admin.songs.store') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
-                <input type="hidden" name="post_id" value="{{ $post->id }}">
 
                 {{--  POST  --}}
                 <div>
-                    <label for="post_id" class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Post
-                        ID</label>
-                    <input type="text" name="post_id" id="post_id" value="{{ old('post_id') ?? ($post->id ?? '') }}"
-                        class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12"
-                        placeholder="e.g. 1" readonly>
+                    <label for="post_id"
+                        class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Post</label>
+                    <select name="post_id" id="post_id"
+                        class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12">
+                        <option value="">Select an anime...</option>
+                        @foreach ($posts as $post)
+                            <option value="{{ $post->id }}"
+                                {{ (old('post_id') ?? $selectedPostId) == $post->id ? 'selected' : '' }}>
+                                {{ $post->title }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -100,7 +111,7 @@
                             class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12">
                             @foreach ($seasons as $season)
                                 <option value="{{ $season->id }}"
-                                    {{ old('season_id', $post->season_id) == $season->id ? 'selected' : '' }}>
+                                    {{ old('season_id', $currentPost->season_id ?? '') == $season->id ? 'selected' : '' }}>
                                     {{ $season->name }}
                                 </option>
                             @endforeach
@@ -115,7 +126,7 @@
                             class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12">
                             @foreach ($years as $year)
                                 <option value="{{ $year->id }}"
-                                    {{ old('year_id', $post->year_id) == $year->id ? 'selected' : '' }}>
+                                    {{ old('year_id', $currentPost->year_id ?? '') == $year->id ? 'selected' : '' }}>
                                     {{ $year->name }}
                                 </option>
                             @endforeach

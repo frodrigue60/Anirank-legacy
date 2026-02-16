@@ -77,7 +77,9 @@
 
         <main class="">
             @isset($breadcrumb)
-                @include('layouts.breadcrumb')
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+                    @include('layouts.breadcrumb')
+                </div>
             @endisset
 
             @include('layouts.alerts')

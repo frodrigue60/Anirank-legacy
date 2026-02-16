@@ -1,15 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Add Video Content')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="mb-8 flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">Add Video Source</h1>
-                <p class="text-zinc-400 mt-1">Managing videos for <span
-                        class="text-blue-400 font-semibold">{{ $songVariant->name }}
-                        {{ $songVariant->slug }}</span></p>
-            </div>
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white tracking-tight">Link Video Asset</h1>
+            <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">{{ $songVariant->song->title }} -
+                {{ $songVariant->slug }}</p>
         </div>
 
         {{-- Form Card --}}

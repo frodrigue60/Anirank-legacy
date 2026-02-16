@@ -1,12 +1,14 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Add Studio')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-white tracking-tight">Create Studio</h1>
-            <p class="text-zinc-400 mt-1">Creating a new studio for <span class="text-blue-400 font-semibold">Anirank</span>
-            </p>
+            <h1 class="text-3xl font-bold text-white tracking-tight">Add Studio</h1>
+            <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">Register a new animation
+                production house</p>
         </div>
 
         {{-- Form Card --}}

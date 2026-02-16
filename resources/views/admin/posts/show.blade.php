@@ -1,12 +1,31 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Post Details')
 
 @section('content')
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {{-- Header Section --}}
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-white tracking-tight">Show Post</h1>
-            <p class="text-zinc-400 mt-1"><span class="text-blue-400 font-semibold">{{ $post->title }}</span></p>
+    <div class="space-y-8">
+        {{-- Custom Header Section --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+                <h1 class="text-3xl font-bold text-white tracking-tight">{{ $post->title }}</h1>
+                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">Entry Metadata & Content</p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <a href="{{ route('admin.posts.edit', $post->id) }}"
+                    class="inline-flex items-center px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-zinc-800 hover:border-zinc-700 shadow-xl">
+                    <span class="material-symbols-outlined mr-2">edit</span>
+                    EDIT ENTRY
+                </a>
+
+                <a href="{{ route('admin.posts.songs', $post->id) }}"
+                    class="inline-flex items-center px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">
+                    <span class="material-symbols-outlined mr-2">music_note</span>
+                    MANAGE SONGS
+                </a>
+            </div>
         </div>
+
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {{-- Visual Sidebar --}}
