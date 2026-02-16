@@ -102,16 +102,13 @@
     font-family: "Material Symbols Outlined";
     font-weight: normal;
     font-style: normal;
-    font-size: inherit; /* Allow Tailwind text-* classes to control size */
+    font-size: 1em; /* Critical: scales with the element's actual font-size (Tailwind utilities) */
     line-height: 1;
+    display: inline-block;
+    text-transform: none !important;
     letter-spacing: normal;
-    text-transform: none;
-    display: inline-flex; /* Use flex for better vertical alignment */
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    white-space: nowrap;
     word-wrap: normal;
+    white-space: nowrap;
     direction: ltr;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -119,22 +116,16 @@
     font-feature-settings: "liga";
 
     /* Fine-tune optical alignment */
-    transform: translateY(-0.05em);
+    vertical-align: middle;
 
     /* Pre-rendering protection */
-    color: transparent; /* Hides the text "star", "play", etc. */
+    color: transparent;
 }
 
-/* Once the font loads, the parent color (like text-yellow-400) will apply if we use: */
+/* Ensure color from Tailwind wins */
 .material-symbols-outlined {
-    transition: color 0.1s;
-}
-
-/* When the font is active, it will use its own glyphs. We can force color visible 
-   either by waiting for load or just ensuring it's not transparent indefinitely. 
-   Usually, font-display: block handles this, but we can also use: */
-:is(.material-symbols-outlined) {
     color: inherit;
+    transition: color 0.1s;
 }
 
 .material-symbols-outlined.filled {
