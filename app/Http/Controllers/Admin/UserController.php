@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Role;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -45,13 +46,8 @@ class UserController extends Controller
             ['name' => 'Users', 'url' => route('admin.users.index')],
             ['name' => 'Create', 'url' => route('admin.users.create')],
         ];
-        $type = [
-            ['name' => 'User', 'value' => 'user'],
-            ['name' => 'Admin', 'value' => 'admin'],
-            ['name' => 'Editor', 'value' => 'editor'],
-            ['name' => 'Creator', 'value' => 'creator']
-        ];
-        return view('admin.users.create', compact('type', 'breadcrumb'));
+        $roles = Role::all();
+        return view('admin.users.create', compact('roles', 'breadcrumb'));
     }
 
     /**
@@ -69,20 +65,23 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $messageBag = $validator->getMessageBag();
-            return Redirect::back()
-                ->withInput([
-                    'name' => $request->input('name'),
-                    'email' => $request->input('email'),
-                    'userType' => $request->input('userType'),
-                ])
-                ->with('error', $messageBag);
+            return Redirect::back()->withErrors($validator)->withInput();
         } else {
-            User::create([
+            $user = User::create([
                 'name' => $request['name'],
                 'email' => $request['email'],
                 'password' => Hash::make($request['password']),
             ]);
+
+            if ($request->has('role_id')) {
+                $user->roles()->sync($request->role_id);
+            } else {
+                // Default to 'user' role if none provided
+                $userRole = Role::where('slug', 'user')->first();
+                if ($userRole) {
+                    $user->roles()->attach($userRole->id);
+                }
+            }
 
             return Redirect::route('admin.users.index')->with('success', 'User Created Successfully');
         }
@@ -111,14 +110,9 @@ class UserController extends Controller
             ['name' => 'Users', 'url' => route('admin.users.index')],
             ['name' => 'Edit', 'url' => route('admin.users.edit', $id)],
         ];
-        $user = User::find($id);
-        $type = [
-            ['name' => 'User', 'value' => 'user'],
-            ['name' => 'Admin', 'value' => 'admin'],
-            ['name' => 'Editor', 'value' => 'editor'],
-            ['name' => 'Creator', 'value' => 'creator']
-        ];
-        return view('admin.users.edit', compact('user', 'type', 'breadcrumb'));
+        $user = User::with('roles')->findOrFail($id);
+        $roles = Role::all();
+        return view('admin.users.edit', compact('user', 'roles', 'breadcrumb'));
     }
 
     /**
@@ -138,19 +132,22 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $errors = $validator->getMessageBag();
-            return Redirect::back()->with('error', $errors);
+            return Redirect::back()->withErrors($validator)->withInput();
         } else {
             $user->name = $request->name;
             $user->email = $request->email;
-            $user->type = $request->userType;
-            if ($request->password != null) {
-                $user->password = Hash::make($request['password']);
+
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
             }
-            if ($user->update()) {
+
+            if ($user->save()) {
+                if ($request->has('role_id')) {
+                    $user->roles()->sync($request->role_id);
+                }
                 return Redirect::route('admin.users.index')->with('success', 'User Updated Successfully');
             } else {
-                return Redirect::route('admin.users.index')->with('error', 'Somethis was wrong!');
+                return Redirect::back()->with('error', 'Something went wrong!');
             }
         }
     }

@@ -56,22 +56,51 @@ class User extends Authenticatable
         return $this->hasMany(UserRequest::class);
     }
 
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    public function hasRole($role)
+    {
+        if (is_string($role)) {
+            return $this->roles->contains('slug', $role);
+        }
+
+        if ($role instanceof Role) {
+            return $this->roles->contains('id', $role->id);
+        }
+
+        if (is_array($role)) {
+            foreach ($role as $r) {
+                if ($this->hasRole($r)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return false;
+    }
+
     public function isStaff()
     {
-        return in_array($this->type, ['admin', 'editor', 'creator']);
+        return $this->hasRole(['admin', 'editor', 'creator']);
     }
 
     public function isAdmin()
     {
-        return $this->type === 'admin';
+        return $this->hasRole('admin');
     }
+
     public function isEditor()
     {
-        return $this->type === 'editor';
+        return $this->hasRole('editor');
     }
+
     public function isCreator()
     {
-        return $this->type === 'creator';
+        return $this->hasRole('creator');
     }
 
     public function generateSlug()

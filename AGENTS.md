@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Anirank** is a web application for discovering, playing, and rating anime openings (OP) and endings (ED). Users can explore anime themes, rate them, add them to favorites, and create playlists. The project is built with **Laravel 9** and uses **MySQL** as its database.
+**Anirank** is a web application for discovering, playing, and rating anime openings (OP) and endings (ED). Users can explore anime themes, rate them, add them to favorites, and create playlists. The project is built with **Laravel 12** and uses **MySQL** as its database.
 
 ## Core Features
 
@@ -16,8 +16,8 @@
 
 ## Tech Stack
 
-- **Backend**: PHP 8.2, Laravel 9.x
-- **Frontend**: Blade templates, Livewire 2.x, Tailwind CSS, Vite, Vanilla JS
+- **Backend**: PHP 8.2+, Laravel 12.x
+- **Frontend**: Blade templates, Livewire 3.x, Tailwind CSS 4.x, Vite, Vanilla JS
 - **Database**: MySQL 8.0
 - **Environment**: Laragon / Docker
 
@@ -186,16 +186,16 @@ Represents a **musician or band**.
 
 Standard Laravel user model with extensions.
 
-| Field          | Type   | Description                                 |
-| -------------- | ------ | ------------------------------------------- |
-| `name`         | string | User's display name.                        |
-| `email`        | string | User's email address.                       |
-| `password`     | string | Hashed password.                            |
-| `type`         | string | Role: `admin`, `editor`, `creator`, `user`. |
-| `image`        | string | Path to profile picture.                    |
-| `banner`       | string | Path to profile banner.                     |
-| `score_format` | string | User's preferred rating display format.     |
-| `slug`         | string | URL-friendly identifier.                    |
+| Field          | Type   | Description                                  |
+| -------------- | ------ | -------------------------------------------- |
+| `name`         | string | User's display name.                         |
+| `email`        | string | User's email address.                        |
+| `password`     | string | Hashed password.                             |
+| `roles`        | M:M    | Many-to-Many relationship with `Role` model. |
+| `image`        | string | Path to profile picture.                     |
+| `banner`       | string | Path to profile banner.                      |
+| `score_format` | string | User's preferred rating display format.      |
+| `slug`         | string | URL-friendly identifier.                     |
 
 **Relationships:**
 
@@ -203,9 +203,26 @@ Standard Laravel user model with extensions.
 
 **Key Methods:**
 
-- `isStaff()`, `isAdmin()`, `isEditor()`, `isCreator()` → Role checks.
+- `hasRole($role)` → Checks if the user has a specific role (slug or model).
+- `isStaff()`, `isAdmin()`, `isEditor()`, `isCreator()` → Role-checking helpers (internal M:M check).
 - `generateSlug()` → Creates a unique slug from the name.
 - `canViewPlaylist(Playlist $playlist)` → Permission check.
+
+---
+
+### `Role`
+
+Represents a **user role** for permissions.
+
+| Field         | Type   | Description                        |
+| ------------- | ------ | ---------------------------------- |
+| `name`        | string | Display name (e.g. Administrator). |
+| `slug`        | string | Slug identifier (e.g. admin).      |
+| `description` | text   | Optional description.              |
+
+**Relationships:**
+
+- `belongsToMany` → `User`
 
 ---
 
@@ -1340,7 +1357,24 @@ The application heavily utilizes **Livewire** for reactive UI components, especi
 
 1.  **Middleware**:
     - `auth`: For logged-in users.
-    - `staff`: For admin/editor/creator roles.
+    - `role`: Unified middleware for role-based access control (e.g., `role:admin,editor`).
+    - Semantic Aliases: `staff`, `admin`, `editor`, `creator` are configured as parameterized `role` aliases in `Kernel.php` for backward compatibility.
 2.  **Asset Management**: Use `@vite` for main assets. Use `@push('scripts')` / `@push('styles')` for page-specific resources.
 3.  **Configuration**: Always use `config()` instead of `env()` in views and application code.
 4.  **Routes**: Grouped by context (`public`, `admin.`) with resource controllers where applicable.
+
+---
+
+## Future Roadmap & CMS Integrations
+
+The following features are identified as standard/premium upgrades for the Anirank CMS to enhance security, user engagement, and scalability:
+
+1.  **Audit Trails**: Implement an activity logging system to track administrative changes (who edited what and when).
+2.  **Real-time Notifications**: Centralized notification system using Laravel Reverb/Pusher for replies, solved reports, and new seasonal releases.
+3.  **Advanced Analytics**: Integrated dashboard with charts for trending themes, top artists, and user growth metrics.
+4.  **Media Library**: A centralized manager for image/video assets with automatic WebP conversion and lazy-loading optimizations.
+5.  **SEO Suite**: Enhanced meta-tag management (Title, Description, OpenGraph) per post and song.
+6.  **Intelligent Caching**: Use Redis to store complex ranking calculations, improving performance under high traffic.
+7.  **Social Login**: Integration with Discord, Google, or Twitter via Laravel Socialite.
+8.  **Internal API**: Full REST/GraphQL API to power potential mobile apps or third-party integrations.
+9.  **Gamification**: Achievement system and badges for active contributors and highly-rated theme discoverers.

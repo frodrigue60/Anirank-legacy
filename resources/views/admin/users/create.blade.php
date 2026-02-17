@@ -51,20 +51,25 @@
                                 placeholder="••••••••">
                         </div>
 
-                        <div class="space-y-2">
-                            <label for="userType"
-                                class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Platform
-                                Role</label>
-                            <select name="userType" id="userType" required
-                                class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12">
-                                <option value="">Select a role</option>
-                                @foreach ($type as $item)
-                                    <option value="{{ $item['value'] }}"
-                                        {{ old('userType') == $item['value'] ? 'selected' : '' }}>
-                                        {{ $item['name'] }}
-                                    </option>
+                        <div class="space-y-4 col-span-2">
+                            <label class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Platform
+                                Roles</label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                @foreach ($roles as $role)
+                                    <label
+                                        class="relative flex items-center p-4 rounded-2xl bg-zinc-950/50 border border-zinc-800 cursor-pointer group hover:border-blue-500/50 transition-all">
+                                        <input type="checkbox" name="role_id[]" value="{{ $role->id }}"
+                                            {{ old('role_id') && in_array($role->id, old('role_id')) ? 'checked' : '' }}
+                                            class="form-checkbox h-5 w-5 text-blue-600 rounded-lg border-zinc-700 bg-zinc-900 focus:ring-offset-0 focus:ring-blue-500">
+                                        <div class="ml-3">
+                                            <span
+                                                class="block text-sm font-bold text-white group-hover:text-blue-400 transition-colors">{{ $role->name }}</span>
+                                            <span
+                                                class="block text-[10px] text-zinc-500 uppercase tracking-tighter">{{ $role->slug }}</span>
+                                        </div>
+                                    </label>
                                 @endforeach
-                            </select>
+                            </div>
                         </div>
                     </div>
                 </div>
