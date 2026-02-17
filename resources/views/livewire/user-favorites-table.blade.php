@@ -12,7 +12,7 @@
                     <span
                         class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors text-base">search</span>
                     <input wire:model.live.debounce.300ms="name" type="text" placeholder="Search anime..."
-                        class="w-full !bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm !text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
+                        class="w-full bg-surface-darker! border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white! focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
                 </div>
             </div>
 
@@ -97,7 +97,7 @@
                             style="background-image: url('{{ Storage::url($song->post->banner) }}'); filter: brightness(0.5);">
                         </div>
                         <div
-                            class="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/80 to-transparent">
+                            class="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/80 to-transparent">
                         </div>
                         <div class="relative h-full p-6 flex items-center justify-between">
                             <div class="space-y-1">
@@ -123,9 +123,13 @@
                                 <div
                                     class="glass px-3 py-2 rounded-lg border-primary/30 flex items-center gap-1.5 shadow-lg">
                                     <span class="material-symbols-outlined text-primary text-sm fill-1">star</span>
-                                    <span
-                                        class="text-white font-bold text-lg">{{ number_format($song->ratings_avg_rating ?? 0, 1) }}</span>
+                                    <span class="text-white font-bold text-lg">{{ $song->score }}</span>
                                 </div>
+                                @if ($song->userScore)
+                                    <div class="text-[10px] text-white/40 uppercase font-black tracking-widest mt-1">
+                                        Your Score: <span class="text-primary">{{ $song->userScore }}</span>
+                                    </div>
+                                @endif
                                 <a href="{{ route('songs.show', $song->id) }}"
                                     class="mt-4 flex items-center justify-center h-10 w-10 rounded-full bg-white/10 hover:bg-primary transition-all text-white backdrop-blur-sm border border-white/10 group-hover:border-primary/50">
                                     <span class="material-symbols-outlined">play_arrow</span>

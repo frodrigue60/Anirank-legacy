@@ -11,29 +11,32 @@ use Livewire\WithPagination;
 use Livewire\Attributes\Url;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Livewire\Traits\HasRankingScore;
+use Illuminate\Support\Facades\Auth;
 
 class UserFavoritesTable extends Component
 {
     use WithPagination;
+    use HasRankingScore;
 
     public $userId;
     public $user;
 
     #[Url(except: '')]
     public $name = '';
-    
+
     #[Url(except: '')]
     public $type = '';
-    
+
     #[Url(except: '')]
     public $year_id = '';
-    
+
     #[Url(except: '')]
     public $season_id = '';
-    
+
     #[Url(except: '')]
     public $sort = '';
-    
+
     public $perPage = 18;
     public $hasMorePages = true;
     public $readyToLoad = false;
@@ -133,6 +136,8 @@ class UserFavoritesTable extends Component
 
         $songs = $query->paginate($this->perPage);
         $this->hasMorePages = $songs->hasMorePages();
+
+        $this->setScoreSongs($songs, Auth::user());
 
         return view('livewire.user-favorites-table', [
             'songs' => $songs,

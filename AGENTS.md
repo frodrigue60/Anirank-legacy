@@ -424,22 +424,21 @@ Handles the video player page and user interactions (rating, likes, favorites).
 
 Handles user profile, favorites, and settings.
 
-| Method                | Route                         | Description                                   |
-| --------------------- | ----------------------------- | --------------------------------------------- |
-| `index()`             | `GET /profile`                | Current user dashboard (uses `UserSettings`). |
-| `show($slug)`         | `GET /users/{slug}`           | Public user profile.                          |
-| `favorites(Request)`  | `GET /favorites`              | Favorites list (uses `FavoritesTable`).       |
-| `userList($slug)`     | `GET /user/{slug}/list`       | A specific user's rated themes list.          |
-| `uploadProfilePic()`  | `POST /profile/upload-pic`    | (Legacy) Upload profile picture.              |
-| `uploadBannerPic()`   | `POST /profile/upload-banner` | (Legacy) Upload profile banner.               |
-| `changeScoreFormat()` | `POST /profile/score-format`  | (Legacy) Change score display format.         |
-| `welcome()`           | `GET /welcome`                | Welcome/onboarding page.                      |
+| Method                | Route                         | Description                                     |
+| --------------------- | ----------------------------- | ----------------------------------------------- |
+| `index()`             | `GET /profile`                | Current user dashboard (uses `UserSettings`).   |
+| `show(User $user)`    | `GET /users/{id}`             | Public user profile (Route Model Binding).      |
+| `favorites()`         | `GET /favorites`              | Personal favorites (Redirects to `users.show`). |
+| `uploadProfilePic()`  | `POST /profile/upload-pic`    | (Legacy) Upload profile picture.                |
+| `uploadBannerPic()`   | `POST /profile/upload-banner` | (Legacy) Upload profile banner.                 |
+| `changeScoreFormat()` | `POST /profile/score-format`  | (Legacy) Change score display format.           |
+| `welcome()`           | `GET /welcome`                | Welcome/onboarding page.                        |
 
 **Key Helper Methods:**
 
-- `setScore($songs, $score_format)` → Formats scores based on user preference (5-star, 10-point, 100-point).
-- `sortPosts($sort, $songs)` → Sorts favorites by various criteria.
-- `setScoreOnlyVariants($variants, $user)` → Attaches rating data to variants.
+- `setScore($songs, $score_format)` → Formats scores based on user preference.
+- `sortSongs($sort, $songs)` → Sorts songs by various criteria.
+- `filterTypesSortChar()` → Returns metadata for song filtering.
 
 ---
 

@@ -5,11 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Report;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Redirect;
 
 class ReportController extends Controller
 {
@@ -56,13 +51,11 @@ class ReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(report $report)
     {
-        $report = Report::findOrFail($id);
-
         $breadcrumb = [
             ['name' => 'Reports', 'url' => route('admin.reports.index')],
-            ['name' => 'Show', 'url' => route('admin.reports.show', $id)],
+            ['name' => 'Show', 'url' => route('admin.reports.show', $report->id)],
         ];
 
         return view('admin.reports.show', compact('report', 'breadcrumb'));
@@ -74,7 +67,7 @@ class ReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(report $report)
     {
         //
     }
@@ -97,20 +90,18 @@ class ReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(report $report)
     {
-        $report = Report::findOrFail($id);
         $report->delete();
-        return redirect(route('admin.reports.index'))->with('warning', 'Report ' . $id . ' deleted');
+        return redirect(route('admin.reports.index'))->with('warning', 'Report ' . $report->id . ' deleted');
     }
 
-    public function toggleStatus($id)
+    public function toggle(report $report)
     {
         try {
-            $report = Report::findOrFail($id);
             $report->toggle();
 
-            return redirect()->back()->with('success', 'Report #' . $id . ' status updated to ' . $report->status);
+            return redirect()->back()->with('success', 'Report #' . $report->id . ' status updated to ' . $report->status);
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Failed to update report: ' . $th->getMessage());
         }

@@ -18,11 +18,6 @@ use App\Models\Year;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $score_formats = [
@@ -40,117 +35,46 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return abort(404);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         return abort(404);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+
+    public function show(User $user)
     {
-        return abort(404);
+        return view('public.users.show', compact('user'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function edit($id)
     {
         return abort(404);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function update(Request $request, $id)
     {
         return abort(404);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function destroy($id)
     {
         return abort(404);
     }
 
-    public function userList($slug)
-    {
-        //dd($userId);
-        $user = User::where('slug', $slug)->select('id', 'slug', 'score_format', 'image', 'banner', 'name')->first();
-
-        if (!$user) {
-            return redirect('/')->with('warning', 'Invalid user');
-        }
-
-        $years = Year::all();
-        $seasons = Season::all();
-        $types = $this->filterTypesSortChar()['types'];
-        $sortMethods = $this->filterTypesSortChar()['sortMethods'];
-        //dd($songs);
-        return view('public.users.list', compact('seasons', 'years', 'sortMethods', 'types', 'user'));
-    }
-
-
-    public function favorites(Request $request)
+    public function favorites()
     {
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        $status = true;
-
-        $user = Auth::user();
-        //$score_format = $user->score_format;
-
-        $season = Season::where('name', $request->season)->first();
-        $year = Year::where('name', $request->year)->first();
-        $type = $request->type;
-        $sort = $request->sort;
-        $name = $request->name;
-
-        $years = Year::all();
-        $seasons = Season::all();
-
-        $types = $this->filterTypesSortChar()['types'];
-        $sortMethods = $this->filterTypesSortChar()['sortMethods'];
-
-        $types = $this->filterTypesSortChar()['types'];
-        $sortMethods = $this->filterTypesSortChar()['sortMethods'];
-
-        return view('public.users.favorites', compact('seasons', 'years', 'sortMethods', 'types', 'user'));
+        return redirect()->route('users.show', Auth::id());
     }
 
     public function paginate($songs, $perPage = 18, $page = null, $options = [])
@@ -162,7 +86,7 @@ class UserController extends Controller
         return $songs;
     }
 
-    public function sortPosts($sort, $songs)
+    public function sortSongs($sort, $songs)
     {
         switch ($sort) {
             case 'title':
@@ -390,96 +314,5 @@ class UserController extends Controller
             'characters' => $characters
         ];
         return $data;
-    }
-
-    public function setScoreOnlyVariants($variants, $user = null)
-    {
-        $variants->each(function ($variant) use ($user) {
-            $variant->userScore = null;
-            $factor = 1;
-            $isDecimalFormat = false; // Determina si el formato permite decimales
-
-            if ($user) {
-                switch ($user->score_format) {
-                    case 'POINT_100':
-                        $factor = 1;
-                        break;
-                    case 'POINT_10_DECIMAL':
-                        $factor = 0.1;
-                        $isDecimalFormat = true;
-                        break;
-                    case 'POINT_10':
-                        $factor = 1 / 10;
-                        break;
-                    case 'POINT_5':
-                        $factor = 1 / 20;
-                        $isDecimalFormat = true;
-                        break;
-                    default:
-                        $factor = 1;
-                        break;
-                }
-
-                if ($userRating = $this->getUserRating($variant->id, $user->id)) {
-                    $variant->userScore = $isDecimalFormat
-                        ? round($userRating->rating * $factor, 1) // Conserva 1 decimal
-                        : (int) round($userRating->rating * $factor); // Fuerza entero
-                }
-            }
-
-            $variant->score = $isDecimalFormat
-                ? round($variant->averageRating * $factor, 1) // Conserva 1 decimal
-                : (int) round($variant->averageRating * $factor); // Fuerza entero
-        });
-
-        return $variants;
-    }
-
-    public function sortVariants($sort, $songVariants)
-    {
-        //dd($song_variants);
-        switch ($sort) {
-            case 'title':
-                $songVariants = $songVariants->sortBy(function ($song_variant) {
-                    return $song_variant->song->post->title;
-                });
-                return $songVariants;
-                break;
-
-            case 'averageRating':
-                $songVariants = $songVariants->sortByDesc('averageRating');
-                return $songVariants;
-                break;
-
-            case 'view_count':
-                $songVariants = $songVariants->sortByDesc('views');
-                return $songVariants;
-                break;
-
-            case 'likeCount':
-                $songVariants = $songVariants->sortByDesc('likeCount');
-                return $songVariants;
-                break;
-
-            case 'recent':
-                $songVariants = $songVariants->sortByDesc('created_at');
-                return $songVariants;
-                break;
-
-            default:
-                $songVariants = $songVariants->sortByDesc('created_at');
-                return $songVariants;
-                break;
-        }
-    }
-    public function getUserRating($songVariantId, $userId)
-    {
-        $userRating = DB::table('ratings')
-            ->where('rateable_type', SongVariant::class)
-            ->where('rateable_id', $songVariantId)
-            ->where('user_id', $userId)
-            ->first(['rating']);
-
-        return $userRating;
     }
 }

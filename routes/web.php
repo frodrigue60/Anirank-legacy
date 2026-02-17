@@ -48,10 +48,6 @@ Route::controller(PostController::class)->group(function () {
     Route::get('/animes', 'animes')->name('posts.animes');
 });
 
-Route::controller(UserController::class)->group(function () {
-    Route::get('/users/{slug}', 'userList')->name('users.list');
-});
-
 Route::controller(SongController::class)->group(function () {
     Route::get('/songs/seasonal', 'seasonal')->name('songs.seasonal');
     Route::get('/songs/ranking', 'ranking')->name('songs.ranking');
@@ -95,7 +91,7 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
     Route::resource('producers', AdminProducerController::class);
 
     // Reports
-    Route::patch('/reports/{report}/toggle', [AdminReportController::class, 'toggleStatus'])->name('reports.toggle');
+    Route::patch('/reports/{report}/toggle', [AdminReportController::class, 'toggle'])->name('reports.toggle');
     Route::resource('reports', AdminReportController::class);
 
     // Posts
