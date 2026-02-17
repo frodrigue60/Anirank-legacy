@@ -46,11 +46,13 @@ Route::controller(PostController::class)->group(function () {
     Route::get('/', 'index')->name('home');
 
     Route::get('/animes', 'animes')->name('posts.animes');
+    Route::get('/anime/{post}', 'show')->name('posts.show');
 });
 
 Route::controller(SongController::class)->group(function () {
     Route::get('/songs/seasonal', 'seasonal')->name('songs.seasonal');
     Route::get('/songs/ranking', 'ranking')->name('songs.ranking');
+    Route::get('/song/{post}/{song}', 'showAnimeSong')->name('songs.show.nested')->scopeBindings();
 });
 
 Route::get('/offline', fn() => view('offline'))->name('offline');

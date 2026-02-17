@@ -101,66 +101,65 @@
                         </div>
                         <div class="relative h-full p-6 flex items-center justify-between">
                             <div class="space-y-1">
-                                <div
-                                    class="inline-flex items-center px-2 py-0.5 rounded bg-primary text-[10px] font-bold text-white mb-2 uppercase tracking-wider">
-                                    {{ $song->slug }}</div>
-                                <h3
-                                    class="text-2xl font-bold text-white group-hover:text-primary transition-colors text-glow">
-                                    {{ $song->name }}</h3>
-                                <div class="text-slate-300 text-sm font-medium">
-                                    @foreach ($song->artists as $artist)
-                                        <span
-                                            class="hover:text-primary transition-colors cursor-pointer">{{ $artist->name }}</span>
-                                        @if (!$loop->last)
-                                            ,
-                                        @endif
-                                    @endforeach
-                                </div>
-                                <div class="text-slate-500 text-xs italic mt-2">
-                                    {{ $song->post->title }}</div>
+                                class="inline-flex items-center px-2 py-0.5 rounded bg-primary text-[10px] font-bold text-white mb-2 uppercase tracking-wider">
+                                {{ $song->type }}{{ $song->theme_num }}</div>
+                            <h3
+                                class="text-2xl font-bold text-white group-hover:text-primary transition-colors text-glow">
+                                {{ $song->name }}</h3>
+                            <div class="text-slate-300 text-sm font-medium">
+                                @foreach ($song->artists as $artist)
+                                    <span
+                                        class="hover:text-primary transition-colors cursor-pointer">{{ $artist->name }}</span>
+                                    @if (!$loop->last)
+                                        ,
+                                    @endif
+                                @endforeach
                             </div>
-                            <div class="flex flex-col items-end gap-2">
-                                <div
-                                    class="glass px-3 py-2 rounded-lg border-primary/30 flex items-center gap-1.5 shadow-lg">
-                                    <span class="material-symbols-outlined text-primary text-sm fill-1">star</span>
-                                    <span class="text-white font-bold text-lg">{{ $song->score }}</span>
-                                </div>
-                                @if ($song->userScore)
-                                    <div class="text-[10px] text-white/40 uppercase font-black tracking-widest mt-1">
-                                        Your Score: <span class="text-primary">{{ $song->userScore }}</span>
-                                    </div>
-                                @endif
-                                <a href="{{ route('songs.show', $song->id) }}"
-                                    class="mt-4 flex items-center justify-center h-10 w-10 rounded-full bg-white/10 hover:bg-primary transition-all text-white backdrop-blur-sm border border-white/10 group-hover:border-primary/50">
-                                    <span class="material-symbols-outlined">play_arrow</span>
-                                </a>
+                            <div class="text-slate-500 text-xs italic mt-2">
+                                {{ $song->post->title }}</div>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <div
+                                class="glass px-3 py-2 rounded-lg border-primary/30 flex items-center gap-1.5 shadow-lg">
+                                <span class="material-symbols-outlined text-primary text-sm fill-1">star</span>
+                                <span class="text-white font-bold text-lg">{{ $song->score }}</span>
                             </div>
+                            @if ($song->userScore)
+                                <div class="text-[10px] text-white/40 uppercase font-black tracking-widest mt-1">
+                                    Your Score: <span class="text-primary">{{ $song->userScore }}</span>
+                                </div>
+                            @endif
+                            <a href="{{ $song->url }}"
+                                class="mt-4 flex items-center justify-center h-10 w-10 rounded-full bg-white/10 hover:bg-primary transition-all text-white backdrop-blur-sm border border-white/10 group-hover:border-primary/50">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                            </a>
                         </div>
                     </div>
-                @endforeach
             </div>
-
-            {{-- Empty State --}}
-            @if ($songs->isEmpty())
-                <div class="py-24 flex flex-col items-center justify-center text-center opacity-40">
-                    <span class="material-symbols-outlined text-7xl mb-4">favorite_border</span>
-                    <p class="text-xl font-bold">No favorite themes found matching your filters.</p>
-                    <button wire:click="$set('name', '')"
-                        class="mt-4 text-primary hover:text-primary-light text-sm font-bold uppercase tracking-widest">Clear
-                        Searches</button>
-                </div>
-            @endif
-        @else
-            @include('livewire.skeletons.card-skeleton')
-        @endif
-
-        {{-- Loader/Infinite Scroll --}}
-        @if ($hasMorePages && $readyToLoad)
-            <div wire:intersect="loadMore" wire:key="intersect-user-favorites"
-                class="py-12 flex flex-col items-center gap-4">
-                <div class="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin">
-                </div>
-            </div>
-        @endif
+        @endforeach
     </div>
+
+    {{-- Empty State --}}
+    @if ($songs->isEmpty())
+        <div class="py-24 flex flex-col items-center justify-center text-center opacity-40">
+            <span class="material-symbols-outlined text-7xl mb-4">favorite_border</span>
+            <p class="text-xl font-bold">No favorite themes found matching your filters.</p>
+            <button wire:click="$set('name', '')"
+                class="mt-4 text-primary hover:text-primary-light text-sm font-bold uppercase tracking-widest">Clear
+                Searches</button>
+        </div>
+    @endif
+@else
+    @include('livewire.skeletons.card-skeleton')
+    @endif
+
+    {{-- Loader/Infinite Scroll --}}
+    @if ($hasMorePages && $readyToLoad)
+        <div wire:intersect="loadMore" wire:key="intersect-user-favorites"
+            class="py-12 flex flex-col items-center gap-4">
+            <div class="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin">
+            </div>
+        </div>
+    @endif
+</div>
 </div>

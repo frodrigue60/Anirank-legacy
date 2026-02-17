@@ -103,7 +103,7 @@
                     class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
                     @foreach ($posts as $post)
                         <div wire:key="anime-grid-{{ $post->id }}" class="group relative">
-                            <div class="aspect-[2/3] rounded-lg overflow-hidden bg-surface-darker shadow-lg relative">
+                            <div class="aspect-2/3 rounded-lg overflow-hidden bg-surface-darker shadow-lg relative">
                                 {{-- Cover Image --}}
                                 <img src="{{ Storage::url($post->thumbnail) }}" alt="{{ $post->title }}"
                                     loading="lazy"
@@ -123,8 +123,8 @@
                                 </div>
                                 {{-- Hover Overlay --}}
                                 <div
-                                    class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-                                    <a href="{{ route('posts.show', $post->id) }}" class="absolute inset-0 z-10"></a>
+                                    class="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+                                    <a href="{{ route('posts.show', $post) }}" class="absolute inset-0 z-10"></a>
                                 </div>
                             </div>
                             <h3
@@ -141,15 +141,15 @@
                             class="flex bg-surface-dark rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group relative border border-white/5">
 
                             {{-- COVER (Left) --}}
-                            <div class="w-[120px] md:w-[180px] shrink-0 relative aspect-[2/3]">
-                                <a href="{{ route('posts.show', $post->id) }}" class="block w-full h-full">
+                            <div class="w-[120px] md:w-[180px] shrink-0 relative aspect-2/3">
+                                <a href="{{ route('posts.show', $post) }}" class="block w-full h-full">
                                     <img src="{{ Storage::url($post->thumbnail) }}" alt="{{ $post->title }}"
                                         loading="lazy" class="w-full h-full object-cover">
                                 </a>
 
                                 {{-- Overlay: Title & Studio --}}
                                 <div
-                                    class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2 pointer-events-none">
+                                    class="absolute inset-0 bg-linear-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2 pointer-events-none">
                                     <h3
                                         class="text-sm font-bold text-white leading-tight line-clamp-2 mb-0.5 text-shadow-sm">
                                         {{ $post->title }}
@@ -209,7 +209,7 @@
                             <div class="flex-1 min-w-0">
                                 <h3
                                     class="text-sm font-bold text-white leading-tight truncate px-1 group-hover:text-primary transition-colors">
-                                    <a href="{{ route('posts.show', $post->id) }}">{{ $post->title }}</a>
+                                    <a href="{{ route('posts.show', $post) }}">{{ $post->title }}</a>
                                 </h3>
                                 <div class="flex items-center gap-3 text-xs text-white/40 mt-0.5 px-1">
                                     @if ($post->format)
@@ -228,7 +228,7 @@
 
                             {{-- Action --}}
                             <div class="ml-auto">
-                                <a href="{{ route('posts.show', $post->id) }}"
+                                <a href="{{ route('posts.show', $post) }}"
                                     class="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-white/40 hover:bg-primary hover:text-white transition-all">
                                     <span class="material-symbols-outlined text-lg">chevron_right</span>
                                 </a>

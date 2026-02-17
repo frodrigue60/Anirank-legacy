@@ -97,7 +97,7 @@
                             style="background-image: url('{{ Storage::url($song->post->banner) }}'); filter: brightness(0.5);">
                         </div>
                         <div
-                            class="absolute inset-0 bg-gradient-to-r from-background-dark via-background-dark/80 to-transparent">
+                            class="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/80 to-transparent">
                         </div>
                         <div class="relative h-full p-6 flex items-center justify-between">
                             <div class="space-y-1">
@@ -120,7 +120,7 @@
                                     <span
                                         class="text-white font-bold text-lg">{{ number_format($song->ratings_avg_rating ?? 0, 1) }}</span>
                                 </div>
-                                <a href="{{ route('songs.show', $song->id) }}"
+                                <a href="{{ $song->url }}"
                                     class="mt-4 flex items-center justify-center h-10 w-10 rounded-full bg-white/10 hover:bg-primary transition-all text-white backdrop-blur-sm border border-white/10 group-hover:border-primary/50">
                                     <span class="material-symbols-outlined">play_arrow</span>
                                 </a>

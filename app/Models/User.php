@@ -189,4 +189,14 @@ class User extends Authenticatable
         $this->last_login_at = now();
         return $this->save();
     }
+
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 }

@@ -127,11 +127,15 @@ class Song extends Model
             return $song->songVariants;
         })->sortBy('version_number')->first();
 
-        return route('variants.show', [
-            'anime_slug' => $this->post->slug,
-            'song_slug' => $this->slug,
-            'variant_slug' => $smallestVariant->slug
+        return route('songs.show.nested', [
+            'post' => $this->post->slug,
+            'song' => $this->slug,
         ]);
+    }
+
+    public function getUrlAttribute()
+    {
+        return $this->url_first_variant;
     }
 
     public function reactions()
@@ -286,5 +290,15 @@ class Song extends Model
     public function reports()
     {
         return $this->hasMany(Report::class);
+    }
+
+    /**
+     * Get the route key for the model.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
     }
 }

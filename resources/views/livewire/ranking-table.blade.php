@@ -74,11 +74,11 @@
                                             src="{{ Storage::url($song->post->thumbnail) }}" />
                                     </div>
                                     <div class="min-w-0">
-                                        <a href="{{ route('songs.show', $song->id) }}"
+                                        <a href="{{ $song->url }}"
                                             class="text-lg font-bold text-white truncate block leading-tight mb-1 hover:text-primary transition-colors">{{ $song->name }}
                                         </a>
                                         <div class="flex flex-col items-start gap-1 text-sm">
-                                            <a href="{{ route('posts.show', $song->post->id) }}"
+                                            <a href="{{ route('posts.show', $song->post) }}"
                                                 class="text-primary font-bold truncate hover:underline">{{ $song->post->title }}</a>
 
                                             <span class="text-white/60 truncate">
@@ -104,7 +104,7 @@
                                 {{-- Actions Column --}}
                                 <div class="flex items-center justify-end gap-2">
                                     <button @click.stop="window.playSongGlobal({{ $song->id }})"
-                                        class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary text-white transition-all shadow-lg hover:shadow-primary/20 cursor-pointer z-[10]">
+                                        class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary text-white transition-all shadow-lg hover:shadow-primary/20 cursor-pointer z-10">
                                         <span
                                             class="material-symbols-outlined text-[20px] filled pointer-events-none">play_arrow</span>
                                     </button>

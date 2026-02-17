@@ -48,13 +48,13 @@
                     @php
                         $featuredPost = $producer->posts->first();
                     @endphp
-                    <a wire:key="prod-{{ $producer->id }}" href="{{ route('producers.show', $producer->id) }}"
-                        class="group relative overflow-hidden rounded-xl bg-slate-800 aspect-[16/10] border border-transparent hover:border-primary/50 transition-all cursor-pointer shadow-lg shadow-black/20">
+                    <a wire:key="prod-{{ $producer->id }}" href="{{ route('producers.show', $producer) }}"
+                        class="group relative overflow-hidden rounded-xl bg-slate-800 aspect-16/10 border border-transparent hover:border-primary/50 transition-all cursor-pointer shadow-lg shadow-black/20">
                         <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                             style="background-image: url('{{ Storage::url($featuredPost->banner) }}');filter: brightness(0.5);">
                         </div>
                         <div
-                            class="absolute inset-0 bg-gradient-to-t from-[#191022]/95 via-[#191022]/40 to-transparent">
+                            class="absolute inset-0 bg-linear-to-t from-background-dark/95 via-background-dark/40 to-transparent">
                         </div>
                         <div class="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-1">
                             <div class="flex justify-between items-end">

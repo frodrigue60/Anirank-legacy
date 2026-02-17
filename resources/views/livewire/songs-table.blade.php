@@ -20,7 +20,7 @@
                     <span
                         class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors">search</span>
                     <input wire:model.live.debounce.300ms="name" type="text" placeholder="Search themes..."
-                        class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm !text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
+                        class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white! focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
                 </div>
             </div>
 
@@ -111,7 +111,7 @@
                             <div class="space-y-1">
                                 <div
                                     class="inline-flex items-center px-2 py-0.5 rounded bg-primary text-[10px] font-bold text-white mb-2 uppercase tracking-wider">
-                                    {{ $song->slug }}</div>
+                                    {{ $song->type }}{{ $song->theme_num }}</div>
                                 <h3
                                     class="text-2xl font-bold text-white group-hover:text-primary transition-colors text-glow">
                                     {{ $song->name }}</h3>
@@ -134,7 +134,7 @@
                                     <span
                                         class="text-white font-bold text-lg">{{ number_format($song->averageRating ?? 0, 1) }}</span>
                                 </div>
-                                <a href="{{ route('songs.show', $song->id) }}"
+                                <a href="{{ $song->url }}"
                                     class="mt-4 flex items-center justify-center h-10 w-10 rounded-full bg-white/10 hover:bg-primary transition-all text-white backdrop-blur-sm border border-white/10 group-hover:border-primary/50">
                                     <span class="material-symbols-outlined">play_arrow</span>
                                 </a>

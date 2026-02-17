@@ -90,7 +90,7 @@
 
             @auth
                 @include('partials.user.modal-request')
-                @include('partials.user.modal-report')
+                <livewire:report-modal />
             @endauth
         </main>
 

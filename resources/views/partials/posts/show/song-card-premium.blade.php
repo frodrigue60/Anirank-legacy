@@ -24,7 +24,7 @@
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
             <p class="text-sm text-white/40 font-medium truncate">
                 @foreach ($song->artists as $artist)
-                    <a href="{{ route('artists.show', $artist->id) }}"
+                    <a href="{{ route('artists.show', $artist) }}"
                         class="hover:text-primary transition-colors">{{ $artist->name }}</a>{{ !$loop->last ? ', ' : '' }}
                 @endforeach
             </p>
@@ -33,13 +33,14 @@
 
     <div class="flex items-center gap-2">
         @auth
-            <button type="button" onclick="window.openReportModal({{ $song->id }})" title="Report Issue"
+            <button type="button" onclick="Livewire.dispatch('openReportModal', { songId: {{ $song->id }} })"
+                title="Report Issue"
                 class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-500 rounded-full border border-white/5 transition-all">
                 <span class="material-symbols-outlined text-[18px]">report</span>
             </button>
         @endauth
 
-        <a href="{{ route('songs.show', $song->id) }}"
+        <a href="{{ $song->url }}"
             class="w-10 h-10 flex items-center justify-center bg-primary rounded-full text-white shadow-lg shadow-primary/20 hover:scale-110 active:scale-95 transition-all">
             <span class="material-symbols-outlined filled text-2xl">play_arrow</span>
         </a>

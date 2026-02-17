@@ -26,7 +26,7 @@ class SongDetail extends Component
 
     #[Validate('required|min:3|max:1000')]
     public $replyBody = '';
-    
+
     public $replyingTo = null;
     public $editingCommentId = null;
 
@@ -128,7 +128,7 @@ class SongDetail extends Component
     public function switchVariant($variantId)
     {
         $this->currentVariant = $this->song->songVariants->find($variantId);
-        $this->dispatch('video-changed', src: $this->getVideoUrl());
+        $this->dispatch('video-changed', src: $this->getVideoUrl(), isEmbed: $this->isCurrentEmbed());
     }
 
     public function getVideoUrl()
@@ -137,11 +137,32 @@ class SongDetail extends Component
             return '';
         }
 
-        if (Storage::disk('public')->exists($this->currentVariant->video->video_src)) {
-            return Storage::url($this->currentVariant->video->video_src);
+        $video = $this->currentVariant->video;
+
+        if ($video->isEmbed()) {
+            // embed_code contains full <iframe> HTML, extract the src attribute
+            if (preg_match('/src=["\']([^"\']+)["\']/', $video->embed_code, $matches)) {
+                $url = $matches[1];
+                // Append autoplay parameter
+                $separator = str_contains($url, '?') ? '&' : '?';
+                return $url . $separator . 'autoplay=1';
+            }
+            return $video->embed_code;
         }
 
-        return $this->currentVariant->video->video_src;
+        // File type
+        if ($video->video_src && Storage::disk('public')->exists($video->video_src)) {
+            return Storage::url($video->video_src);
+        }
+
+        return $video->video_src ?? '';
+    }
+
+    public function isCurrentEmbed()
+    {
+        return $this->currentVariant
+            && $this->currentVariant->video
+            && $this->currentVariant->video->isEmbed();
     }
 
     public function toggleLike()
@@ -367,13 +388,15 @@ class SongDetail extends Component
             $this->calculateScore();
             $this->showRatingModal = false;
 
-            $this->dispatch('toast',
+            $this->dispatch(
+                'toast',
                 type: 'success',
                 message: 'Rating Saved!',
                 description: "You rated {$this->song->name} with {$value} points."
             );
         } catch (\Exception $e) {
-            $this->dispatch('toast',
+            $this->dispatch(
+                'toast',
                 type: 'error',
                 message: 'Error saving rating',
                 description: $e->getMessage()

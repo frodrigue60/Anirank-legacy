@@ -108,16 +108,12 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        $post = Post::with(['songs' => function ($q) {
-            $q->with(['songVariants.video', 'artists:id,name', 'favorites', 'ratings']);
+        $post->load(['songs' => function ($q) {
+            $q->with(['songVariants.video', 'artists:id,name,slug', 'favorites', 'ratings']);
             $q->withAvg('ratings', 'rating');
-        }])->where('id', $post->id)->first();
+        }]);
 
         $user = Auth::user();
-
-        if (!$post) {
-            return redirect(route('home'))->with('warning', 'Post not exist!');
-        }
 
         if (!$post->status) {
             if ($user && $user->isAdmin()) {
@@ -150,32 +146,6 @@ class PostController extends Controller
         return view('public.posts.index', compact('seasons', 'years', 'formats'));
     }
 
-    public function showAnime($animeSlug)
-    {
-        $post = Post::with(['songs' => function ($q) {
-            $q->with(['songVariants.video', 'artists:id,name', 'favorites', 'ratings']);
-            $q->withAvg('ratings', 'rating');
-        }])->where('slug', $animeSlug)->first();
-
-        $user = Auth::user();
-
-        if (!$post) {
-            return redirect(route('home'))->with('warning', 'Post not exist!');
-        }
-
-        if (!$post->status) {
-            if ($user && $user->isAdmin()) {
-                // Admin can view
-            } else {
-                return redirect('/')->with('danger', $user ? 'User not autorized!' : 'Post status: Private');
-            }
-        }
-
-        $openings = $post->songs->where('type', 'OP')->sortBy('theme_num');
-        $endings = $post->songs->where('type', 'ED')->sortBy('theme_num');
-
-        return view('public.posts.show', compact('post', 'openings', 'endings'));
-    }
 
     public function setScoreOnlyVariants($variants, $user = null)
     {

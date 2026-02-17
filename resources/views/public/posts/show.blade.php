@@ -150,7 +150,7 @@
                                         class="text-xs font-black text-white/20 uppercase tracking-widest">Producers</span>
                                     <div class="flex flex-col gap-2">
                                         @foreach ($post->producers as $item)
-                                            <a href="{{ route('studios.show', $item->slug) }}"
+                                            <a href="{{ route('producers.show', $item) }}"
                                                 class="flex items-center gap-2 text-sm text-white hover:text-primary transition-colors font-bold group/studio">
                                                 <span
                                                     class="material-symbols-outlined text-[16px] text-white/20 group-hover/studio:text-primary">business</span>
@@ -166,7 +166,7 @@
                                     <span class="text-xs font-black text-white/20 uppercase tracking-widest">Studios</span>
                                     <div class="flex flex-col gap-2">
                                         @foreach ($post->studios as $item)
-                                            <a href="{{ route('studios.show', $item->slug) }}"
+                                            <a href="{{ route('studios.show', $item) }}"
                                                 class="flex items-center gap-2 text-sm text-white hover:text-primary transition-colors font-bold group/studio">
                                                 <span
                                                     class="material-symbols-outlined text-[16px] text-white/20 group-hover/studio:text-primary">business</span>

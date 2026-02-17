@@ -2,12 +2,32 @@
     <div class="space-y-8">
 
         {{-- Video Player Section --}}
-        <div
-            class="relative w-full aspect-video rounded-3xl overflow-hidden bg-black shadow-2xl shadow-primary/20 group border border-white/5">
-            @if ($currentVariant)
-                <video id="player" class="w-full h-full object-contain" controls autoplay crossorigin playsinline>
-                    <source src="{{ $this->getVideoUrl() }}" type="video/mp4">
-                </video>
+        <div class="relative w-full aspect-video rounded-3xl overflow-hidden bg-black shadow-2xl shadow-primary/20 group border border-white/5"
+            x-data="{
+                isEmbed: @js($this->isCurrentEmbed()),
+                videoSrc: @js($this->getVideoUrl()),
+            }"
+            x-on:video-changed.window="
+                isEmbed = $event.detail.isEmbed;
+                videoSrc = $event.detail.src;
+                $nextTick(() => {
+                    if (!isEmbed) {
+                        const vid = $el.querySelector('video');
+                        if (vid) { vid.load(); vid.play(); }
+                    }
+                });
+            ">
+            @if ($currentVariant && $currentVariant->video)
+                <template x-if="isEmbed">
+                    <iframe :src="videoSrc" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media"
+                        allowfullscreen></iframe>
+                </template>
+                <template x-if="!isEmbed">
+                    <video id="player" class="w-full h-full object-contain" controls autoplay crossorigin
+                        playsinline>
+                        <source :src="videoSrc" type="video/mp4">
+                    </video>
+                </template>
             @else
                 <div class="absolute inset-0 flex items-center justify-center bg-surface-darker">
                     <div class="text-center">
@@ -40,8 +60,7 @@
                     @endif
                 </div>
                 <div class="flex flex-col">
-                    <a href="{{ route('posts.show', $post->id) }}"
-                        class="text-white/60 hover:text-white transition-colors">
+                    <a href="{{ route('posts.show', $post) }}" class="text-white/60 hover:text-white transition-colors">
                         {{ $song->post->title }}
                     </a>
                     <h1 class="text-2xl md:text-4xl font-black text-white leading-tight mb-2">
@@ -52,7 +71,7 @@
                 <div class="flex items-center gap-2 text-white/60 text-sm font-medium">
                     <span>by</span>
                     @foreach ($song->artists as $artist)
-                        <a href="{{ route('artists.show', $artist->id) }}"
+                        <a href="{{ route('artists.show', $artist) }}"
                             class="text-primary hover:text-white transition-colors">
                             {{ $artist->name }}
                         </a>
@@ -136,7 +155,8 @@
                 </button>
 
                 @auth
-                    <button type="button" onclick="window.openReportModal({{ $song->id }})" title="Report Issue"
+                    <button type="button" onclick="Livewire.dispatch('openReportModal', { songId: {{ $song->id }} })"
+                        title="Report Issue"
                         class="group w-12 h-11 flex items-center justify-center rounded-2xl border border-white/10 bg-surface-dark hover:bg-red-500/20 text-white/60 hover:text-red-500 transition-all">
                         <span class="material-symbols-outlined text-[22px]">report_problem</span>
                     </button>

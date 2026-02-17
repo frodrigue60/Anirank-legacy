@@ -1,14 +1,16 @@
 <div
     class="space-y-4 {{ $isReply ? 'ml-8 mt-4 border-l-2 border-white/5 pl-4' : 'bg-surface-darker/30 rounded-3xl p-6 border border-white/5' }} animation-fade-in">
     <div class="flex gap-4">
-        <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10">
+        <a href="{{ route('users.show', $comment->user) }}"
+            class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10 hover:ring-2 hover:ring-primary transition-all">
             <img src="{{ $comment->user->profile_photo_url }}" alt="{{ $comment->user->name }}"
                 class="w-full h-full object-cover">
-        </div>
+        </a>
         <div class="flex-1 space-y-2">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <h4 class="font-bold text-white text-sm">{{ $comment->user->name }}</h4>
+                    <a href="{{ route('users.show', $comment->user) }}"
+                        class="font-bold text-white text-sm hover:text-primary transition-colors">{{ $comment->user->name }}</a>
                     @if ($comment->parent_id)
                         <span
                             class="text-[10px] text-primary font-bold uppercase tracking-wider bg-primary/10 px-1.5 py-0.5 rounded">Reply</span>

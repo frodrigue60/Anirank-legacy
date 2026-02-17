@@ -35,17 +35,17 @@
     {{-- @guest
         <section class="relative h-screen flex items-center justify-center overflow-hidden">
             <div class="absolute inset-0 z-0">
-                <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/60 to-transparent z-10">
+                <div class="absolute inset-0 bg-linear-to-t from-background-dark via-background-dark/60 to-transparent z-10">
                 </div>
                 <div
-                    class="absolute inset-0 bg-gradient-to-r from-background-dark/80 via-transparent to-background-dark/80 z-10">
+                    class="absolute inset-0 bg-linear-to-r from-background-dark/80 via-transparent to-background-dark/80 z-10">
                 </div>
                 <img class="w-full h-full object-cover scale-105" data-alt="Cinematic wide shot of anime cityscape at night"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4NKMsiVFSxKoMy0QJq1bdQInEoybDwBon5RstY0kyN604vExTI9pu8NcCmoEH1v6KITdZ4av_LtDghv2w-_XaKXQElk4leiUH9GVq1u0IyulYjmeCIqspuNtkNr8PCg2bZhyubZmFlVu3i7A2-Ug2FVNBcK4uF7HEtkwYOOHS-swOGUyTo14YgLkUPJsdetP6SpSqK0fw-RR74Zhd-zOxh-7r1ruGpFQDSftrvuYB_oXOcfl7wzCHPUY-joO8Cn9Nr-6SuEVYS6A" />
             </div>
             <div class="relative z-20 container mx-auto px-6 text-center max-w-4xl">
                 <h1
-                    class="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-none text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60">
+                    class="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-none text-transparent bg-clip-text bg-linear-to-b from-white to-white/60">
                     Your Anime Soundtrack Journey Starts Here
                 </h1>
                 <div class="flex flex-wrap justify-center gap-8 mb-10 text-lg">
@@ -118,7 +118,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-4 mt-2 justify-center md:justify-start">
-                                <a href="{{ route('songs.show', $featuredSong->id) }}"
+                                <a href="{{ route('songs.show.nested', ['post' => $featuredSong->post->slug, 'song' => $featuredSong->slug]) }}"
                                     class="bg-primary hover:bg-primary/80 text-white h-12 px-8 rounded-full font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary/30">
                                     <span class="material-symbols-outlined filled">play_circle</span>
                                     <span>Play Now</span>
@@ -160,7 +160,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center justify-between">
-                                            <a href="{{ route('songs.show', $song->id) }}"
+                                            <a href="{{ route('songs.show.nested', ['post' => $song->post->slug, 'song' => $song->slug]) }}"
                                                 class="font-bold text-white truncate text-lg hover:text-primary transition-colors">{{ $song->name }}</a>
                                             <div
                                                 class="flex items-center gap-1 bg-surface-dark text-yellow-400 text-xs font-bold">
@@ -230,7 +230,7 @@
                         <div class="flex items-center justify-between group">
                             <a href="{{ route('artists.show', $artist->slug) }}" class="flex items-center gap-3 min-w-0">
                                 <div
-                                    class="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-colors flex-shrink-0">
+                                    class="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-colors shrink-0">
                                     @if ($artist->image)
                                         <img src="{{ Storage::url($artist->image) }}" alt="{{ $artist->name }}"
                                             class="w-full h-full object-cover">

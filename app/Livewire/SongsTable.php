@@ -15,16 +15,16 @@ class SongsTable extends Component
 
     #[Url(except: '')]
     public $name = '';
-    
+
     #[Url(except: '')]
     public $type = '';
-    
+
     #[Url(except: '')]
     public $year_id = '';
-    
+
     #[Url(except: '')]
     public $season_id = '';
-    
+
     #[Url(except: 'recent')]
     public $sort = 'recent';
 
@@ -85,7 +85,7 @@ class SongsTable extends Component
         }
 
         $query = Song::query()
-            ->with(['post:id,title,slug,banner,thumbnail', 'artists:id,name'])
+            ->with(['post:id,title,slug,banner,thumbnail', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->withCount('likes')
             ->whereHas('post', function ($q) {

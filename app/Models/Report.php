@@ -15,6 +15,8 @@ class Report extends Model
     protected $fillable = [
         'user_id',
         'song_id',
+        'title',
+        'content',
         'source',
         'status',
     ];

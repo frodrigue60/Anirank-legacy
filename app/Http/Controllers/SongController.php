@@ -55,12 +55,9 @@ class SongController extends Controller
      */
     public function show(Song $song)
     {
-        $post = Post::with(['songs'])->where('slug', $song->post->slug)->first();
-        $user = Auth::check() ? Auth::user() : null;
-
-        if (!$post) {
-            return redirect(route('home'))->with('warning', 'Post not exist!');
-        }
+        $song->load(['songVariants.video', 'post']);
+        $post = $song->post;
+        $user = Auth::user();
 
         if (!$post->status) {
             if ($user && $user->isAdmin()) {
@@ -68,15 +65,6 @@ class SongController extends Controller
             } else {
                 return redirect('/')->with('danger', $user ? 'User not autorized!' : 'Post status: Private');
             }
-        }
-
-        $song = Song::with(['songVariants.video'])
-            ->where('slug', $song->slug)
-            ->where('post_id', $post->id)
-            ->first();
-
-        if (!$song) {
-            return redirect('/')->with('warning', 'Song not found!');
         }
 
         $song->incrementViews();
@@ -133,14 +121,9 @@ class SongController extends Controller
         return view('public.ranking');
     }
 
-    public function showAnimeSong($anime_slug, $song_slug)
+    public function showAnimeSong(Post $post, Song $song)
     {
-        $post = Post::with(['songs'])->where('slug', $anime_slug)->first();
-        $user = Auth::check() ? Auth::user() : null;
-
-        if (!$post) {
-            return redirect(route('home'))->with('warning', 'Post not exist!');
-        }
+        $user = Auth::user();
 
         if (!$post->status) {
             if ($user && $user->isAdmin()) {
@@ -150,14 +133,7 @@ class SongController extends Controller
             }
         }
 
-        $song = Song::with(['songVariants.video'])
-            ->where('slug', $song_slug)
-            ->where('post_id', $post->id)
-            ->first();
-
-        if (!$song) {
-            return redirect('/')->with('warning', 'Song not found!');
-        }
+        $song->load(['songVariants.video']);
 
         $song->incrementViews();
 

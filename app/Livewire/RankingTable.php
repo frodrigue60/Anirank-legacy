@@ -63,7 +63,7 @@ class RankingTable extends Component
         $perPage = $this->perPage * $this->page;
 
         $query = Song::query()
-            ->with(['post:id,title,slug,banner,thumbnail', 'artists:id,name'])
+            ->with(['post:id,title,slug,banner,thumbnail', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->whereHas('post', function ($query) use ($status) {
                 $query->where('status', $status);

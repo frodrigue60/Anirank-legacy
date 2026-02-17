@@ -1,9 +1,8 @@
 @foreach ($songs as $song)
     <div class="media-card">
-        <a class="cover">
+        <a href="{{ $song->url }}" class="cover">
             <div class="absolute top-0 z-20">
                 <div class="flex gap-1 p-1">
-                    <span class="bg-primary rounded-sm text-sm px-1">{{ $song->slug }}</span>
                     <span
                         class="bg-primary rounded-sm text-sm px-1">{{ number_format($song->average_rating ?? 0, 1) }}</span>
                 </div>
