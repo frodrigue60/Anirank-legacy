@@ -112,9 +112,6 @@
     @stack('scripts')
     @yield('script')
 
-    @if (Route::is('seasonal') || Route::is('ranking'))
-        <livewire:global-bottom-player />
-    @endif
 </body>
 
 </html>

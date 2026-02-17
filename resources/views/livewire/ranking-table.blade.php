@@ -103,11 +103,11 @@
 
                                 {{-- Actions Column --}}
                                 <div class="flex items-center justify-end gap-2">
-                                    <button @click.stop="window.playSongGlobal({{ $song->id }})"
+                                    <a href="{{ $song->url }}"
                                         class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary text-white transition-all shadow-lg hover:shadow-primary/20 cursor-pointer z-10">
                                         <span
                                             class="material-symbols-outlined text-[20px] filled pointer-events-none">play_arrow</span>
-                                    </button>
+                                    </a>
                                     <button wire:click="toggleFavorite({{ $song->id }})" wire:loading.attr="disabled"
                                         class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-red-400 transition-all">
                                         <span
