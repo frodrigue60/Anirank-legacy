@@ -11,6 +11,7 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🎵 Immersive Player**: A dedicated cinema-mode player for seamless theme playback.
 - **📁 User Collections**: Create public/private playlists and maintain a personalized favorites list.
 - **🔐 Dynamic Role Management**: A robust many-to-many role system (`User <-> Role`) with unified middleware for scalable permissions.
+- **📊 Advanced Analytics**: Time-series view tracking for trending content and a premium admin dashboard with interactive charts.
 - **🛠️ Standardized Admin Panel**: Robust CRUD control with unified search patterns and RESTful state management.
 
 ## Tech Stack

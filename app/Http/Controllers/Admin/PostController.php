@@ -18,8 +18,13 @@ use Illuminate\Support\Facades\Redirect;
 use Intervention\Image\ImageManagerStatic as Image;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Year;
+use App\Models\Song;
+use App\Models\User;
+use App\Models\DailyMetric;
 use GuzzleHttp\Client;
 use App\Services\Breadcrumb;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -780,7 +785,50 @@ class PostController extends Controller
 
     public function dashboard()
     {
-        return view('admin.dashboard');
+        $last7Days = collect(range(6, 0))->map(function ($days) {
+            return now()->subDays($days)->toDateString();
+        });
+
+        // 1. User Growth (Last 30 days)
+        $userGrowth = User::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date');
+
+        // 2. Trending Songs (Last 7 days views)
+        $trendingSongs = Song::select('songs.*')
+            ->join('daily_metrics', 'songs.id', '=', 'daily_metrics.song_id')
+            ->where('daily_metrics.date', '>=', now()->subDays(7))
+            ->selectRaw('SUM(daily_metrics.views_count) as recent_views')
+            ->groupBy('songs.id')
+            ->orderByDesc('recent_views')
+            ->limit(5)
+            ->get();
+
+        // 3. Overall Statistics
+        $stats = [
+            'total_users' => User::count(),
+            'active_users_24h' => User::where('last_login_at', '>=', now()->subDays(1))->count(),
+            'total_songs' => Song::count(),
+            'total_posts' => Post::count(),
+            'total_views' => Song::sum('views'),
+        ];
+
+        // 4. Views Chart Data (Last 7 days)
+        $viewsData = DailyMetric::select('date', DB::raw('SUM(views_count) as total_views'))
+            ->where('date', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('total_views', 'date');
+
+        $chartData = $last7Days->mapWithKeys(function ($date) use ($viewsData) {
+            return [$date => $viewsData->get($date, 0)];
+        });
+
+        return view('admin.dashboard', compact('stats', 'chartData', 'trendingSongs', 'userGrowth'));
     }
 
     private function assignSeason(int $month)

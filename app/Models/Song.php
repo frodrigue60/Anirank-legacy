@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Rateable;
 use Illuminate\Support\Facades\Session;
+use App\Models\DailyMetric;
 
 class Song extends Model
 {
@@ -88,11 +89,25 @@ class Song extends Model
         $key = 'song_' . $this->id;
 
         if (!Session::has($key)) {
-            DB::table('songs')
-                ->where('id', $this->id)
-                ->increment('views');
+            DB::beginTransaction();
+            try {
+                // Static global count
+                DB::table('songs')
+                    ->where('id', $this->id)
+                    ->increment('views');
 
-            Session::put($key, true);
+                // Daily time-series count
+                DailyMetric::updateOrCreate(
+                    ['song_id' => $this->id, 'date' => now()->toDateString()],
+                    ['views_count' => DB::raw('views_count + 1')]
+                );
+
+                DB::commit();
+                Session::put($key, true);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                // Optionally log error
+            }
         }
     }
 

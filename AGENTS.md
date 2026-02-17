@@ -186,16 +186,17 @@ Represents a **musician or band**.
 
 Standard Laravel user model with extensions.
 
-| Field          | Type   | Description                                  |
-| -------------- | ------ | -------------------------------------------- |
-| `name`         | string | User's display name.                         |
-| `email`        | string | User's email address.                        |
-| `password`     | string | Hashed password.                             |
-| `roles`        | M:M    | Many-to-Many relationship with `Role` model. |
-| `image`        | string | Path to profile picture.                     |
-| `banner`       | string | Path to profile banner.                      |
-| `score_format` | string | User's preferred rating display format.      |
-| `slug`         | string | URL-friendly identifier.                     |
+| Field           | Type     | Description                                   |
+| --------------- | -------- | --------------------------------------------- |
+| `name`          | string   | User's display name.                          |
+| `email`         | string   | User's email address.                         |
+| `password`      | string   | Hashed password.                              |
+| `roles`         | M:M      | Many-to-Many relationship with `Role` model.  |
+| `image`         | string   | Path to profile picture.                      |
+| `banner`        | string   | Path to profile banner.                       |
+| `score_format`  | string   | User's preferred rating display format.       |
+| `last_login_at` | datetime | Timestamp of the user's most recent activity. |
+| `slug`          | string   | URL-friendly identifier.                      |
 
 **Relationships:**
 
@@ -223,6 +224,22 @@ Represents a **user role** for permissions.
 **Relationships:**
 
 - `belongsToMany` → `User`
+
+---
+
+### `DailyMetric`
+
+Time-series snapshot of content performance.
+
+| Field         | Type    | Description                                     |
+| ------------- | ------- | ----------------------------------------------- |
+| `song_id`     | integer | Foreign key for the song.                       |
+| `date`        | date    | The specific day of the tracking.               |
+| `views_count` | integer | Total views received on that day (incremented). |
+
+**Relationships:**
+
+- `belongsTo` → `Song`
 
 ---
 
@@ -1360,8 +1377,11 @@ The application heavily utilizes **Livewire** for reactive UI components, especi
     - `role`: Unified middleware for role-based access control (e.g., `role:admin,editor`).
     - Semantic Aliases: `staff`, `admin`, `editor`, `creator` are configured as parameterized `role` aliases in `Kernel.php` for backward compatibility.
 2.  **Asset Management**: Use `@vite` for main assets. Use `@push('scripts')` / `@push('styles')` for page-specific resources.
-3.  **Configuration**: Always use `config()` instead of `env()` in views and application code.
-4.  **Routes**: Grouped by context (`public`, `admin.`) with resource controllers where applicable.
+3.  **Analytics & Tracking**:
+    - **Views**: Tracked in `DailyMetric` (daily snapshots) and `songs.views` (total).
+    - **User Activity**: Automated via `UpdateLastLogin` listener on `Illuminate\Auth\Events\Login`.
+4.  **Configuration**: Always use `config()` instead of `env()` in views and application code.
+5.  **Routes**: Grouped by context (`public`, `admin.`) with resource controllers where applicable.
 
 ---
 
@@ -1371,7 +1391,7 @@ The following features are identified as standard/premium upgrades for the Anira
 
 1.  **Audit Trails**: Implement an activity logging system to track administrative changes (who edited what and when).
 2.  **Real-time Notifications**: Centralized notification system using Laravel Reverb/Pusher for replies, solved reports, and new seasonal releases.
-3.  **Advanced Analytics**: Integrated dashboard with charts for trending themes, top artists, and user growth metrics.
+3.  **Real-time Notifications**: Centralized notification system using Laravel Reverb/Pusher for replies, solved reports, and new seasonal releases.
 4.  **Media Library**: A centralized manager for image/video assets with automatic WebP conversion and lazy-loading optimizations.
 5.  **SEO Suite**: Enhanced meta-tag management (Title, Description, OpenGraph) per post and song.
 6.  **Intelligent Caching**: Use Redis to store complex ranking calculations, improving performance under high traffic.

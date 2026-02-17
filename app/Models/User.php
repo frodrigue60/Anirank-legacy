@@ -180,4 +180,13 @@ class User extends Authenticatable
     {
         return $this->playlists()->withCount('posts')->get()->sum('posts_count');
     }
+
+    /**
+     * Update the user's last login timestamp.
+     */
+    public function updateLastLogin()
+    {
+        $this->last_login_at = now();
+        return $this->save();
+    }
 }
