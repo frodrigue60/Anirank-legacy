@@ -17,16 +17,12 @@ use App\Services\Breadcrumb;
 
 class SongController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
         $query = Song::query()->with('post', 'artists');
 
         $currentPost = null;
+        $currentArtist = null;
         $breadcrumbItems = [
             ['name' => 'Songs', 'url' => route('admin.songs.index')]
         ];
@@ -40,6 +36,21 @@ class SongController extends Controller
                     ['name' => 'Posts', 'url' => route('admin.posts.index')],
                     ['name' => $currentPost->title, 'url' => route('admin.posts.show', $currentPost->id)],
                     ['name' => 'Songs', 'url' => route('admin.songs.index', ['post_id' => $currentPost->id])]
+                ];
+            }
+        }
+
+        if ($request->filled('artist_id')) {
+            $query->whereHas('artists', function ($q) use ($request) {
+                $q->where('artists.id', $request->artist_id);
+            });
+            $currentArtist = Artist::find($request->artist_id);
+
+            if ($currentArtist) {
+                $breadcrumbItems = [
+                    ['name' => 'Artists', 'url' => route('admin.artists.index')],
+                    ['name' => $currentArtist->name, 'url' => route('admin.artists.index', ['q' => $currentArtist->name])], // Assuming there's no show page for artists yet, or using search
+                    ['name' => 'Songs', 'url' => route('admin.songs.index', ['artist_id' => $currentArtist->id])]
                 ];
             }
         }
@@ -60,14 +71,9 @@ class SongController extends Controller
         }
 
         $songs = $query->latest()->paginate(20);
-        return view('admin.songs.index', compact('songs', 'currentPost', 'breadcrumb'));
+        return view('admin.songs.index', compact('songs', 'currentPost', 'currentArtist', 'breadcrumb'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create(Request $request)
     {
         $selectedPostId = $request->post_id;
@@ -106,12 +112,6 @@ class SongController extends Controller
         return view('admin.songs.create', compact('breadcrumb', 'posts', 'types', 'seasons', 'years', 'selectedPostId', 'currentPost'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $name_romaji = null;
@@ -207,23 +207,11 @@ class SongController extends Controller
 
 
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Song $song)
     {
         $breadcrumb = Breadcrumb::generate([
@@ -237,7 +225,7 @@ class SongController extends Controller
             ],
             [
                 'name' => 'Songs',
-                'url' => route('admin.posts.songs', $song->post_id)
+                'url' => route('admin.songs.index', ['post_id' => $song->post_id])
             ],
             [
                 'name' => 'Edit',
@@ -258,13 +246,6 @@ class SongController extends Controller
         return view('admin.songs.edit', compact('song', /* 'artists', */ 'types', 'seasons', 'years', 'breadcrumb', 'posts'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $songId)
     {
         //dd($request->all());
@@ -317,12 +298,6 @@ class SongController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $song = Song::find($id);
@@ -343,15 +318,5 @@ class SongController extends Controller
             return json_decode('"' . $string . '"');
         }
         return $string;
-    }
-
-    public function addVariant($song_id)
-    {
-        return redirect()->route('admin.variants.store', ['song_id' => $song_id]);
-    }
-
-    public function variants($song_id)
-    {
-        return redirect()->route('admin.variants.index', ['song_id' => $song_id]);
     }
 }

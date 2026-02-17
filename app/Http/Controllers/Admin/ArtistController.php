@@ -20,7 +20,7 @@ class ArtistController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $breadcrumb = [
             [
@@ -28,9 +28,15 @@ class ArtistController extends Controller
                 'url' => route('admin.artists.index'),
             ]
         ];
-        $artists =  Artist::all();
-        $artists = $artists->sortByDesc('created_at');
-        $artists = $this->paginate($artists, 15);
+
+        $query = Artist::query();
+        if ($request->filled('q')) {
+            $query->where('name', 'like', "%{$request->q}%")
+                ->orWhere('name_jp', 'like', "%{$request->q}%");
+        }
+
+        $artists = $query->paginate(15);
+
         return view('admin.artists.index', compact('artists', 'breadcrumb'));
     }
 
@@ -188,15 +194,6 @@ class ArtistController extends Controller
         $artist->delete();
 
         return redirect(route('admin.artists.index'))->with('success', 'Data deleted');
-    }
-
-    public function searchArtist(Request $request)
-    {
-
-        $artists = DB::table('artists')
-            ->where('name', 'LIKE', '%' . $request->input('q') . '%')
-            ->paginate(10);
-        return view('admin.artists.index', compact('artists'));
     }
 
     public function paginate($artists, $perPage = 10, $page = null, $options = [])

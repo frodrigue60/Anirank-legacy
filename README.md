@@ -5,19 +5,27 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 ## Key Features
 
 - **🚀 AniList Synchronization**: Automatically fetch anime metadata, themes, and studio/producer relationships directly from AniList.
-- **🎬 Studio vs. Producer Distinction**: Unlike many platforms, Anirank separates animation studios (creative) from production companies/committees (business).
+- **🎬 Studio vs. Producer Distinction**: Separates animation studios (creative) from production companies/committees (business) for better data accuracy.
 - **📊 Seasonal Charts**: Browse the latest themes organized by year and season.
 - **🏆 Global Rankings**: Real-time leaderboards for top-rated and most-viewed openings and endings.
 - **🎵 Immersive Player**: A dedicated cinema-mode player for seamless theme playback.
 - **📁 User Collections**: Create public/private playlists and maintain a personalized favorites list.
-- **🛠️ Robust Admin Panel**: Full CRUD control over all entities, including a bulk-sync tool for data consistency.
+- **🛠️ Standardized Admin Panel**: Robust CRUD control with unified search patterns and RESTful state management.
 
 ## Tech Stack
 
-- **Backend**: Laravel 9.x, PHP 8.2
-- **Frontend**: Livewire 2.x, Tailwind CSS, Vite, Vanilla JS
+- **Backend**: Laravel 12.x, PHP 8.2+
+- **Frontend**: Blade + Alpine.js (Admin), Livewire 3.x (Public), Tailwind CSS
 - **Database**: MySQL 8.0
-- **icons**: Material Symbols (Google)
+- **Icons**: Material Symbols (Google)
+
+## Administrative Standards
+
+The project follows a set of strict administrative architectural patterns:
+
+- **Unified Search**: Local searches are integrated directly into the `index` methods via query parameters (`?q=...`), providing bookmarkable results and cleaner controllers.
+- **RESTful State Management**: Resource status changes (e.g., toggling a post's publicity or activating a season) use the `PATCH` method and model-level encapsulation (`setCurrent`, `toggleStatus`).
+- **Standardized Hierarchies**: Navigation follows a clear `Post -> Song -> Variant -> Video` flow with consistent breadcrumbs and cross-linking between related entities.
 
 ## Getting Started
 
@@ -33,7 +41,7 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 1. **Clone the repository**:
 
     ```bash
-    git clone https://github.com/your-repo/Anirank.git
+    git clone https://github.com/frodrigue60/Anirank.git
     cd Anirank
     ```
 
@@ -67,9 +75,9 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 
 ## Development
 
-The project uses **Livewire** for most reactive components. You can find these in `app/Http/Livewire` and their corresponding views in `resources/views/livewire`.
+The project uses **Alpine.js** for reactivity in the admin panel and **Livewire 3** for the public-facing application.
 
-For styling, we use **Tailwind CSS** with a custom purple-centric dark theme. See `tailwind.config.js` and `resources/css/app.css` for design tokens.
+For styling, we use **Tailwind CSS** with a custom high-end glassmorphic theme. See `tailwind.config.js` and `resources/css/app.css` for design tokens.
 
 ---
 

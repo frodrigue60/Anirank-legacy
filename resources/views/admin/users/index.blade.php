@@ -25,14 +25,14 @@
         <div class="space-y-6">
             {{-- Search Bar --}}
             <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-6">
-                <form action="{{ route('admin.users.search') }}" method="GET" class="relative group">
+                <form action="{{ route('admin.users.index') }}" method="GET" class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <span
                             class="material-symbols-outlined text-zinc-500 group-focus-within:text-blue-500 transition-colors">search</span>
                     </div>
-                    <input type="text" name="q"
+                    <input type="text" name="q" value="{{ request('q') }}"
                         class="block w-full pl-11 pr-32 py-4 bg-zinc-950/50 border border-zinc-800 text-white placeholder-zinc-500 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
-                        placeholder="Search users by name, email, or ID..." required>
+                        placeholder="Search users by name, email, or ID...">
                     <div class="absolute inset-y-2 right-2 flex items-center">
                         <button type="submit"
                             class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg active:scale-95">

@@ -21,14 +21,16 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $breadcrumb = [
             ['name' => 'Users', 'url' => route('admin.users.index')],
         ];
-        $users =  User::all();
-        $users = $users->sortByDesc('created_at');
-        $users = $this->paginate($users, $perPage = 5);
+        $users = User::query();
+        if ($request->has('q')) {
+            $users->where('name', 'LIKE', '%' . $request->q . '%');
+        }
+        $users = $users->paginate(10);
         return view('admin.users.index', compact('users', 'breadcrumb'));
     }
 
@@ -169,15 +171,6 @@ class UserController extends Controller
         } else {
             return Redirect::route('admin.users.index')->with('warning', 'Somethis was wrong!');
         }
-    }
-
-    public function searchUser(Request $request)
-    {
-        $users = User::query()
-            ->where('name', 'LIKE', '%' . $request->input('q') . '%')
-            ->paginate(10);
-
-        return view('admin.users.index', compact('users'));
     }
 
     public function paginate($posts, $perPage = null, $page = null, $options = [])

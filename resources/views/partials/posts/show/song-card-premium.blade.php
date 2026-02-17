@@ -31,19 +31,18 @@
         </div>
     </div>
 
-    {{-- Actions --}}
-    <div class="flex items-center gap-3 shrink-0">
-        @if ($song->averageRating)
-            <div
-                class="hidden sm:flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-lg border border-white/5 text-yellow-400 text-xs font-black shadow-inner">
-                <span class="material-symbols-outlined filled text-[14px]">star</span>
-                {{ number_format($song->averageRating / 10, 1) }}
-            </div>
-        @endif
+    <div class="flex items-center gap-2">
+        @auth
+            <button type="button" onclick="window.openReportModal({{ $song->id }})" title="Report Issue"
+                class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-500 rounded-full border border-white/5 transition-all">
+                <span class="material-symbols-outlined text-[18px]">report</span>
+            </button>
+        @endauth
 
         <a href="{{ route('songs.show', [$post->slug, $song->slug]) }}"
             class="w-10 h-10 flex items-center justify-center bg-primary rounded-full text-white shadow-lg shadow-primary/20 hover:scale-110 active:scale-95 transition-all">
             <span class="material-symbols-outlined filled text-2xl">play_arrow</span>
         </a>
     </div>
+</div>
 </div>

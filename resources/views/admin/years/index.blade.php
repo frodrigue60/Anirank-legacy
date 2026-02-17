@@ -46,15 +46,19 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <a href="{{ route('admin.years.toggle', $year->id) }}"
-                                        class="inline-flex items-center justify-center p-2 rounded-xl transition-all border {{ $year->current ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-900/20' : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-white hover:bg-zinc-700' }}"
-                                        title="{{ $year->current ? 'Active' : 'Inactive' }}">
-                                        @if ($year->current)
-                                            <span class="material-symbols-outlined text-lg">event_available</span>
-                                        @else
-                                            <span class="material-symbols-outlined text-lg">schedule</span>
-                                        @endif
-                                    </a>
+                                    <form action="{{ route('admin.years.set.current', $year->id) }}" method="post">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit"
+                                            class="inline-flex items-center justify-center p-2 rounded-xl transition-all border {{ $year->current ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-900/20' : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-white hover:bg-zinc-700' }}"
+                                            title="{{ $year->current ? 'Active' : 'Inactive' }}">
+                                            @if ($year->current)
+                                                <span class="material-symbols-outlined text-lg">event_available</span>
+                                            @else
+                                                <span class="material-symbols-outlined text-lg">schedule</span>
+                                            @endif
+                                        </button>
+                                    </form>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-end gap-2">

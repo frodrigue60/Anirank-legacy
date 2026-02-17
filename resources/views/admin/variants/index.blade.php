@@ -28,7 +28,7 @@
                         @csrf
                         <input type="hidden" name="song_id" value="{{ $currentSong->id }}">
                         <button type="submit"
-                            class="px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest">
+                            class="px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest hover:scale-105">
                             <span class="material-symbols-outlined mr-2 text-base">add</span>
                             Add New Variant
                         </button>
@@ -87,7 +87,7 @@
                                     @endif
                                     <td class="px-6 py-4 text-center">
                                         @if ($variant->video)
-                                            <a href="{{ route('admin.variants.videos', $variant->id) }}"
+                                            <a href="{{ route('admin.videos.index', ['variant_id' => $variant->id]) }}"
                                                 class="inline-flex items-center px-3 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase rounded-lg border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all tracking-widest">
                                                 <span class="material-symbols-outlined text-sm mr-1.5">play_circle</span>
                                                 CONFIGURED
@@ -106,7 +106,7 @@
                                                 class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500">
                                                 <span class="material-symbols-outlined text-sm">edit</span>
                                             </a>
-                                            <a href="{{ route('admin.variants.videos.add', $variant->id) }}"
+                                            <a href="{{ route('admin.videos.index', ['variant_id' => $variant->id]) }}"
                                                 class="p-2 bg-zinc-800 hover:bg-emerald-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-emerald-500"
                                                 title="Add/Update Video">
                                                 <span class="material-symbols-outlined text-sm">movie</span>

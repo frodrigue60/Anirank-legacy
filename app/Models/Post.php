@@ -89,4 +89,10 @@ class Post extends Model
     {
         return $this->belongsToMany(ExternalLink::class);
     }
+
+    public function toggleStatus()
+    {
+        $this->status = !$this->status;
+        return $this->save();
+    }
 }

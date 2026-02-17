@@ -18,7 +18,7 @@
                     EDIT ENTRY
                 </a>
 
-                <a href="{{ route('admin.posts.songs', $post->id) }}"
+                <a href="{{ route('admin.songs.index', ['post_id' => $post->id]) }}"
                     class="inline-flex items-center px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">
                     <span class="material-symbols-outlined mr-2">music_note</span>
                     MANAGE SONGS

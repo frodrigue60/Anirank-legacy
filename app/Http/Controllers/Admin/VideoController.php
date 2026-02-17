@@ -16,41 +16,72 @@ use Illuminate\Support\Str;
 
 class VideoController extends Controller
 {
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $song_id
-     * @return \Illuminate\Http\Response
-     */
-    public function index($song_id)
+    public function index(Request $request)
     {
-        $song = Song::findOrFail($song_id);
+        $songVariant = SongVariant::with('video')->findOrFail($request->variant_id);
+        $video = $songVariant->video;
 
-        return view('admin.videos.index', compact('song'));
+        $breadcrumb = Breadcrumb::generate([
+            [
+                'name' => 'Index',
+                'url' => route('admin.posts.index'),
+            ],
+            [
+                'name' => $songVariant->song->post->title,
+                'url' => route('admin.songs.index', ['post_id' => $songVariant->song->post->id]),
+            ],
+            [
+                'name' => $songVariant->song->slug,
+                'url' => route('admin.variants.index', ['song_id' => $songVariant->song->id]),
+            ],
+            [
+                'name' => $songVariant->slug . ' - ' . 'video',
+                'url' => '',
+            ],
+        ]);
+
+        return view('admin.videos.index', compact('songVariant', 'breadcrumb', 'video'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @param  int  $song_id
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function create(Request $request)
     {
-        dd('create');
+        $variantId = $request->query('variant_id') ?? $request->query('variant');
+
+        if (!$variantId) {
+            return redirect(route('admin.posts.index'))->with('error', 'Variant ID is required to add a video.');
+        }
+
+        $songVariant = SongVariant::with('song', 'song.post')->findOrFail($variantId);
+        $song = $songVariant->song;
+        $post = $song->post;
+
+        $breadcrumb = Breadcrumb::generate([
+            [
+                'name' => 'Index',
+                'url' => route('admin.posts.index'),
+            ],
+            [
+                'name' => $post->title,
+                'url' => route('admin.songs.index', ['post_id' => $post->id]),
+            ],
+            [
+                'name' => $song->slug,
+                'url' => route('admin.variants.index', ['song_id' => $song->id]),
+            ],
+            [
+                'name' => $songVariant->slug . ' - ' . 'video',
+                'url' => '',
+            ],
+        ]);
+
+        return view('admin.videos.create', compact('song', 'songVariant', 'breadcrumb'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        $variant_id = $request->song_variant_id;
-        $song_variant = SongVariant::with('song.post')->find($variant_id);
-        $song = $song_variant->song;
-        $post = $song_variant->song->post;
+        $songVariant = SongVariant::with('song.post')->find($request->song_variant_id);
+        $song = $songVariant->song;
+        $post = $songVariant->song->post;
 
         $path = null;
         $file_name = null;
@@ -59,7 +90,7 @@ class VideoController extends Controller
             $video = new Video();
             //$video->song_id = $song->id;
 
-            $video->song_variant_id = $variant_id;
+            $video->song_variant_id = $songVariant->id;
 
             if ($request->hasFile('video')) {
                 $validator = Validator::make($request->all(), [
@@ -92,7 +123,7 @@ class VideoController extends Controller
                 $mimeType = $request->video->getMimeType();
                 $extension = $this->getExtensionFromMimeType($mimeType);
 
-                $file_name = $post->slug . '-' . $song->slug . ($song_variant->version_number > 1 ? '-' . $song_variant->slug : '') . '.' . $extension;
+                $file_name = $post->slug . '-' . $song->slug . ($songVariant->version_number > 1 ? '-' . $songVariant->slug : '') . '.' . $extension;
                 $video->video_src = $path . $file_name;
 
                 $video->type = 'file';
@@ -125,12 +156,6 @@ class VideoController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         try {
@@ -140,13 +165,6 @@ class VideoController extends Controller
             dd($e);
         }
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         try {
@@ -161,7 +179,7 @@ class VideoController extends Controller
                 ],
                 [
                     'name' => $post->title,
-                    'url' => route('admin.posts.songs', $post->id),
+                    'url' => route('admin.songs.index', ['post_id' => $post->id]),
                 ],
                 [
                     'name' => $song->slug,
@@ -169,7 +187,7 @@ class VideoController extends Controller
                 ],
                 [
                     'name' => $video->id,
-                    'url' => route('admin.variants.index', ['song_id' => $song->id]),
+                    'url' => route('admin.videos.edit', $video->id),
                 ],
             ]);
 
@@ -179,13 +197,6 @@ class VideoController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         try {
@@ -267,12 +278,6 @@ class VideoController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $video = Video::findOrFail($id);

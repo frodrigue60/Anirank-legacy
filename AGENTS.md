@@ -1167,10 +1167,9 @@ All admin routes use the `admin.` prefix for naming.
 | Route | Method | Action | Name |
 |-------------------------------------|--------|------------------|-------------------------------|
 | `/admin/posts` | GET | `index` | `admin.posts.index` |
-| `/admin/posts/search` | POST | `search` | `admin.posts.search` |
-| `/admin/posts/{post}/toggle-status` | POST | `toggleStatus` | `admin.posts.toggle.status` |
-| `/admin/posts/{post}/songs` | GET | `songs` | `admin.posts.songs` |
-| `/admin/posts/{post}/songs/add` | GET | `addSong` | `admin.posts.songs.add` |
+| `/admin/posts/{post}/toggle-status` | PATCH | `toggleStatus` | `admin.posts.toggle.status` |
+| `/admin/songs?post_id={id}` | GET | `index` | `admin.songs.index` |
+| `/admin/songs/create?post_id={id}` | GET | `create` | `admin.songs.create` |
 | `/admin/posts/search-animes` | POST | `searchInAnilist`| `admin.posts.search.animes` |
 | `/admin/posts/get-by-id/{id}` | GET | `getById` | `admin.posts.get.by.id` |
 | `/admin/posts/get-seasonal-animes` | POST | `getSeasonalAnimes`| `admin.posts.get.seasonal.animes` |
@@ -1180,10 +1179,9 @@ All admin routes use the `admin.` prefix for naming.
 **Songs & Variants:**
 | Route | Method | Action | Name |
 |----------------------------------------|--------|--------------|------------------------------|
-| `/admin/songs/{song}/variants` | GET | `variants` | `admin.songs.variants` |
-| `/admin/songs/{song}/variants/add` | GET | `addVariant` | `admin.songs.variants.add` |
-| `/admin/variants/{variant}/videos` | GET | `videos` | `admin.variants.videos` |
-| `/admin/variants/{variant}/videos/add` | GET | `addVideos` | `admin.variants.videos.add` |
+| `/admin/variants?song_id={id}` | GET | `index` | `admin.variants.index` |
+| `/admin/videos/create?variant_id={id}` | GET | `create` | `admin.videos.create` |
+| `/admin/videos?variant_id={id}` | GET | `index` | `admin.videos.index` |
 
 **Resource Controllers (Admin):**
 | Resource | Controller | Notes |
@@ -1192,15 +1190,15 @@ All admin routes use the `admin.` prefix for naming.
 | `variants` | `Admin\SongVariantController`| Full CRUD |
 | `videos` | `Admin\VideoController` | Full CRUD |
 | `posts` | `Admin\PostController` | Full CRUD |
-| `artists` | `Admin\ArtistController` | Full CRUD + search |
-| `users` | `Admin\UserController` | Full CRUD + search |
+| `artists` | `Admin\ArtistController` | Full CRUD |
+| `users` | `Admin\UserController` | Full CRUD |
 | `reports` | `Admin\ReportController` | Full CRUD + toggle |
 | `requests` | `Admin\UserRequestController`| Full CRUD |
 | `comments` | `Admin\CommentController` | Full CRUD |
 | `studios` | `Admin\StudioController` | Full CRUD |
 | `producers`| `Admin\ProducerController`| Full CRUD |
-| `years` | `Admin\YearController` | Full CRUD + toggle |
-| `seasons` | `Admin\SeasonController` | Full CRUD + toggle |
+| `years` | `Admin\YearController` | Full CRUD + setCurrent (PATCH) |
+| `seasons` | `Admin\SeasonController` | Full CRUD + setCurrent (PATCH) |
 
 ---
 

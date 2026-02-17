@@ -38,30 +38,32 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         if (Auth::check()) {
-            //dd($request->all());
-
             $validator = Validator::make($request->all(), [
-                'song_variant_id' => 'required|integer|exists:song_variants,id',
+                'song_id' => 'required|integer|exists:songs,id',
                 'title' => 'required|max:255|string',
                 'content' => 'string|nullable',
-                'user_id' => 'required|integer|exists:users,id',
             ]);
 
             if ($validator->fails()) {
-                return redirect($request->header('Referer'))
+                return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
             }
 
-            $report = new Report();
-            $report->song_variant_id = $request->song_variant_id;
-            $report->title = $request->title;
-            $report->content = $request->content;
-            $report->user_id = $request->user_id;
-            $report->source = $request->header('Referer');
-            $report->save();
+            try {
+                $report = new Report();
+                $report->song_id = $request->song_id;
+                $report->user_id = Auth::id();
+                $report->title = $request->title;
+                $report->content = $request->content ?? 'No details provided';
+                $report->source = $request->header('Referer') ?? url()->previous();
+                $report->status = Report::STATUS_PENDING;
+                $report->save();
 
-            return redirect()->back()->with('success', 'Thanks for report this problem');
+                return redirect()->back()->with('success', 'Thanks for your report! Our staff will review it soon.');
+            } catch (\Throwable $th) {
+                return redirect()->back()->with('error', 'Failed to submit report: ' . $th->getMessage());
+            }
         }
 
         return redirect()->back()->with('warning', 'Please login to send a report');

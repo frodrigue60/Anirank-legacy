@@ -31,9 +31,6 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-zinc-800/50">
-                        @php
-                            $video = $songVariant->video;
-                        @endphp
                         @if ($video)
                             <tr class="hover:bg-zinc-800/30 transition-colors group">
                                 <td class="px-6 py-4 text-sm font-mono text-zinc-500 text-center">#{{ $video->id }}</td>
@@ -74,7 +71,7 @@
                             <tr>
                                 <td colspan="4" class="px-6 py-12 text-center">
                                     <p class="text-zinc-500 italic">No video configured for this variant.</p>
-                                    <a href="{{ route('admin.variants.videos.add', $song_variant->id) }}"
+                                    <a href="{{ route('admin.videos.create', ['variant_id' => $songVariant->id]) }} "
                                         class="mt-4 inline-flex items-center text-blue-500 hover:text-blue-400 font-bold">
                                         <span class="material-symbols-outlined mr-2">add</span> ADD VIDEO NOW
                                     </a>

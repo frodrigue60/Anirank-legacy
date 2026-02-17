@@ -144,10 +144,9 @@ class SeasonController extends Controller
         }
     }
 
-    public function toggle(Season $season)
+    public function setCurrent(Season $season)
     {
-        Season::where('id', $season->id)->update(['current' => true]);
-        Season::where('id', '!=', $season->id)->update(['current' => false]);
+        $season->setCurrent();
 
         return redirect(route('admin.seasons.index'))->with('success', 'Season updated successfully!');
     }

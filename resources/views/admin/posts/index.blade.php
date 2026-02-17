@@ -103,15 +103,14 @@
                 @endif
 
                 {{-- Local Search --}}
-                <form action="{{ route('admin.posts.search') }}" method="POST" class="relative group">
-                    @csrf
+                <form action="{{ route('admin.posts.index') }}" method="GET" class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <span
                             class="material-symbols-outlined text-zinc-500 group-focus-within:text-blue-500 transition-colors">search</span>
                     </div>
-                    <input type="text" name="q"
+                    <input type="text" name="q" value="{{ request('q') }}"
                         class="block w-full pl-11 pr-32 py-4 bg-zinc-950/50 border border-zinc-800 text-white placeholder-zinc-500 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
-                        placeholder="Search posts in database..." required>
+                        placeholder="Search posts in database...">
                     <div class="absolute inset-y-2 right-2 flex items-center">
                         <button type="submit"
                             class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg active:scale-95">
@@ -174,10 +173,10 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        <span
+                                        <a href="{{ route('admin.songs.index', ['post_id' => $post->id]) }}"
                                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
                                             {{ $post->songs->count() }}
-                                        </span>
+                                        </a>
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         @if (Auth::user()->isCreator())
@@ -204,6 +203,7 @@
                                             <form action="{{ route('admin.posts.toggle.status', $post->id) }}"
                                                 method="post">
                                                 @csrf
+                                                @method('PATCH')
                                                 <button type="submit"
                                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase border transition-all {{ $post->status == true ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500 hover:text-white' : 'bg-amber-500/10 text-amber-500 border-amber-500/30 hover:bg-amber-500 hover:text-white' }}">
                                                     <span

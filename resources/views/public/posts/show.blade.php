@@ -85,7 +85,7 @@
                             class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-emerald-500/20 text-emerald-400 rounded-xl transition-all border border-white/5">
                             <span class="material-symbols-outlined text-[20px]">edit</span>
                         </a>
-                        <a href="{{ route('admin.posts.songs', $post->id) }}" title="Manage Songs"
+                        <a href="{{ route('admin.songs.index', ['post_id' => $post->id]) }}" title="Manage Songs"
                             class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-primary/20 text-primary rounded-xl transition-all border border-white/5">
                             <span class="material-symbols-outlined text-[20px]">list</span>
                         </a>
@@ -144,9 +144,10 @@
                                 </p>
                             </div>
 
-                            @if($post->producers->count() > 0)
+                            @if ($post->producers->count() > 0)
                                 <div class="flex flex-col gap-3">
-                                    <span class="text-xs font-black text-white/20 uppercase tracking-widest">Producers</span>
+                                    <span
+                                        class="text-xs font-black text-white/20 uppercase tracking-widest">Producers</span>
                                     <div class="flex flex-col gap-2">
                                         @foreach ($post->producers as $item)
                                             <a href="{{ route('studios.show', $item->slug) }}"
@@ -160,7 +161,7 @@
                                 </div>
                             @endif
 
-                            @if($post->studios->count() > 0)
+                            @if ($post->studios->count() > 0)
                                 <div class="flex flex-col gap-3">
                                     <span class="text-xs font-black text-white/20 uppercase tracking-widest">Studios</span>
                                     <div class="flex flex-col gap-2">
@@ -176,7 +177,7 @@
                                 </div>
                             @endif
 
-                            @if($post->externalLinks->count() > 0)
+                            @if ($post->externalLinks->count() > 0)
                                 <div class="flex flex-col gap-3">
                                     <span class="text-xs font-black text-white/20 uppercase tracking-widest">External
                                         Links</span>
@@ -237,7 +238,8 @@
                                 <div
                                     class="flex flex-col items-center justify-center py-12 bg-surface-dark/20 rounded-3xl border border-white/5">
                                     <span class="material-symbols-outlined text-4xl text-white/10 mb-2">music_off</span>
-                                    <p class="text-white/20 font-bold uppercase tracking-widest text-xs">No openings recorded
+                                    <p class="text-white/20 font-bold uppercase tracking-widest text-xs">No openings
+                                        recorded
                                     </p>
                                 </div>
                             @endforelse
@@ -264,7 +266,8 @@
                                 <div
                                     class="flex flex-col items-center justify-center py-12 bg-surface-dark/20 rounded-3xl border border-white/5">
                                     <span class="material-symbols-outlined text-4xl text-white/10 mb-2">music_off</span>
-                                    <p class="text-white/20 font-bold uppercase tracking-widest text-xs">No endings recorded</p>
+                                    <p class="text-white/20 font-bold uppercase tracking-widest text-xs">No endings
+                                        recorded</p>
                                 </div>
                             @endforelse
                         </div>

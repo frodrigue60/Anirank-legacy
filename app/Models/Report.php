@@ -9,8 +9,24 @@ class Report extends Model
 {
     use HasFactory;
 
-    public function Song()
+    const STATUS_PENDING = 'pending';
+    const STATUS_FIXED = 'fixed';
+
+    protected $fillable = [
+        'user_id',
+        'song_id',
+        'source',
+        'status',
+    ];
+
+    public function song()
     {
         return $this->belongsTo(Song::class);
+    }
+
+    public function toggle()
+    {
+        $this->status = $this->status === self::STATUS_FIXED ? self::STATUS_PENDING : self::STATUS_FIXED;
+        return $this->save();
     }
 }

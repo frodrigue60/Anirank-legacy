@@ -122,7 +122,7 @@ class SongVariantController extends Controller
             ],
             [
                 'name' => $post->title,
-                'url' => route('admin.posts.songs', $post->id),
+                'url' => route('admin.songs.index', ['post_id' => $post->id]),
             ],
             [
                 'name' => $song->slug,
@@ -186,64 +186,5 @@ class SongVariantController extends Controller
         } else {
             return redirect(route('admin.variants.index', ['song_id' => $songVariant->song_id]))->with('error', 'Error deleting variant');
         }
-    }
-
-    public function videos($variantId)
-    {
-        $songVariant = SongVariant::with('video', 'song', 'song.post')->find($variantId);
-        //dd($song_variant);
-        $song = $songVariant->song;
-        $post = $song->post;
-        $video = $songVariant->video;
-
-        $breadcrumb = Breadcrumb::generate([
-            [
-                'name' => 'Index',
-                'url' => route('admin.posts.index'),
-            ],
-            [
-                'name' => $post->title,
-                'url' => route('admin.posts.songs', $post->id),
-            ],
-            [
-                'name' => $song->slug,
-                'url' => route('admin.variants.index', ['song_id' => $song->id]),
-            ],
-            [
-                'name' => $video->id,
-                'url' => route('admin.variants.index', ['song_id' => $song->id]),
-            ],
-        ]);
-
-        return view("admin.videos.index", compact("songVariant", 'breadcrumb'));
-    }
-
-    public function addVideos($variantId)
-    {
-
-        $songVariant = SongVariant::with('song', 'song.post')->find($variantId);
-        $song = $songVariant->song;
-        $post = $song->post;
-
-        $breadcrumb = Breadcrumb::generate([
-            [
-                'name' => 'Index',
-                'url' => route('admin.posts.index'),
-            ],
-            [
-                'name' => $post->title,
-                'url' => route('admin.posts.songs', $post->id),
-            ],
-            [
-                'name' => $song->slug,
-                'url' => route('admin.variants.index', ['song_id' => $song->id]),
-            ],
-            [
-                'name' => $songVariant->slug . ' - ' . 'video',
-                'url' => '',
-            ],
-        ]);
-
-        return view('admin.videos.create', compact('song', 'songVariant', 'breadcrumb'));
     }
 }

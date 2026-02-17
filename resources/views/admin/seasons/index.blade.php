@@ -47,15 +47,19 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <a href="{{ route('admin.seasons.toggle', $season->id) }}"
-                                        class="inline-flex items-center justify-center p-2 rounded-xl transition-all border {{ $season->current ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-900/20' : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-white hover:bg-zinc-700' }}"
-                                        title="{{ $season->current ? 'Active' : 'Inactive' }}">
-                                        @if ($season->current)
-                                            <span class="material-symbols-outlined text-lg">check_circle</span>
-                                        @else
-                                            <span class="material-symbols-outlined text-lg">schedule</span>
-                                        @endif
-                                    </a>
+                                    <form action="{{ route('admin.seasons.set.current', $season->id) }}" method="post">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit"
+                                            class="inline-flex items-center justify-center p-2 rounded-xl transition-all border {{ $season->current ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-900/20' : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-white hover:bg-zinc-700' }}"
+                                            title="{{ $season->current ? 'Active' : 'Inactive' }}">
+                                            @if ($season->current)
+                                                <span class="material-symbols-outlined text-lg">check_circle</span>
+                                            @else
+                                                <span class="material-symbols-outlined text-lg">schedule</span>
+                                            @endif
+                                        </button>
+                                    </form>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-end gap-2">

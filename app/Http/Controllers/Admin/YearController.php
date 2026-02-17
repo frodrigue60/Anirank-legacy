@@ -134,10 +134,9 @@ class YearController extends Controller
         return redirect(route('admin.years.index'));
     }
 
-    public function toggle(Year $year)
+    public function setCurrent(Year $year)
     {
-        Year::where('id', $year->id)->update(['current' => true]);
-        Year::where('id', '!=', $year->id)->update(['current' => false]);
+        $year->setCurrent();
 
         return redirect(route('admin.years.index'))->with('success', 'Year updated successfully!');
     }

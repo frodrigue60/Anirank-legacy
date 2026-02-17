@@ -23,9 +23,9 @@ class ReportController extends Controller
         $breadcrumb = [
             ['name' => 'Reports', 'url' => route('admin.reports.index')],
         ];
-        $reports = Report::all();
-        $reports = $reports->sortByDesc('created_at');
-        $reports = $this->paginate($reports);
+
+        $reports = Report::with('song')->latest()->paginate(20);
+
         return view('admin.reports.index', compact('reports', 'breadcrumb'));
     }
 
@@ -58,11 +58,13 @@ class ReportController extends Controller
      */
     public function show($id)
     {
+        $report = Report::findOrFail($id);
+
         $breadcrumb = [
             ['name' => 'Reports', 'url' => route('admin.reports.index')],
             ['name' => 'Show', 'url' => route('admin.reports.show', $id)],
         ];
-        $report = Report::find($id);
+
         return view('admin.reports.show', compact('report', 'breadcrumb'));
     }
 
@@ -99,29 +101,18 @@ class ReportController extends Controller
     {
         $report = Report::findOrFail($id);
         $report->delete();
-        return redirect(route('admin.reports.index'))->with('warning', 'Report ' . $report->id . ' deleted');
+        return redirect(route('admin.reports.index'))->with('warning', 'Report ' . $id . ' deleted');
     }
 
     public function toggleStatus($id)
     {
-        $report = Report::find($id);
+        try {
+            $report = Report::findOrFail($id);
+            $report->toggle();
 
-        if ($report->status == 'fixed') {
-            $report->status = 'pending';
-        } elseif ($report->status = 'pending') {
-            $report->status = 'fixed';
+            return redirect()->back()->with('success', 'Report #' . $id . ' status updated to ' . $report->status);
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Failed to update report: ' . $th->getMessage());
         }
-
-        $report->update();
-        return Redirect::route('admin.reports.index')->with('warning', 'Report status ' . $report->id . ' changed!');
-    }
-
-    public function paginate($reports, $perPage = 10, $page = null, $options = [])
-    {
-        $page = Paginator::resolveCurrentPage();
-        $options = ['path' => Paginator::resolveCurrentPath()];
-        $items = $reports instanceof Collection ? $reports : Collection::make($reports);
-        $reports = new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
-        return $reports;
     }
 }

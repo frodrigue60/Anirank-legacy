@@ -23,30 +23,27 @@ use App\Services\Breadcrumb;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $posts = Post::orderByDesc('id')->paginate(20);
 
+    public function index(Request $request)
+    {
         $breadcrumb = Breadcrumb::generate([
             [
                 'name' => 'Posts',
                 'url' => route('admin.posts.index'),
             ],
         ]);
-        //dd($posts);
+
+        $query = Post::query();
+
+        if ($request->filled('q')) {
+            $query->where('title', 'like', "%{$request->q}%")
+                ->orWhere('description', 'like', "%{$request->q}%");
+        }
+        $posts = $query->latest()->paginate(20);
+
         return view('admin.posts.index', compact('posts', 'breadcrumb'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $artists = Artist::all();
@@ -79,12 +76,6 @@ class PostController extends Controller
         return view('admin.posts.create', compact('years', 'seasons', 'types', 'artists', 'postStatus', 'breadcrumb'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         //dd($request->all());
@@ -121,9 +112,8 @@ class PostController extends Controller
 
             if ($post->save()) {
                 //$post->retag($request->tags);
-                $post = Post::where('slug', $post->slug);
                 $msg = 'Post created successfully';
-                return redirect(route('admin.posts.songs', $post->id))->with('success', $msg);
+                return redirect(route('admin.songs.index', ['post_id' => $post->id]))->with('success', $msg);
             } else {
                 $msg = 'Somethis was wrong!';
                 return redirect(route('admin.posts.index'))->with('error', $msg);
@@ -134,12 +124,6 @@ class PostController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show(Post $post)
     {
         if (Auth::check() && Auth::user()->isStaff()) {
@@ -169,12 +153,6 @@ class PostController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Post $post)
     {
         $artists = Artist::all();
@@ -207,13 +185,7 @@ class PostController extends Controller
         return view('admin.posts.edit', compact('post', 'types', 'artists', 'postStatus', 'breadcrumb', 'years', 'seasons'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
     public function update(Request $request, $id)
     {
         //dd($request->all());
@@ -262,12 +234,6 @@ class PostController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $post = Post::find($id);
@@ -279,22 +245,10 @@ class PostController extends Controller
         }
     }
 
-    //seach posts in admin pannel
-    public function search(Request $request)
-    {
-        $posts = Post::query()
-            ->where('title', 'LIKE', '%' . $request->input('q') . '%')
-            ->paginate(10);
-        //dd($posts);
-        return view('admin.posts.index', compact('posts'));
-    }
-
     public function toggleStatus(Post $post)
     {
         try {
-            $post->update([
-                'status' => !$post->status
-            ]);
+            $post->toggleStatus();
 
             return redirect()->back()->with('success', 'Post status updated: ' . $post->id);
         } catch (\Throwable $th) {
@@ -655,9 +609,7 @@ class PostController extends Controller
         ';
         return $query;
     }
-    /* Used by generateMassive Method
-     *
-     */
+
     function saveAnimeThumbnail($item, $post)
     {
         if ($item->coverImage->extraLarge != null) {
@@ -676,9 +628,7 @@ class PostController extends Controller
         }
         return $post;
     }
-    /* Used by generateMassive Method
-     *
-     */
+
     function saveAnimeBanner($item, $post)
     {
         if ($item->bannerImage != null) {
@@ -699,9 +649,6 @@ class PostController extends Controller
         return $post;
     }
 
-    /* Used by Store and Update Method
-     *
-     */
     public function storePostImages($post, $request)
     {
         /* Thumnail with file store */
@@ -829,42 +776,6 @@ class PostController extends Controller
     public function storeSingleImage($path, $imageContent)
     {
         Storage::disk('public')->put($path, $imageContent);
-    }
-
-    /* Unused */
-    public function addSong(Post $post)
-    {
-        $seasons = Season::all();
-        $years = Year::all();
-        $types = [
-            ['name' => 'Opening', 'value' => 'OP'],
-            ['name' => 'Ending', 'value' => 'ED'],
-            ['name' => 'Insert', 'value' => 'INS'],
-            ['name' => 'Other', 'value' => 'OTH']
-        ];
-        $artists = Artist::all();
-
-        $breadcrumb = Breadcrumb::generate([
-            [
-                'name' => 'Index',
-                'url' => route('admin.posts.index'),
-            ],
-            [
-                'name' => $post->title,
-                'url' => route('admin.posts.songs', $post->id),
-            ],
-            [
-                'name' => 'Add song',
-                'url' => '',
-            ],
-        ]);
-
-        return view('admin.songs.create', compact('artists', 'types', 'post', 'seasons', 'years', 'breadcrumb'));
-    }
-
-    public function songs(Post $post)
-    {
-        return redirect()->route('admin.songs.index', ['post_id' => $post->id]);
     }
 
     public function dashboard()

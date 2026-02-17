@@ -8,7 +8,7 @@
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-white tracking-tight">Edit Video Asset</h1>
             <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">
-                {{ $video->songVariant->song->title }} ({{ $video->label }})</p>
+                {{ $video->songVariant->song->name }} ({{ $video->label }})</p>
         </div>
 
         {{-- Form Card --}}
@@ -29,20 +29,20 @@
                         <div
                             class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-zinc-800 border-dashed rounded-2xl hover:border-blue-500/50 transition-colors group">
                             <div class="space-y-1 text-center">
-                                <i
+                                <span
                                     class="material-symbols-outlined text-4xl text-zinc-600 mb-3 group-hover:text-blue-400 transition-colors">upload_file</span>
-                                    <div class="flex text-sm text-zinc-400">
-                                        <label for="formFileBanner"
-                                            class="relative cursor-pointer bg-transparent rounded-md font-bold text-blue-500 hover:text-blue-400 transition-colors">
-                                            <span>Select new file</span>
-                                            <input id="formFileBanner" name="video" type="file" class="sr-only">
-                                        </label>
-                                        <p class="pl-1">or drag and drop</p>
-                                    </div>
-                                    @if ($video->video_src)
-                                        <p class="text-[10px] text-zinc-500 font-mono">Current:
-                                            {{ basename($video->video_src) }}</p>
-                                    @endif
+                                <div class="flex text-sm text-zinc-400">
+                                    <label for="formFileBanner"
+                                        class="relative cursor-pointer bg-transparent rounded-md font-bold text-blue-500 hover:text-blue-400 transition-colors">
+                                        <span>Select new file</span>
+                                        <input id="formFileBanner" name="video" type="file" class="sr-only">
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                @if ($video->video_src)
+                                    <p class="text-[10px] text-zinc-500 font-mono">Current:
+                                        {{ basename($video->video_src) }}</p>
+                                @endif
                             </div>
                         </div>
                     </div>

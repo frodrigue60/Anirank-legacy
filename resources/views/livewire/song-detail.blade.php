@@ -90,7 +90,7 @@
                             style="width: {{ $percent }}%"></div>
                     </div>
                 </div>
-                <div class="h-8 w-[1px] bg-white/10"></div>
+                <div class="h-8 w-px bg-white/10"></div>
                 {{-- Rating Trigger --}}
                 <button wire:click="openRatingModal" class="flex flex-col text-left group">
                     <span
@@ -122,10 +122,18 @@
                     <span
                         class="material-symbols-outlined {{ $song->isFavorited() ? 'filled' : '' }} text-[22px]">favorite</span>
                 </button>
-                <button wire:click="openPlaylistModal"
-                    class="flex items-center gap-2 px-5 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-xl transition-all text-sm font-bold shadow-lg shadow-primary/5">
-                    <span class="material-symbols-outlined text-[18px]">playlist_add</span> Add to Playlist
+
+                <button wire:click="openPlaylistModal" title="Add to Playlist"
+                    class="group w-12 h-11 flex items-center justify-center rounded-2xl border border-white/10 bg-surface-dark hover:bg-primary/20 text-white/60 hover:text-primary transition-all">
+                    <span class="material-symbols-outlined text-[22px]">playlist_add</span>
                 </button>
+
+                @auth
+                    <button type="button" onclick="window.openReportModal({{ $song->id }})" title="Report Issue"
+                        class="group w-12 h-11 flex items-center justify-center rounded-2xl border border-white/10 bg-surface-dark hover:bg-red-500/20 text-white/60 hover:text-red-500 transition-all">
+                        <span class="material-symbols-outlined text-[22px]">report_problem</span>
+                    </button>
+                @endauth
             </div>
         </div>
 
@@ -223,7 +231,7 @@
 
     {{-- Playlist Modal --}}
     <div x-show="playlistModalOpen" style="display: none;"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        class="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
         x-transition.opacity>
         <div class="bg-[#1e1e2e] w-full max-w-md rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
             @click.away="playlistModalOpen = false">
@@ -281,7 +289,7 @@
 
     {{-- Rating Modal --}}
     <div x-show="ratingModalOpen" style="display: none;"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        class="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
         x-transition.opacity>
         <div class="bg-[#1e1e2e] w-full max-w-sm rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
             @click.away="ratingModalOpen = false">

@@ -82,12 +82,8 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', [AdminPostController::class, 'dashboard'])->name('dashboard');
 
     // Songs & Variants
-    Route::get('songs/{song}/variants/add', [AdminSongController::class, 'addVariant'])->name('songs.variants.add');
-    Route::get('songs/{song}/variants', [AdminSongController::class, 'variants'])->name('songs.variants');
     Route::resource('songs', AdminSongController::class);
 
-    Route::get('/variants/{variant}/videos', [AdminSongVariantController::class, 'videos'])->name('variants.videos');
-    Route::get('/variants/{variant}/videos/add', [AdminSongVariantController::class, 'addVideos'])->name('variants.videos.add');
     Route::resource('variants', AdminSongVariantController::class);
 
     // Common Resources
@@ -98,15 +94,12 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
     Route::resource('producers', AdminProducerController::class);
 
     // Reports
-    Route::post('/reports/{report}/toggle', [AdminReportController::class, 'toggleStatus'])->name('reports.toggle');
+    Route::patch('/reports/{report}/toggle', [AdminReportController::class, 'toggleStatus'])->name('reports.toggle');
     Route::resource('reports', AdminReportController::class);
 
     // Posts
     Route::controller(AdminPostController::class)->prefix('posts')->as('posts.')->group(function () {
-        Route::post('/search', 'search')->name('search');
-        Route::post('/{post}/toggle-status', 'toggleStatus')->name('toggle.status');
-        Route::get('/{post}/songs/add', 'addSong')->name('songs.add');
-        Route::get('/{post}/songs', 'songs')->name('songs');
+        Route::patch('/{post}/toggle-status', 'toggleStatus')->name('toggle.status');
         Route::post('/search-animes', 'searchInAnilist')->name('search.animes');
         Route::get('/by-id/{id}', 'getById')->name('by.id');
         Route::post('/seasonal-animes', 'getSeasonalAnimes')->name('seasonal.animes');
@@ -116,18 +109,18 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
     });
     Route::resource('posts', AdminPostController::class);
 
-    // Artists & Users search
-    Route::get('/artists/search', [AdminArtistController::class, 'searchArtist'])->name('artists.search');
+    //Artists
     Route::resource('artists', AdminArtistController::class);
 
-    Route::get('/users/search', [AdminUserController::class, 'searchUser'])->name('users.search');
+    //Users
     Route::resource('users', AdminUserController::class);
 
-    // Years & Seasons toggle
-    Route::post('years/{year}/toggle', [AdminYearController::class, 'toggle'])->name('years.toggle');
+    //Years
+    Route::patch('years/{year}/set-current', [AdminYearController::class, 'setCurrent'])->name('years.set.current');
     Route::resource('years', AdminYearController::class);
 
-    Route::post('seasons/{season}/toggle', [AdminSeasonController::class, 'toggle'])->name('seasons.toggle');
+    //Seasons
+    Route::patch('seasons/{season}/set-current', [AdminSeasonController::class, 'setCurrent'])->name('seasons.set.current');
     Route::resource('seasons', AdminSeasonController::class);
 });
 

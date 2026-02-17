@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Season extends Model
 {
@@ -26,5 +27,14 @@ class Season extends Model
     public function songVariants()
     {
         return $this->hasMany(SongVariant::class);
+    }
+
+    public function setCurrent()
+    {
+        return DB::transaction(function () {
+            static::query()->update(['current' => false]);
+            $this->current = true;
+            return $this->save();
+        });
     }
 }
