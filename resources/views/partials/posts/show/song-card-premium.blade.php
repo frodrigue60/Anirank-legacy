@@ -39,7 +39,7 @@
             </button>
         @endauth
 
-        <a href="{{ route('songs.show', [$post->slug, $song->slug]) }}"
+        <a href="{{ route('songs.show', $song->id) }}"
             class="w-10 h-10 flex items-center justify-center bg-primary rounded-full text-white shadow-lg shadow-primary/20 hover:scale-110 active:scale-95 transition-all">
             <span class="material-symbols-outlined filled text-2xl">play_arrow</span>
         </a>

@@ -39,9 +39,16 @@
                         <span class="text-xs font-bold text-white/40 uppercase tracking-widest">Version 1</span>
                     @endif
                 </div>
-                <h1 class="text-2xl md:text-4xl font-black text-white leading-tight mb-2">
-                    {{ $song->name }}
-                </h1>
+                <div class="flex flex-col">
+                    <a href="{{ route('posts.show', $post->id) }}"
+                        class="text-white/60 hover:text-white transition-colors">
+                        {{ $song->post->title }}
+                    </a>
+                    <h1 class="text-2xl md:text-4xl font-black text-white leading-tight mb-2">
+                        {{ $song->name }}
+                    </h1>
+
+                </div>
                 <div class="flex items-center gap-2 text-white/60 text-sm font-medium">
                     <span>by</span>
                     @foreach ($song->artists as $artist)
