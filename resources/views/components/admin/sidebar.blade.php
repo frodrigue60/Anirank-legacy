@@ -45,6 +45,7 @@
                     <x-admin.sidebar-link route="admin.studios.index" icon="business" label="Studios" />
                     <x-admin.sidebar-link route="admin.years.index" icon="calendar_today" label="Years" />
                     <x-admin.sidebar-link route="admin.seasons.index" icon="ac_unit" label="Seasons" />
+                    <x-admin.sidebar-link route="admin.roles.index" icon="security" label="Roles" />
                 </div>
             </div>
 

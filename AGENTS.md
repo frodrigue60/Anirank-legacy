@@ -779,6 +779,21 @@ Manages production company/committee records.
 
 ---
 
+### `Admin\RoleController`
+
+Manages system roles and permissions.
+
+| Method                 | Route                       | Description                       |
+| ---------------------- | --------------------------- | --------------------------------- |
+| `index()`              | `GET admin/roles`           | List all roles with search.       |
+| `create()`             | `GET admin/roles/create`    | Create role form.                 |
+| `store(Request)`       | `POST admin/roles`          | Create new role.                  |
+| `edit($id)`            | `GET admin/roles/{id}/edit` | Edit role form.                   |
+| `update(Request, $id)` | `PUT admin/roles/{id}`      | Update role details.              |
+| `destroy($id)`         | `DELETE admin/roles/{id}`   | Delete role (with safety guards). |
+
+---
+
 ### Other Admin Controllers
 
 | Controller        | Purpose                                               |

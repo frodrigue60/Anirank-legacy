@@ -32,7 +32,8 @@ use App\Http\Controllers\Admin\{
     SeasonController as AdminSeasonController,
     CommentController as AdminCommentController,
     StudioController as AdminStudioController,
-    ProducerController as AdminProducerController
+    ProducerController as AdminProducerController,
+    RoleController as AdminRoleController
 };
 
 /*
@@ -122,6 +123,9 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
     //Seasons
     Route::patch('seasons/{season}/set-current', [AdminSeasonController::class, 'setCurrent'])->name('seasons.set.current');
     Route::resource('seasons', AdminSeasonController::class);
+
+    // Roles
+    Route::resource('roles', AdminRoleController::class);
 });
 
 /*

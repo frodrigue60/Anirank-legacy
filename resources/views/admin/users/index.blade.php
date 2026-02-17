@@ -23,6 +23,19 @@
 
 
         <div class="space-y-6">
+            {{-- Role Filter Indicator --}}
+            @if ($selectedRole)
+                <div class="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4">
+                    <span class="material-symbols-outlined text-blue-500">filter_list</span>
+                    <span class="text-sm text-blue-400 font-medium">Filtering by role:
+                        <strong>{{ $selectedRole->name }}</strong></span>
+                    <a href="{{ route('admin.users.index', array_merge(request()->except('role'), ['q' => request('q')])) }}"
+                        class="ml-auto text-[10px] font-black uppercase tracking-widest text-blue-400 hover:text-white transition-colors">
+                        CLEAR FILTER
+                    </a>
+                </div>
+            @endif
+
             {{-- Search Bar --}}
             <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-6">
                 <form action="{{ route('admin.users.index') }}" method="GET" class="relative group">
@@ -54,7 +67,7 @@
                                 <th class="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-widest">Email
                                     Address</th>
                                 <th class="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-widest text-center">
-                                    Type</th>
+                                    Roles</th>
                                 <th class="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-widest text-right">
                                     Actions</th>
                             </tr>
@@ -88,18 +101,27 @@
                                         {{ $user->email }}
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        @php
-                                            $typeColor = match ($user->type) {
-                                                'admin' => 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-                                                'editor' => 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-                                                'creator' => 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-                                                default => 'bg-zinc-800 text-zinc-400 border-zinc-700',
-                                            };
-                                        @endphp
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border {{ $typeColor }}">
-                                            {{ $user->type }}
-                                        </span>
+                                        <div class="flex flex-wrap justify-center gap-1">
+                                            @forelse ($user->roles as $role)
+                                                @php
+                                                    $roleColor = match ($role->slug) {
+                                                        'admin' => 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+                                                        'editor' => 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+                                                        'creator'
+                                                            => 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+                                                        default => 'bg-zinc-800 text-zinc-400 border-zinc-700',
+                                                    };
+                                                @endphp
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border {{ $roleColor }}">
+                                                    {{ $role->name }}
+                                                </span>
+                                            @empty
+                                                <span
+                                                    class="text-[10px] text-zinc-600 font-black uppercase tracking-widest italic">No
+                                                    Roles</span>
+                                            @endforelse
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-end gap-2">

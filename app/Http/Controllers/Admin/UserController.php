@@ -27,12 +27,27 @@ class UserController extends Controller
         $breadcrumb = [
             ['name' => 'Users', 'url' => route('admin.users.index')],
         ];
-        $users = User::query();
+
+        $users = User::with('roles');
+        $selectedRole = null;
+
         if ($request->has('q')) {
-            $users->where('name', 'LIKE', '%' . $request->q . '%');
+            $users->where('name', 'LIKE', '%' . $request->q . '%')
+                ->orWhere('email', 'LIKE', '%' . $request->q . '%');
         }
+
+        if ($request->has('role_id')) {
+            $selectedRole = Role::find($request->role_id);
+            if ($selectedRole) {
+                $users->whereHas('roles', function ($query) use ($selectedRole) {
+                    $query->where('roles.id', $selectedRole->id);
+                });
+                $breadcrumb[] = ['name' => $selectedRole->name, 'url' => '#'];
+            }
+        }
+
         $users = $users->paginate(10);
-        return view('admin.users.index', compact('users', 'breadcrumb'));
+        return view('admin.users.index', compact('users', 'breadcrumb', 'selectedRole'));
     }
 
     /**
