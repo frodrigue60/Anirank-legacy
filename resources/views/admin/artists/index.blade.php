@@ -26,8 +26,8 @@
             <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-6">
                 <form action="{{ route('admin.artists.search') }}" method="GET" class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i
-                            class="fa-solid fa-magnifying-glass text-zinc-500 group-focus-within:text-blue-500 transition-colors"></i>
+                        <span
+                            class="material-symbols-outlined text-zinc-500 group-focus-within:text-blue-500 transition-colors">search</span>
                     </div>
                     <input type="text" name="q"
                         class="block w-full pl-11 pr-32 py-4 bg-zinc-950/50 border border-zinc-800 text-white placeholder-zinc-500 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
@@ -68,7 +68,7 @@
                                                     <img src="{{ $artist->image }}" alt=""
                                                         class="w-full h-full object-cover">
                                                 @else
-                                                    <i class="fa-solid fa-user text-xs"></i>
+                                                    <span class="material-symbols-outlined text-zinc-500">person</span>
                                                 @endif
                                             </div>
                                             <div class="flex flex-col">
@@ -92,12 +92,12 @@
                                                 <a href="{{ route('admin.artists.edit', $artist->id) }}"
                                                     class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500"
                                                     title="Edit Artist">
-                                                    <i class="fa-solid fa-pencil"></i>
+                                                    <span class="material-symbols-outlined text-sm">edit</span>
                                                 </a>
                                                 <a href="{{ route('admin.artists.show', $artist->id) }}"
                                                     class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700"
                                                     title="View Profile">
-                                                    <i class="fa-solid fa-eye"></i>
+                                                    <span class="material-symbols-outlined text-sm">visibility</span>
                                                 </a>
                                                 @if (Auth::user()->isAdmin())
                                                     <form action="{{ route('admin.artists.destroy', $artist->id) }}"
@@ -107,7 +107,7 @@
                                                         <button type="submit" onclick="return confirm('Delete artist?')"
                                                             class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500"
                                                             title="Delete Artist">
-                                                            <i class="fa-solid fa-trash-can"></i>
+                                                            <span class="material-symbols-outlined text-sm">delete</span>
                                                         </button>
                                                     </form>
                                                 @endif

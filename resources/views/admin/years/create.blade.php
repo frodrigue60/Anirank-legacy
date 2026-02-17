@@ -29,8 +29,8 @@
                 <div class="pt-4">
                     <button
                         class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] flex items-center justify-center gap-2 text-sm uppercase tracking-widest">
-                        <i class="fa-solid fa-save"></i>
-                        SAVE YEAR
+                        <span class="material-symbols-outlined mr-2">save</span>
+                        ADD YEAR ENTRY
                     </button>
                 </div>
             </form>

@@ -40,7 +40,7 @@
             <div class="bg-rose-500/10 border border-rose-500/20 rounded-3xl p-12 text-center max-w-2xl mx-auto">
                 <div
                     class="w-20 h-20 bg-rose-500/20 rounded-3xl flex items-center justify-center text-rose-500 mx-auto mb-6">
-                    <i class="fa-solid fa-lock text-4xl"></i>
+                    <span class="material-symbols-outlined text-4xl">lock</span>
                 </div>
                 <h3 class="text-2xl font-black text-rose-400 mb-3">Access Restricted</h3>
                 <p class="text-white/60 mb-8">You do not have the required staff privileges to access this area.</p>

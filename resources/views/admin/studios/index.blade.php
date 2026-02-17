@@ -30,6 +30,10 @@
                         <thead>
                             <tr class="bg-zinc-950/50 border-b border-zinc-800">
                                 <th class="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-widest">ID</th>
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <span
+                                        class="material-symbols-outlined text-zinc-500 group-focus-within:text-blue-500 transition-colors">search</span>
+                                </div>
                                 <th class="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-widest">Studio
                                     Details</th>
                                 <th class="px-6 py-4 text-xs font-bold text-zinc-400 uppercase tracking-widest text-center">
@@ -46,7 +50,12 @@
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700 overflow-hidden">
-                                                <i class="fa-solid fa-palette text-xs"></i>
+                                                @if ($studio->image)
+                                                    <img src="{{ $studio->image }}" alt=""
+                                                        class="w-full h-full object-cover">
+                                                @else
+                                                    <span class="material-symbols-outlined text-xs">palette</span>
+                                                @endif
                                             </div>
                                             <div class="flex flex-col">
                                                 <span class="text-sm font-bold text-white">
@@ -68,7 +77,7 @@
                                                 <a href="{{ route('admin.studios.edit', $studio->id) }}"
                                                     class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500"
                                                     title="Edit Studio">
-                                                    <i class="fa-solid fa-pencil"></i>
+                                                    <span class="material-symbols-outlined text-sm">edit</span>
                                                 </a>
                                                 @if (Auth::user()->isAdmin())
                                                     <form action="{{ route('admin.studios.destroy', $studio->id) }}"
@@ -78,7 +87,7 @@
                                                         <button type="submit" onclick="return confirm('Delete studio?')"
                                                             class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500"
                                                             title="Delete Studio">
-                                                            <i class="fa-solid fa-trash-can"></i>
+                                                            <span class="material-symbols-outlined text-sm">delete</span>
                                                         </button>
                                                     </form>
                                                 @endif

@@ -864,19 +864,7 @@ class PostController extends Controller
 
     public function songs(Post $post)
     {
-
-        $breadcrumb = Breadcrumb::generate([
-            [
-                'name' => 'Index',
-                'url' => route('admin.posts.index'),
-            ],
-            [
-                'name' => $post->title,
-                'url' => route('admin.posts.songs', $post->id),
-            ],
-        ]);
-
-        return view('admin.songs.manage', compact('post', 'breadcrumb'));
+        return redirect()->route('admin.songs.index', ['post_id' => $post->id]);
     }
 
     public function dashboard()

@@ -8,9 +8,20 @@
         <div class="flex justify-between items-center gap-6">
             <div>
                 <div>
-                    <h1 class="text-3xl font-bold text-white tracking-tight">Song Catalog</h1>
-                    <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">Global Theme Management &
-                        Registry</p>
+                    <h1 class="text-3xl font-bold text-white tracking-tight">
+                        @if ($currentPost)
+                            Songs: {{ $currentPost->title }}
+                        @else
+                            Song Catalog
+                        @endif
+                    </h1>
+                    <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">
+                        @if ($currentPost)
+                            Theme Music Registry for this entry
+                        @else
+                            Global Theme Management & Registry
+                        @endif
+                    </p>
                 </div>
 
                 <div class="flex flex-wrap gap-3">
@@ -18,7 +29,7 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('admin.songs.create') }}"
+                <a href="{{ route('admin.songs.create', request('post_id') ? ['post_id' => request('post_id')] : []) }}"
                     class="px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest">
                     <span class="material-symbols-outlined mr-2 text-base">add</span>
                     Add New Song
@@ -30,6 +41,9 @@
             {{-- Search Card --}}
             <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-6">
                 <form action="{{ route('admin.songs.index') }}" method="GET" class="relative group">
+                    @if (request('post_id'))
+                        <input type="hidden" name="post_id" value="{{ request('post_id') }}">
+                    @endif
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <span
                             class="material-symbols-outlined text-zinc-500 group-focus-within:text-primary transition-colors">search</span>
@@ -112,7 +126,7 @@
                                                 class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500">
                                                 <span class="material-symbols-outlined text-sm">edit</span>
                                             </a>
-                                            <a href="{{ route('admin.songs.variants', $song->id) }}"
+                                            <a href="{{ route('admin.variants.index', ['song_id' => $song->id]) }}"
                                                 class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700"
                                                 title="Manage Variants">
                                                 <span class="material-symbols-outlined text-sm">layers</span>

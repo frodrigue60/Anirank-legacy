@@ -47,6 +47,7 @@
 
             {{-- Page Content --}}
             <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+                @include('layouts.breadcrumb')
                 @if (isset($slot))
                     {{ $slot }}
                 @else

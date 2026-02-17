@@ -10,9 +10,7 @@
             </span>
         </button>
 
-        <div class="hidden md:block">
-            @include('layouts.breadcrumb')
-        </div>
+
     </div>
 
     {{-- Right Side: Search & User --}}

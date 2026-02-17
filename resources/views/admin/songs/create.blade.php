@@ -65,7 +65,7 @@
                 {{-- Song Names --}}
                 <div class="space-y-6 bg-zinc-950/30 p-6 rounded-2xl border border-zinc-800/50">
                     <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center">
-                        <i class="fa-solid fa-music mr-2"></i> SONG METADATA
+                        <span class="material-symbols-outlined mr-2">music_note</span> SONG METADATA
                     </h3>
 
                     <div class="space-y-4">
@@ -138,7 +138,7 @@
                 <div class="pt-4">
                     <button
                         class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] flex items-center justify-center gap-2 text-sm uppercase tracking-widest">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span class="material-symbols-outlined mr-2">cloud_upload</span>
                         SAVE SONG ENTRY
                     </button>
                 </div>

@@ -41,13 +41,16 @@
                                         @if (Auth::user()->isAdmin() || Auth::user()->isEditor())
                                             @if ($request->status == 'pending')
                                                 <a href="{{ route('admin.requests.show', $request->id) }}"
-                                                    class="inline-flex items-center px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-bold rounded-xl transition-all border border-zinc-700">
-                                                    VIEW & ATTEND
+                                                    class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700"
+                                                    title="View Request">
+                                                    <span class="material-symbols-outlined text-sm">visibility</span>
                                                 </a>
                                             @else
                                                 <span
                                                     class="inline-flex items-center px-4 py-2 bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest rounded-xl border border-emerald-500/20">
-                                                    <i class="fa-solid fa-check mr-1.5"></i> Attended
+                                                    <span
+                                                        class="material-symbols-outlined text-sm mr-1.5">check_circle</span>
+                                                    Attended
                                                 </span>
                                             @endif
 
@@ -60,7 +63,7 @@
                                                     onclick="return confirm('Reject and delete this request?')"
                                                     class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500"
                                                     title="Force Delete">
-                                                    <i class="fa-solid fa-trash-can"></i>
+                                                    <span class="material-symbols-outlined">delete</span>
                                                 </button>
                                             </form>
                                         @endif

@@ -18,7 +18,7 @@
 
                 <div class="space-y-6">
                     <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center">
-                        <i class="fa-solid fa-building mr-2 text-blue-500"></i> PRODUCER DETAILS
+                        <span class="material-symbols-outlined mr-2 text-blue-500">corporate_fare</span> PRODUCER DETAILS
                     </h3>
 
                     <div class="space-y-2">
@@ -37,8 +37,8 @@
                 <div class="pt-4">
                     <button
                         class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] flex items-center justify-center gap-2 text-sm uppercase tracking-widest">
-                        <i class="fa-solid fa-save"></i>
-                        SAVE PRODUCER ENTRY
+                        <span class="material-symbols-outlined mr-2">save</span>
+                        CREATE PRODUCER ENTRY ENTRY
                     </button>
                 </div>
             </form>

@@ -53,12 +53,13 @@
                                     @if ($report->status == 'pending')
                                         <a href="{{ route('admin.reports.toggle', $report->id) }}"
                                             class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-white transition-all">
-                                            <i class="fa-solid fa-clock mr-1.5"></i> Pending
+                                            <span class="material-symbols-outlined text-sm mr-1.5">schedule</span> Pending
                                         </a>
                                     @else
                                         <a href="{{ route('admin.reports.toggle', $report->id) }}"
                                             class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all">
-                                            <i class="fa-solid fa-check mr-1.5"></i> Resolved
+                                            <span class="material-symbols-outlined text-sm mr-1.5">check_circle</span>
+                                            Resolved
                                         </a>
                                     @endif
                                 </td>
@@ -68,7 +69,7 @@
                                             <a href="{{ route('admin.reports.show', $report->id) }}"
                                                 class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700"
                                                 title="View Report Details">
-                                                <i class="fa-solid fa-eye"></i>
+                                                <span class="material-symbols-outlined">visibility</span>
                                             </a>
                                             <form action="{{ route('admin.reports.destroy', $report->id) }}" method="post"
                                                 class="inline">
@@ -78,7 +79,7 @@
                                                     onclick="return confirm('Dismiss and delete this report?')"
                                                     class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500"
                                                     title="Delete Report">
-                                                    <i class="fa-solid fa-trash-can"></i>
+                                                    <span class="material-symbols-outlined">delete</span>
                                                 </button>
                                             </form>
                                         @endif

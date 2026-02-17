@@ -15,19 +15,15 @@
                 <li class="flex items-center gap-2.5">
                     <span class="material-symbols-outlined text-white/10 text-base!">chevron_right</span>
                     @if (!$loop->last)
-                <li class="flex items-center">
-                    <a href="{{ $item['url'] }}" class="text-zinc-400 hover:text-primary transition-colors">
-                        {{ $item['name'] }}
-                    </a>
+                        <a href="{{ $item['url'] }}" class="text-zinc-400 hover:text-primary transition-colors">
+                            {{ $item['name'] }}
+                        </a>
+                    @else
+                        <span class="text-white truncate max-w-[150px] sm:max-w-none">
+                            {{ $item['name'] }}
+                        </span>
+                    @endif
                 </li>
-            @else
-                <li class="flex items-center">
-                    <span class="text-white truncate max-w-[150px] sm:max-w-none">
-                        {{ $item['name'] }}
-                    </span>
-                </li>
-            @endif
-            </li>
             @endforeach
         @endisset
     </ol>

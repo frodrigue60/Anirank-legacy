@@ -52,11 +52,11 @@
                                     <div class="flex items-center justify-end gap-2">
                                         <a href="{{ route('admin.videos.edit', $video->id) }}"
                                             class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500">
-                                            <i class="fa-solid fa-pencil"></i>
+                                            <span class="material-symbols-outlined text-sm">edit</span>
                                         </a>
                                         <a href="{{ route('admin.videos.show', $video->id) }}"
                                             class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700">
-                                            <i class="fa-solid fa-eye"></i>
+                                            <span class="material-symbols-outlined text-sm">visibility</span>
                                         </a>
                                         <form action="{{ route('admin.videos.destroy', $video->id) }}" method="post"
                                             class="inline">
@@ -64,7 +64,7 @@
                                             @method('DELETE')
                                             <button type="submit" onclick="return confirm('Delete video?')"
                                                 class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500">
-                                                <i class="fa-solid fa-trash-can"></i>
+                                                <span class="material-symbols-outlined text-sm">delete</span>
                                             </button>
                                         </form>
                                     </div>
@@ -76,7 +76,7 @@
                                     <p class="text-zinc-500 italic">No video configured for this variant.</p>
                                     <a href="{{ route('admin.variants.videos.add', $song_variant->id) }}"
                                         class="mt-4 inline-flex items-center text-blue-500 hover:text-blue-400 font-bold">
-                                        <i class="fa-solid fa-plus mr-2"></i> ADD VIDEO NOW
+                                        <span class="material-symbols-outlined mr-2">add</span> ADD VIDEO NOW
                                     </a>
                                 </td>
                             </tr>

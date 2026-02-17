@@ -119,9 +119,9 @@ class VideoController extends Controller
                 $request->video->storeAs($path, $file_name, 'public');
             }
 
-            return redirect(route('admin.songs.variants', $song->id))->with('success', 'saved successfully');
+            return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Video saved successfully');
         } catch (ModelNotFoundException $e) {
-            return redirect(route('admin.songs.variants', $song->id))->with('error', $e);
+            return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('error', $e->getMessage());
         }
     }
 
@@ -165,11 +165,11 @@ class VideoController extends Controller
                 ],
                 [
                     'name' => $song->slug,
-                    'url' => route('admin.songs.variants', $song->id),
+                    'url' => route('admin.variants.index', ['song_id' => $song->id]),
                 ],
                 [
                     'name' => $video->id,
-                    'url' => route('admin.songs.variants', $song->id),
+                    'url' => route('admin.variants.index', ['song_id' => $song->id]),
                 ],
             ]);
 
@@ -261,9 +261,9 @@ class VideoController extends Controller
             }
 
 
-            return redirect(route('admin.songs.variants', $song->id))->with('sucess', 'Video updated successfully');
+            return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Video updated successfully');
         } catch (ModelNotFoundException $e) {
-            return redirect(route('admin.songs.variants', $song->id))->with('error', $e);
+            return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('error', $e->getMessage());
         }
     }
 
@@ -280,11 +280,11 @@ class VideoController extends Controller
         $song = $song_variant->song;
         try {
             if ($video->delete()) {
-                return redirect(route('admin.songs.variants', $song->id))->with('success', 'item deleted successfully');
+                return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Video deleted successfully');
             }
         } catch (ModelNotFoundException $e) {
-            return redirect(route('admin.songs.variants', $song->id))
-                ->with('error', $e);
+            return redirect(route('admin.variants.index', ['song_id' => $song->id]))
+                ->with('error', $e->getMessage());
         }
     }
 

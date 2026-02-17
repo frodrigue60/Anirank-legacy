@@ -50,9 +50,9 @@
                                         class="inline-flex items-center justify-center p-2 rounded-xl transition-all border {{ $year->current ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-900/20' : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-white hover:bg-zinc-700' }}"
                                         title="{{ $year->current ? 'Active' : 'Inactive' }}">
                                         @if ($year->current)
-                                            <i class="fa-solid fa-calendar-check text-lg"></i>
+                                            <span class="material-symbols-outlined text-lg">event_available</span>
                                         @else
-                                            <i class="fa-solid fa-clock text-lg"></i>
+                                            <span class="material-symbols-outlined text-lg">schedule</span>
                                         @endif
                                     </a>
                                 </td>
@@ -60,7 +60,7 @@
                                     <div class="flex items-center justify-end gap-2">
                                         <a href="{{ route('admin.years.edit', $year->id) }}"
                                             class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500">
-                                            <i class="fa-solid fa-pencil"></i>
+                                            <span class="material-symbols-outlined text-sm">edit</span>
                                         </a>
                                         <form action="{{ route('admin.years.destroy', $year->id) }}" method="post"
                                             class="inline">
@@ -68,7 +68,7 @@
                                             @method('DELETE')
                                             <button type="submit" onclick="return confirm('Delete this year entry?')"
                                                 class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500">
-                                                <i class="fa-solid fa-trash-can"></i>
+                                                <span class="material-symbols-outlined text-sm">delete</span>
                                             </button>
                                         </form>
                                     </div>

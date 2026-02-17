@@ -14,7 +14,7 @@
             {{-- Content Section --}}
             <div class="p-8">
                 <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6 flex items-center">
-                    <i class="fa-solid fa-envelope-open-text mr-2 text-blue-500"></i> REQUEST CONTENT
+                    <span class="material-symbols-outlined mr-2 text-blue-500">mail_lock</span> REQUEST CONTENT
                 </h3>
 
                 <div
@@ -29,7 +29,7 @@
                 <div class="flex items-center gap-3">
                     <div
                         class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-400 border border-zinc-700">
-                        <i class="fa-solid fa-user text-xs"></i>
+                        <span class="material-symbols-outlined text-xs">person</span>
                     </div>
                     <div class="flex flex-col">
                         <span class="text-sm font-bold text-white">{{ $userRequest->user->name }}</span>
@@ -42,7 +42,7 @@
                     @if ($userRequest->status == 'pending')
                         <a href="{{ route('admin.requests.toggle', $userRequest->id) }}"
                             class="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-blue-900/20 active:scale-95">
-                            <i class="fa-solid fa-check-circle mr-2"></i> MARK ATTENDED
+                            <span class="material-symbols-outlined mr-2">check_circle</span> MARK ATTENDED
                         </a>
                     @endif
                     <form action="{{ route('admin.requests.destroy', $userRequest->id) }}" method="post"
@@ -51,7 +51,7 @@
                         @method('DELETE')
                         <button type="submit" onclick="return confirm('Permanentely delete this request?')"
                             class="w-full inline-flex items-center justify-center px-6 py-2 bg-zinc-800 hover:bg-rose-600 text-zinc-400 hover:text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-zinc-700 hover:border-rose-500 active:scale-95">
-                            <i class="fa-solid fa-trash-can mr-2"></i> DELETE
+                            <span class="material-symbols-outlined mr-2">delete</span> DELETE
                         </button>
                     </form>
                 </div>

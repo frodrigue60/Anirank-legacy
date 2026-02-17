@@ -16,9 +16,33 @@ class SongVariantController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = SongVariant::query()->with('song', 'song.post', 'video');
+
+        $currentSong = null;
+        $breadcrumbItems = [
+            ['name' => 'Variants', 'url' => route('admin.variants.index')]
+        ];
+
+        if ($request->filled('song_id')) {
+            $query->where('song_id', $request->song_id);
+            $currentSong = Song::with('post')->find($request->song_id);
+
+            if ($currentSong) {
+                $breadcrumbItems = [
+                    ['name' => 'Posts', 'url' => route('admin.posts.index')],
+                    ['name' => $currentSong->post->title, 'url' => route('admin.posts.show', $currentSong->post->id)],
+                    ['name' => $currentSong->slug, 'url' => route('admin.songs.index', ['post_id' => $currentSong->post->id])],
+                    ['name' => 'Variants', 'url' => route('admin.variants.index', ['song_id' => $currentSong->id])]
+                ];
+            }
+        }
+
+        $breadcrumb = Breadcrumb::generate($breadcrumbItems);
+        $songVariants = $query->latest()->paginate(20);
+
+        return view('admin.variants.index', compact('songVariants', 'currentSong', 'breadcrumb'));
     }
 
     /**
@@ -60,9 +84,9 @@ class SongVariantController extends Controller
         //dd($songVariant);
 
         if ($songVariant->save()) {
-            return redirect(route('admin.songs.variants', $song->id))->with('success', 'song variant added successfully');
+            return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Song variant added successfully');
         } else {
-            return redirect(route('admin.posts.songs', $song->post->id))->with('error', 'error');
+            return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('error', 'Error adding variant');
         }
     }
 
@@ -102,7 +126,7 @@ class SongVariantController extends Controller
             ],
             [
                 'name' => $song->slug,
-                'url' => route('admin.songs.variants', $song->id),
+                'url' => route('admin.variants.index', ['song_id' => $song->id]),
             ],
             [
                 'name' => $songVariant->slug,
@@ -140,9 +164,10 @@ class SongVariantController extends Controller
         $songVariant->spoiler = false;
 
         if ($songVariant->update()) {
-            return redirect(route('admin.songs.variants', $songVariant->song->id))->with('success', 'Song updated success');
+            $songVariant->artists()->sync($artistsIds ?? []); // Adding safe sync if needed, though not in original store
+            return redirect(route('admin.variants.index', ['song_id' => $songVariant->song->id]))->with('success', 'Song variant updated successfully');
         } else {
-            return redirect(route('admin.songs.variants', $songVariant->song->id))->with('error', 'Something has been wrong');
+            return redirect(route('admin.variants.index', ['song_id' => $songVariant->song->id]))->with('error', 'Something went wrong');
         }
     }
 
@@ -157,9 +182,9 @@ class SongVariantController extends Controller
         $songVariant = SongVariant::find($id);
 
         if ($songVariant->delete()) {
-            return redirect(route('admin.songs.variants', $songVariant->song->id))->with('success', 'song variant added successfully');
+            return redirect(route('admin.variants.index', ['song_id' => $songVariant->song_id]))->with('success', 'Song variant deleted successfully');
         } else {
-            return redirect(route('admin.songs.variants', $songVariant->song->id))->with('error', 'error');
+            return redirect(route('admin.variants.index', ['song_id' => $songVariant->song_id]))->with('error', 'Error deleting variant');
         }
     }
 
@@ -182,11 +207,11 @@ class SongVariantController extends Controller
             ],
             [
                 'name' => $song->slug,
-                'url' => route('admin.songs.variants', $song->id),
+                'url' => route('admin.variants.index', ['song_id' => $song->id]),
             ],
             [
                 'name' => $video->id,
-                'url' => route('admin.songs.variants', $song->id),
+                'url' => route('admin.variants.index', ['song_id' => $song->id]),
             ],
         ]);
 
@@ -211,7 +236,7 @@ class SongVariantController extends Controller
             ],
             [
                 'name' => $song->slug,
-                'url' => route('admin.songs.variants', $song->id),
+                'url' => route('admin.variants.index', ['song_id' => $song->id]),
             ],
             [
                 'name' => $songVariant->slug . ' - ' . 'video',

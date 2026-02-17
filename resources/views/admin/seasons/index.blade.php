@@ -51,9 +51,9 @@
                                         class="inline-flex items-center justify-center p-2 rounded-xl transition-all border {{ $season->current ? 'bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-900/20' : 'bg-zinc-800 text-zinc-500 border-zinc-700 hover:text-white hover:bg-zinc-700' }}"
                                         title="{{ $season->current ? 'Active' : 'Inactive' }}">
                                         @if ($season->current)
-                                            <i class="fa-solid fa-check-circle text-lg"></i>
+                                            <span class="material-symbols-outlined text-lg">check_circle</span>
                                         @else
-                                            <i class="fa-solid fa-clock text-lg"></i>
+                                            <span class="material-symbols-outlined text-lg">schedule</span>
                                         @endif
                                     </a>
                                 </td>
@@ -61,11 +61,11 @@
                                     <div class="flex items-center justify-end gap-2">
                                         <a href="{{ route('admin.seasons.edit', $season->id) }}"
                                             class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500">
-                                            <i class="fa-solid fa-pencil"></i>
+                                            <span class="material-symbols-outlined text-sm">edit</span>
                                         </a>
                                         <a href="{{ route('admin.seasons.show', $season->id) }}"
                                             class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700">
-                                            <i class="fa-solid fa-eye"></i>
+                                            <span class="material-symbols-outlined text-sm">visibility</span>
                                         </a>
                                         <form action="{{ route('admin.seasons.destroy', $season->id) }}" method="post"
                                             class="inline">
@@ -73,7 +73,7 @@
                                             @method('DELETE')
                                             <button type="submit" onclick="return confirm('Delete this season?')"
                                                 class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500">
-                                                <i class="fa-solid fa-trash-can"></i>
+                                                <span class="material-symbols-outlined text-sm">delete</span>
                                             </button>
                                         </form>
                                     </div>

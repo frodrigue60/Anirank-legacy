@@ -29,10 +29,10 @@
                         <button @click="open = !open"
                             class="flex items-center justify-between w-full px-4 py-3 bg-zinc-950/50 hover:bg-zinc-800/50 rounded-2xl transition-all border border-zinc-800 group">
                             <span class="text-sm font-bold text-zinc-300 group-hover:text-white transition-colors">
-                                <i class="fa-solid fa-cloud-arrow-down mr-2 text-blue-500"></i> API OPTIONS
+                                <span class="material-symbols-outlined mr-2 text-blue-500">api</span> API OPTIONS
                             </span>
-                            <i class="fa-solid fa-chevron-down text-zinc-500 transition-transform duration-300"
-                                :class="open ? 'rotate-180' : ''"></i>
+                            <span class="material-symbols-outlined text-zinc-500 transition-transform duration-300"
+                                :class="open ? 'rotate-180' : ''">expand_more</span>
                         </button>
 
                         <div x-show="open" x-collapse x-cloak class="mt-4 space-y-4">
@@ -106,8 +106,8 @@
                 <form action="{{ route('admin.posts.search') }}" method="POST" class="relative group">
                     @csrf
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i
-                            class="fa-solid fa-magnifying-glass text-zinc-500 group-focus-within:text-blue-500 transition-colors"></i>
+                        <span
+                            class="material-symbols-outlined text-zinc-500 group-focus-within:text-blue-500 transition-colors">search</span>
                     </div>
                     <input type="text" name="q"
                         class="block w-full pl-11 pr-32 py-4 bg-zinc-950/50 border border-zinc-800 text-white placeholder-zinc-500 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
@@ -151,7 +151,7 @@
                                                 <img src="{{ Storage::url($post->thumbnail) }}" alt=""
                                                     class="w-full h-full object-cover">
                                             </div>
-                                            <a href="{{ $post->url }}"
+                                            <a href="{{ route('admin.posts.show', $post->id) }}"
                                                 class="text-sm font-semibold text-white hover:text-blue-400 transition-colors line-clamp-2 leading-snug">
                                                 {{ $post->title }}
                                             </a>
@@ -187,12 +187,15 @@
                                             @elseif ($post->status == false)
                                                 <span
                                                     class="px-2.5 py-1 bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase rounded-md border border-amber-500/20">
-                                                    <i class="fa-solid fa-clock mr-1"></i> Pending
+                                                    <span class="material-symbols-outlined text-sm mr-1">schedule</span>
+                                                    Pending
                                                 </span>
                                             @else
                                                 <span
                                                     class="px-2.5 py-1 bg-blue-500/10 text-blue-500 text-[10px] font-bold uppercase rounded-md border border-blue-500/20">
-                                                    <i class="fa-solid fa-check mr-1"></i> Active
+                                                    <span
+                                                        class="material-symbols-outlined text-sm mr-1">check_circle</span>
+                                                    Active
                                                 </span>
                                             @endif
                                         @endif
@@ -203,8 +206,8 @@
                                                 @csrf
                                                 <button type="submit"
                                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase border transition-all {{ $post->status == true ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500 hover:text-white' : 'bg-amber-500/10 text-amber-500 border-amber-500/30 hover:bg-amber-500 hover:text-white' }}">
-                                                    <i
-                                                        class="fa-solid {{ $post->status == true ? 'fa-toggle-on' : 'fa-toggle-off' }} text-sm"></i>
+                                                    <span
+                                                        class="material-symbols-outlined text-sm">{{ $post->status == true ? 'toggle_on' : 'toggle_off' }}</span>
                                                     {{ $post->status == true ? 'Public' : 'Private' }}
                                                 </button>
                                             </form>
@@ -223,16 +226,16 @@
                                                         title="Add Song">
                                                         <span class="material-symbols-outlined">playlist_add</span>
                                                     </a>
-                                                    <a href="{{ route('admin.posts.songs', $post->id) }}"
+                                                    <a href="{{ route('admin.songs.index', ['post_id' => $post->id]) }}"
                                                         class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700"
                                                         title="List Songs">
                                                         <span class="material-symbols-outlined">list</span>
                                                     </a>
                                                 </div>
-                                                <a href="{{ route('admin.posts.show', $post->id) }}"
+                                                {{-- <a href="{{ route('admin.posts.show', $post->id) }}"
                                                     class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700">
                                                     <span class="material-symbols-outlined">visibility</span>
-                                                </a>
+                                                </a> --}}
                                                 <form action="{{ route('admin.posts.destroy', $post->id) }}"
                                                     method="post" class="inline">
                                                     @csrf

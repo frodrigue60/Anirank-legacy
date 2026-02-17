@@ -27,8 +27,8 @@
             <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-6">
                 <form action="{{ route('admin.users.search') }}" method="GET" class="relative group">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <i
-                            class="fa-solid fa-magnifying-glass text-zinc-500 group-focus-within:text-blue-500 transition-colors"></i>
+                        <span
+                            class="material-symbols-outlined text-zinc-500 group-focus-within:text-blue-500 transition-colors">search</span>
                     </div>
                     <input type="text" name="q"
                         class="block w-full pl-11 pr-32 py-4 bg-zinc-950/50 border border-zinc-800 text-white placeholder-zinc-500 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
@@ -67,11 +67,11 @@
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700 overflow-hidden">
-                                                @if ($user->image)
-                                                    <img src="{{ asset('storage/' . $user->image) }}" alt=""
+                                                @if ($user->avatar)
+                                                    <img src="{{ asset('storage/' . $user->avatar) }}" alt=""
                                                         class="w-full h-full object-cover">
                                                 @else
-                                                    <i class="fa-solid fa-user text-xs"></i>
+                                                    <span class="material-symbols-outlined">person</span>
                                                 @endif
                                             </div>
                                             <div class="flex flex-col">
@@ -105,17 +105,18 @@
                                         <div class="flex items-center justify-end gap-2">
                                             @if (Auth::user()->isAdmin())
                                                 <a href="{{ route('admin.users.edit', $user->id) }}"
-                                                    class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500">
-                                                    <i class="fa-solid fa-pencil"></i>
+                                                    class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500"
+                                                    title="Edit User">
+                                                    <span class="material-symbols-outlined text-sm">edit</span>
                                                 </a>
                                                 <form action="{{ route('admin.users.destroy', $user->id) }}" method="post"
                                                     class="inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit"
-                                                        onclick="return confirm('Delete this user account?')"
-                                                        class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500">
-                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    <button type="submit" onclick="return confirm('Delete user?')"
+                                                        class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500"
+                                                        title="Delete User">
+                                                        <span class="material-symbols-outlined text-sm">delete</span>
                                                     </button>
                                                 </form>
                                             @endif

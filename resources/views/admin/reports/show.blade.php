@@ -15,7 +15,7 @@
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8 shadow-xl">
                     <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6 flex items-center">
-                        <i class="fa-solid fa-file-lines mr-2"></i> REPORT CONTENT
+                        <span class="material-symbols-outlined mr-2">description</span> REPORT CONTENT
                     </h3>
 
                     <div class="space-y-6">
@@ -41,19 +41,19 @@
             <div class="space-y-6">
                 <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-6 shadow-xl">
                     <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center">
-                        <i class="fa-solid fa-bolt mr-2"></i> MODERATION
+                        <span class="material-symbols-outlined mr-2">bolt</span> MODERATION
                     </h3>
 
                     <div class="space-y-3">
                         @if ($report->status == 'pending')
                             <a href="{{ route('admin.reports.toggle', $report->id) }}"
                                 class="w-full inline-flex items-center justify-center px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-900/20">
-                                <i class="fa-solid fa-check-double mr-2"></i> MARK AS READ
+                                <span class="material-symbols-outlined mr-2">check_circle</span> MARK AS READ
                             </a>
                         @else
                             <a href="{{ route('admin.reports.toggle', $report->id) }}"
                                 class="w-full inline-flex items-center justify-center px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded-xl transition-all border border-zinc-700">
-                                <i class="fa-solid fa-undo mr-2 text-zinc-500"></i> REOPEN REPORT
+                                <span class="material-symbols-outlined mr-2 text-zinc-500">undo</span> REOPEN REPORT
                             </a>
                         @endif
 
@@ -62,7 +62,7 @@
                             @method('DELETE')
                             <button type="submit" onclick="return confirm('Dismiss and delete permanentely?')"
                                 class="w-full inline-flex items-center justify-center px-4 py-3 bg-rose-600/10 hover:bg-rose-600 text-rose-500 hover:text-white border border-rose-600/20 font-bold rounded-xl transition-all">
-                                <i class="fa-solid fa-trash-can mr-2"></i> DISMISS REPORT
+                                <span class="material-symbols-outlined mr-2">delete</span> DISMISS REPORT
                             </button>
                         </form>
                     </div>
@@ -93,7 +93,7 @@
                     <div class="flex items-center gap-3">
                         <div
                             class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700">
-                            <i class="fa-solid fa-user text-xs"></i>
+                            <span class="material-symbols-outlined text-sm">person</span>
                         </div>
                         <div class="flex flex-col">
                             <span class="text-sm font-bold text-white">#{{ $report->user_id }}</span>

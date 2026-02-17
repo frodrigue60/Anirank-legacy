@@ -63,7 +63,7 @@
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8 shadow-xl">
                     <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6 flex items-center">
-                        <i class="fa-solid fa-align-left mr-2 text-blue-500"></i> SYNOPSIS
+                        <span class="material-symbols-outlined mr-2 text-blue-500">subject</span> SYNOPSIS
                     </h3>
                     <div
                         class="prose prose-invert max-w-none text-zinc-300 leading-relaxed italic border-l-4 border-zinc-800 pl-6 py-2">
@@ -74,7 +74,7 @@
                 @if ($post->banner)
                     <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-4 shadow-xl">
                         <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 px-4 flex items-center">
-                            <i class="fa-solid fa-panorama mr-2 text-blue-500"></i> BANNER ASSET
+                            <span class="material-symbols-outlined mr-2 text-blue-500">landscape</span> BANNER ASSET
                         </h3>
                         <div class="rounded-2xl overflow-hidden aspect-[21/9] border border-zinc-800">
                             <img src="{{ Storage::url($post->banner) }}" alt="" class="w-full h-full object-cover">

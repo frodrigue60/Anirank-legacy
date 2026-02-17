@@ -46,7 +46,7 @@
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700 overflow-hidden">
-                                                <i class="fa-solid fa-building text-xs"></i>
+                                                <span class="material-symbols-outlined text-sm">corporate_fare</span>
                                             </div>
                                             <div class="flex flex-col">
                                                 <span class="text-sm font-bold text-white">
@@ -69,7 +69,7 @@
                                                 <a href="{{ route('admin.producers.edit', $producer->id) }}"
                                                     class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500"
                                                     title="Edit Producer">
-                                                    <i class="fa-solid fa-pencil"></i>
+                                                    <span class="material-symbols-outlined">edit</span>
                                                 </a>
                                                 @if (Auth::user()->isAdmin())
                                                     <form action="{{ route('admin.producers.destroy', $producer->id) }}"
@@ -79,7 +79,7 @@
                                                         <button type="submit" onclick="return confirm('Delete producer?')"
                                                             class="p-2 bg-zinc-800 hover:bg-red-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-red-500"
                                                             title="Delete Producer">
-                                                            <i class="fa-solid fa-trash-can"></i>
+                                                            <span class="material-symbols-outlined">delete</span>
                                                         </button>
                                                     </form>
                                                 @endif

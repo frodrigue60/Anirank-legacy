@@ -24,25 +24,25 @@
                     <div class="space-y-4 bg-zinc-950/30 p-6 rounded-2xl border border-zinc-800/50">
                         <label for="formFileBanner"
                             class="block text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center">
-                            <i class="fa-solid fa-file-video mr-2 text-blue-500"></i> UPDATE VIDEO FILE
+                            <span class="material-symbols-outlined mr-2 text-blue-500">video_file</span> UPDATE VIDEO FILE
                         </label>
                         <div
                             class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-zinc-800 border-dashed rounded-2xl hover:border-blue-500/50 transition-colors group">
                             <div class="space-y-1 text-center">
                                 <i
-                                    class="fa-solid fa-cloud-arrow-up text-3xl text-zinc-600 mb-3 group-hover:text-blue-400 transition-colors"></i>
-                                <div class="flex text-sm text-zinc-400">
-                                    <label for="formFileBanner"
-                                        class="relative cursor-pointer bg-transparent rounded-md font-bold text-blue-500 hover:text-blue-400 transition-colors">
-                                        <span>Select new file</span>
-                                        <input id="formFileBanner" name="video" type="file" class="sr-only">
-                                    </label>
-                                    <p class="pl-1">or drag and drop</p>
-                                </div>
-                                @if ($video->video_src)
-                                    <p class="text-[10px] text-zinc-500 font-mono">Current:
-                                        {{ basename($video->video_src) }}</p>
-                                @endif
+                                    class="material-symbols-outlined text-4xl text-zinc-600 mb-3 group-hover:text-blue-400 transition-colors">upload_file</span>
+                                    <div class="flex text-sm text-zinc-400">
+                                        <label for="formFileBanner"
+                                            class="relative cursor-pointer bg-transparent rounded-md font-bold text-blue-500 hover:text-blue-400 transition-colors">
+                                            <span>Select new file</span>
+                                            <input id="formFileBanner" name="video" type="file" class="sr-only">
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    @if ($video->video_src)
+                                        <p class="text-[10px] text-zinc-500 font-mono">Current:
+                                            {{ basename($video->video_src) }}</p>
+                                    @endif
                             </div>
                         </div>
                     </div>
@@ -58,7 +58,7 @@
                     <div class="space-y-4 bg-zinc-950/30 p-6 rounded-2xl border border-zinc-800/50">
                         <label for="embed"
                             class="block text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center">
-                            <i class="fa-solid fa-code mr-2 text-emerald-500"></i> EMBED CODE / LINK
+                            <span class="material-symbols-outlined mr-2 text-emerald-500">code</span> EMBED CODE / LINK
                         </label>
                         <input type="text" name="embed" id="embed"
                             value="{{ old('embed', $video->embed_code ?? '') }}"
@@ -71,8 +71,8 @@
                 <div class="pt-4">
                     <button
                         class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] flex items-center justify-center gap-2 text-sm uppercase tracking-widest">
-                        <i class="fa-solid fa-save"></i>
-                        UPDATE VIDEO SOURCE
+                        <span class="material-symbols-outlined mr-2">check_circle</span>
+                        UPDATE VIDEO ENTRY SOURCE
                     </button>
                 </div>
             </form>
