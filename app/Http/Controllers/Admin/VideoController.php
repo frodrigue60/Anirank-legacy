@@ -106,24 +106,14 @@ class VideoController extends Controller
                 $path = null;
                 $file_name = null;
 
-                switch ($song->type) {
-                    case 'OP':
-                        $path = "videos/openings/";
-                        break;
-
-                    case 'ED':
-                        $path = "videos/endings/";
-                        break;
-
-                    default:
-                        $path = "videos/";
-                        break;
-                }
+                $yearFolder = Str::slug($song->year->name ?? 'unknown');
+                $seasonFolder = Str::slug($song->season->name ?? 'unknown');
+                $path = "videos/{$yearFolder}/{$seasonFolder}/";
 
                 $mimeType = $request->video->getMimeType();
                 $extension = $this->getExtensionFromMimeType($mimeType);
 
-                $file_name = $post->slug . '-' . $song->slug . ($songVariant->version_number > 1 ? '-' . $songVariant->slug : '') . '.' . $extension;
+                $file_name = $post->slug . '-' . $song->slug . '-' . $songVariant->slug . '.' . $extension;
                 $video->video_src = $path . $file_name;
 
                 $video->type = 'file';
@@ -219,19 +209,9 @@ class VideoController extends Controller
                     return Redirect::back()->with('error', $errors);
                 }
 
-                switch ($video->songVariant->song->type) {
-                    case 'OP':
-                        $path = "videos/openings/";
-                        break;
-
-                    case 'ED':
-                        $path = "videos/endings/";
-                        break;
-
-                    default:
-                        $path = "videos/";
-                        break;
-                }
+                $yearFolder = Str::slug($song->year->name ?? 'unknown');
+                $seasonFolder = Str::slug($song->season->name ?? 'unknown');
+                $path = "videos/{$yearFolder}/{$seasonFolder}/";
 
                 $old_file = $video->video_src;
 
@@ -239,7 +219,7 @@ class VideoController extends Controller
                 $extension = $this->getExtensionFromMimeType($mimeType);
 
                 #
-                $file_name = $post->slug . '-' . $song->slug . ($song_variant->version_number > 1 ? '-' . $song_variant->slug : '') . '.' . $extension;
+                $file_name = $post->slug . '-' . $song->slug . '-' . $song_variant->slug . '.' . $extension;
                 $video->video_src = $path . $file_name;
 
                 //dd($video);
