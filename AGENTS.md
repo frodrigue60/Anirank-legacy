@@ -78,7 +78,7 @@ Represents an **anime series**.
 - `hasMany` → `Song`, `Report`
 - `belongsTo` → `Year`, `Season`, `Format`
 - `belongsToMany` → `Studio`, `Producer`, `ExternalLink`
-- Custom: `openings()`, `endings()`
+- Custom: `openings()`, `endings()`, `rankingHistory()`
 
 ---
 
@@ -102,7 +102,7 @@ Represents a **theme song** (Opening or Ending) associated with a Post.
 **Relationships:**
 
 - `belongsTo` → `Post`, `Year`, `Season`
-- `hasMany` → `SongVariant`
+- `hasMany` → `SongVariant`, `RankingHistory`
 - `belongsToMany` → `Artist`, `Playlist`
 - Polymorphic: `morphMany` → `Comment`, `Reaction`, `Favorite`
 
@@ -236,6 +236,21 @@ Time-series snapshot of content performance.
 | `song_id`     | integer | Foreign key for the song.                       |
 | `date`        | date    | The specific day of the tracking.               |
 | `views_count` | integer | Total views received on that day (incremented). |
+
+- `belongsTo` → `Song`
+
+---
+
+### `RankingHistory`
+
+Stores daily ranking snapshots for performance tracking and trend calculation.
+
+| Field     | Type    | Description                        |
+| --------- | ------- | ---------------------------------- |
+| `song_id` | integer | Foreign key for the song.          |
+| `rank`    | integer | Calculated rank position (1-N).    |
+| `score`   | decimal | The score at the time of tracking. |
+| `date`    | date    | The specific day of the tracking.  |
 
 **Relationships:**
 
@@ -424,15 +439,13 @@ Handles the video player page and user interactions (rating, likes, favorites).
 
 Handles user profile, favorites, and settings.
 
-| Method                | Route                         | Description                                     |
-| --------------------- | ----------------------------- | ----------------------------------------------- |
-| `index()`             | `GET /profile`                | Current user dashboard (uses `UserSettings`).   |
-| `show(User $user)`    | `GET /users/{id}`             | Public user profile (Route Model Binding).      |
-| `favorites()`         | `GET /favorites`              | Personal favorites (Redirects to `users.show`). |
-| `uploadProfilePic()`  | `POST /profile/upload-pic`    | (Legacy) Upload profile picture.                |
-| `uploadBannerPic()`   | `POST /profile/upload-banner` | (Legacy) Upload profile banner.                 |
-| `changeScoreFormat()` | `POST /profile/score-format`  | (Legacy) Change score display format.           |
-| `welcome()`           | `GET /welcome`                | Welcome/onboarding page.                        |
+| `index()` | `GET /profile` | Personal dashboard (Avatar, Banner, Score Format). |
+| `favorites()` | `GET /favorites` | Authenticated user's private favorites list. |
+| `show(User $user)` | `GET /users/{slug}` | Public profile/favorites of any user. |
+| `uploadProfilePic()` | `POST /profile/avatar` | Upload profile picture. |
+| `uploadBannerPic()` | `POST /profile/banner` | Upload profile banner. |
+| `changeScoreFormat()` | `POST /profile/score-format` | Change score display format preference. |
+| `welcome()` | `GET /welcome` | Welcome/onboarding page. |
 
 **Key Helper Methods:**
 
@@ -563,6 +576,7 @@ All admin controllers are located in `app/Http/Controllers/Admin/` and are prote
 | `songs($post_id)`      | `GET admin/posts/{id}/songs`     | View songs belonging to this anime.            |
 | `addSong($post_id)`    | `GET admin/posts/{id}/songs/add` | Form to add a new song to this anime.          |
 | `dashboard()`          | `GET admin/dashboard`            | Admin dashboard with statistics.               |
+| `trackRanking()`       | `POST admin/posts/track-ranking` | Manual trigger for daily ranking snapshots.    |
 
 **AniList Integration Methods:**
 
