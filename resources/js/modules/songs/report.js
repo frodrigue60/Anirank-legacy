@@ -45,17 +45,16 @@ async function sendReport() {
 
             hideModal("modal-report");
 
-            setTimeout(function () {
-                swal(
-                    "Thanks for reporting!",
-                    "We are working on it!",
-                    "success",
-                    {
-                        buttons: false,
-                        timer: 2000,
+            window.dispatchEvent(
+                new CustomEvent("toast", {
+                    detail: {
+                        type: "success",
+                        message: "Report Sent",
+                        description:
+                            "Thanks for reporting! We are working on it!",
                     },
-                );
-            }, 500);
+                }),
+            );
         } else {
             if (response.message.content) {
                 response.message.content.forEach((message) => {

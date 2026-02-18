@@ -14,10 +14,12 @@ class UserRequestController extends Controller
     {
         try {
             $userRequest = new UserRequest();
+            $userRequest->title = $request->title;
             $userRequest->content = $request->content;
             $userRequest->user_id = Auth::user()->id;
 
             $validator = Validator::make($request->all(), [
+                'title'   => 'required|string|max:255',
                 'content' => 'required|string|max:255',
             ]);
 

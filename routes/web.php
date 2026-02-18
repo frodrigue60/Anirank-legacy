@@ -90,6 +90,7 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
 
     // Common Resources
     Route::resource('videos', AdminVideoController::class);
+    Route::patch('/requests/{request}/attend', [AdminUserRequestController::class, 'attend'])->name('requests.attend');
     Route::resource('requests', AdminUserRequestController::class);
     Route::resource('comments', AdminCommentController::class);
     Route::resource('studios', AdminStudioController::class);
@@ -146,8 +147,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile/score-format', 'changeScoreFormat')->name('profile.score-format');
         Route::post('/profile/avatar', 'uploadProfilePic')->name('profile.avatar');
         Route::post('/profile/banner', 'uploadBannerPic')->name('profile.banner');
-        Route::get('/profile', 'index')->name('users.profile');
-        Route::get('/favorites', 'favorites')->name('users.favorites');
+        Route::get('/settings', 'settings')->name('users.settings');
+        Route::get('/{user:slug}/favorites', 'favorites')->name('users.favorites');
     });
 
     // Song Variants Interactions

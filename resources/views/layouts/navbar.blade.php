@@ -98,11 +98,11 @@
                                     <span class="material-symbols-outlined text-[18px]">dashboard</span> Dashboard
                                 </a>
                             @endif
-                            <a href="{{ route('users.profile') }}"
+                            <a href="{{ route('users.settings') }}"
                                 class="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
-                                <span class="material-symbols-outlined text-[18px]">person</span> Profile
+                                <span class="material-symbols-outlined text-[18px]">settings</span> Settings
                             </a>
-                            <a href="{{ route('users.favorites') }}"
+                            <a href="{{ route('users.favorites', Auth::user()->slug) }}"
                                 class="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
                                 <span class="material-symbols-outlined text-[18px]">favorite</span> Favorites
                             </a>

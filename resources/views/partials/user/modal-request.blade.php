@@ -1,4 +1,4 @@
-<div id="requestModal" class="fixed inset-0 z-[60] hidden overflow-y-auto overflow-x-hidden p-4 md:p-8" role="dialog"
+<div id="requestModal" class="fixed inset-0 z-60 hidden overflow-y-auto overflow-x-hidden p-4 md:p-8" role="dialog"
     aria-modal="true">
     {{-- Backdrop --}}
     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="window.hideModal('requestModal')">

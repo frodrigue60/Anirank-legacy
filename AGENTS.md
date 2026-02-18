@@ -346,7 +346,20 @@ Marks an entity as favorited by a user.
 | `Format`       | Anime format (TV, Movie, OVA). Has many Posts.         |
 | `ExternalLink` | External links (MAL, AniList). Many-to-many with Post. |
 | `Report`       | User-submitted reports for SongVariants.               |
-| `UserRequest`  | User-submitted requests (e.g., "add this anime").      |
+
+#### `user_requests`
+
+User-submitted requests (e.g., "add this anime").
+
+| Column        | Type          | Description                    |
+| ------------- | ------------- | ------------------------------ |
+| `id`          | `bigint` (PK) | Primary key                    |
+| `title`       | `string`      | Summary title (category-based) |
+| `content`     | `text`        | Request message                |
+| `status`      | `string`      | `pending` or `attended`        |
+| `user_id`     | `FK → users`  | Submitting user                |
+| `attended_by` | `FK → users`  | Staff who marked as attended   |
+| `timestamps`  | `datetime`    | Created/updated at             |
 
 ---
 
@@ -711,11 +724,12 @@ Manages user-submitted reports for problematic content.
 
 Manages user-submitted requests (e.g., "add this anime").
 
-| Method         | Route                        | Description                        |
-| -------------- | ---------------------------- | ---------------------------------- |
-| `index()`      | `GET admin/requests`         | List all user requests.            |
-| `show($id)`    | `GET admin/requests/{id}`    | View and mark request as attended. |
-| `destroy($id)` | `DELETE admin/requests/{id}` | Delete a request.                  |
+| Method         | Route                              | Description                            |
+| -------------- | ---------------------------------- | -------------------------------------- |
+| `index()`      | `GET admin/requests`               | List all user requests.                |
+| `show($id)`    | `GET admin/requests/{id}`          | View request details (no auto-update). |
+| `attend($id)`  | `PATCH admin/requests/{id}/attend` | Manually mark as attended.             |
+| `destroy($id)` | `DELETE admin/requests/{id}`       | Delete a request.                      |
 
 ---
 

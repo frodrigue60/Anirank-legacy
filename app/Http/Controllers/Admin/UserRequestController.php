@@ -62,11 +62,25 @@ class UserRequestController extends Controller
             ['name' => 'Requests', 'url' => route('admin.requests.index')],
             ['name' => 'Show', 'url' => route('admin.requests.show', $id)],
         ];
-        $userRequest = UserRequest::find($id);
-        $userRequest->attended_by = Auth::user()->id;
-        $userRequest->status = 'attended';
-        $userRequest->update();
+        $userRequest = UserRequest::with('user')->findOrFail($id);
+
         return view('admin.requests.show', compact('userRequest', 'breadcrumb'));
+    }
+
+    /**
+     * Mark the specified resource as attended.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function attend($id)
+    {
+        $userRequest = UserRequest::findOrFail($id);
+        $userRequest->attended_by = Auth::id();
+        $userRequest->status = 'attended';
+        $userRequest->save();
+
+        return Redirect::back()->with('success', 'Request marked as attended.');
     }
 
     /**

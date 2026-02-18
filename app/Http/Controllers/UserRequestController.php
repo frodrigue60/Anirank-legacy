@@ -28,25 +28,22 @@ class UserRequestController extends Controller
      */
     public function store(Request $request)
     {
-        $userRequest = new UserRequest();
-        $userRequest->content = $request->content;
-        $userRequest->user_id = Auth::user()->id;
-
-        $validator = Validator::make($request->all(), [
-            'content' => 'required|string|max:255',
+        $request->validate([
+            'title'   => 'required|string|max:255',
+            'content' => 'required|string|max:500',
         ]);
 
-        if ($validator->fails()) {
-            $messageBag = $validator->getMessageBag();
-            return redirect(route('requests.create'))
-                ->back()
-                ->with('error', $messageBag);
+        $saved = UserRequest::create([
+            'title'   => $request->title,
+            'content' => $request->content,
+            'user_id' => auth()->id(),
+            'status'  => 'pending',
+        ]);
+
+        if ($saved) {
+            return redirect()->route('home')->with('success', 'Thanks for your request!');
         }
 
-        if ($userRequest->save()) {
-            return redirect(route('home'))->with('success', 'Thank for your request');
-        } else {
-            return redirect(route('home'))->with('error', 'Something has been wrong');
-        }
+        return redirect()->back()->with('error', 'Something went wrong. Please try again.');
     }
 }

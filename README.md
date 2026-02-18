@@ -15,6 +15,8 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🔐 Dynamic Role Management**: A robust many-to-many role system (`User <-> Role`) with unified middleware for scalable permissions.
 - **📊 Advanced Analytics**: Time-series view tracking for trending content and a premium admin dashboard with interactive charts.
 - **🛠️ Standardized Admin Panel**: Robust CRUD control with unified search patterns and RESTful state management.
+- **🔔 Unified Notification System**: Real-time feedback via a custom subtle toast notification system, replacing intrusive popups.
+- **📝 Streamlined Request Workflow**: Simplified user request system with automatic categorization and manual staff-controlled status tracking.
 
 ## Tech Stack
 

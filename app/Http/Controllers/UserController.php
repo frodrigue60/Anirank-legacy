@@ -18,18 +18,7 @@ use App\Models\Year;
 
 class UserController extends Controller
 {
-    public function index()
-    {
-        $score_formats = [
-            ['name' => ' 100 Point (55/100)', 'value' => 'POINT_100'],
-            ['name' => '10 Point Decimal (5.5/10)', 'value' => 'POINT_10_DECIMAL'],
-            ['name' => '10 Point (5/10)', 'value' => 'POINT_10'],
-            ['name' => '5 Star (3/5)', 'value' => 'POINT_5'],
-        ];
-
-        $user = Auth::user();
-        return view('public.users.profile', compact('score_formats', 'user'));
-    }
+    public function index() {}
 
     public function create()
     {
@@ -62,6 +51,19 @@ class UserController extends Controller
     public function destroy($id)
     {
         return abort(404);
+    }
+
+    public function settings()
+    {
+        $score_formats = [
+            ['name' => ' 100 Point (55/100)', 'value' => 'POINT_100'],
+            ['name' => '10 Point Decimal (5.5/10)', 'value' => 'POINT_10_DECIMAL'],
+            ['name' => '10 Point (5/10)', 'value' => 'POINT_10'],
+            ['name' => '5 Star (3/5)', 'value' => 'POINT_5'],
+        ];
+
+        $user = Auth::user();
+        return view('public.users.settings', compact('score_formats', 'user'));
     }
 
     public function favorites()

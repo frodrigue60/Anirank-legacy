@@ -10,8 +10,21 @@ class UserRequest extends Model
 {
     use HasFactory;
 
-    public function user(){
-        
+    protected $fillable = [
+        'title',
+        'content',
+        'user_id',
+        'attended_by',
+        'status',
+    ];
+
+    public function user()
+    {
         return $this->belongsTo(User::class);
+    }
+
+    public function attendedBy()
+    {
+        return $this->belongsTo(User::class, 'attended_by');
     }
 }
