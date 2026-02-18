@@ -82,32 +82,8 @@ class GlobalBottomPlayer extends Component
     {
         if (!$this->song) return;
 
-        $user = Auth::check() ? Auth::user() : null;
-        $factor = 1;
-        $isDecimalFormat = false;
-
-        if ($user) {
-            switch ($user->score_format) {
-                case 'POINT_100':
-                    $factor = 1;
-                    break;
-                case 'POINT_10_DECIMAL':
-                    $factor = 0.1;
-                    $isDecimalFormat = true;
-                    break;
-                case 'POINT_10':
-                    $factor = 0.1;
-                    break;
-                case 'POINT_5':
-                    $factor = 0.05;
-                    $isDecimalFormat = true;
-                    break;
-            }
-        }
-
-        $this->song->formattedScore = $isDecimalFormat
-            ? round($this->song->averageRating * $factor, 1)
-            : (int) round($this->song->averageRating * $factor);
+        $format = Auth::user()?->score_format ?? 'POINT_100';
+        $this->song->formattedScore = $this->song->formattedAvgScore($format);
     }
 
     public function togglePlay()

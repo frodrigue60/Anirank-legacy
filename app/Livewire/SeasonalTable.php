@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\DB;
 class SeasonalTable extends Component
 {
     use WithPagination;
-    use Traits\HasRankingScore;
+    use Traits\HasRankingScore {
+        setScoreSongs as traitSetScoreSongs;
+    }
 
     public $readyToLoad = false;
     public $currentSection = 'ALL';
@@ -93,6 +95,31 @@ class SeasonalTable extends Component
         $this->hasMorePages = $songs->count() >= $perPage && $songs->count() < $limit;
 
         return $this->setScoreSongs($songs, Auth::user());
+    }
+
+    public function setScoreSongs($songs, $user)
+    {
+        // Use the trait's method to calculate scores
+        $this->traitSetScoreSongs($songs, $user);
+
+        foreach ($songs as $index => $song) {
+            $song->current_rank = ($this->page - 1) * $this->perPage + $index + 1;
+            $song->previous_rank = $song->getPreviousSeasonalRank();
+
+            if ($song->previous_rank) {
+                if ($song->current_rank < $song->previous_rank) {
+                    $song->trend = 'UP';
+                } elseif ($song->current_rank > $song->previous_rank) {
+                    $song->trend = 'DOWN';
+                } else {
+                    $song->trend = 'SAME';
+                }
+            } else {
+                $song->trend = 'NEW';
+            }
+        }
+
+        return $songs;
     }
 
     public function render()

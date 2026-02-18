@@ -42,37 +42,11 @@ class SongInteractions extends Component
 
     public function calculateScore()
     {
-        $user = Auth::check() ? Auth::user() : null;
         $song = $this->song;
-
         if (!$song) return;
 
-        $song->formattedScore = null;
-        $factor = 1;
-        $isDecimalFormat = false;
-
-        if ($user) {
-            switch ($user->score_format) {
-                case 'POINT_100':
-                    $factor = 1;
-                    break;
-                case 'POINT_10_DECIMAL':
-                    $factor = 0.1;
-                    $isDecimalFormat = true;
-                    break;
-                case 'POINT_10':
-                    $factor = 0.1;
-                    break;
-                case 'POINT_5':
-                    $factor = 0.05;
-                    $isDecimalFormat = true;
-                    break;
-            }
-        }
-
-        $song->formattedScore = $isDecimalFormat
-            ? round($song->averageRating * $factor, 1)
-            : (int) round($song->averageRating * $factor);
+        $format = Auth::user()?->score_format ?? 'POINT_100';
+        $song->formattedScore = $song->formattedAvgScore($format);
     }
 
     public function toggleLike()

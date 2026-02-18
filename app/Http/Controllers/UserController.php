@@ -116,45 +116,10 @@ class UserController extends Controller
     public function setScore($songs, $score_format)
     {
         $songs->each(function ($song) use ($score_format) {
-            $song->score = null;
-            $song->user_score = null;
-            switch ($score_format) {
-                case 'POINT_100':
-                    $song->score = round($song->averageRating);
-                    if ($song->rating != null) {
-                        $song->user_score = round($song->rating);
-                    }
-
-                    break;
-                case 'POINT_10_DECIMAL':
-                    $song->score = round($song->averageRating / 10, 1);
-                    if ($song->rating != null) {
-                        $song->user_score = round($song->rating / 10, 1);
-                    }
-
-                    break;
-                case 'POINT_10':
-                    $song->score = round($song->averageRating / 10);
-                    if ($song->rating != null) {
-                        $song->user_score = round($song->rating / 10);
-                    }
-
-                    break;
-                case 'POINT_5':
-                    $song->score = round($song->averageRating / 20);
-                    if ($song->rating != null) {
-                        $song->user_score = round($song->rating / 20);
-                    }
-
-                    break;
-                default:
-                    $song->score = round($song->averageRating / 10);
-                    if ($song->rating != null) {
-                        $song->user_score = round($song->rating / 10);
-                    }
-
-                    break;
-            }
+            $song->score      = $song->formattedAvgScore($score_format);
+            $song->user_score = isset($song->rating)
+                ? $song->formattedUserScore($score_format, auth()->id())
+                : null;
         });
         return $songs;
     }

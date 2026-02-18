@@ -55,11 +55,23 @@
                         <div wire:key="seasonal-rank-{{ $song->id }}"
                             class="ranking-row grid grid-cols-[60px_1fr_120px_140px] gap-4 px-8 py-5 items-center transition-colors border-b border-white/5 hover:bg-white/5 group">
                             {{-- Rank Column --}}
-                            <div class="flex flex-col items-center gap-1">
+                            <div class="flex items-center gap-1">
                                 <span
                                     class="text-2xl font-black {{ $rankNumber <= 3 ? 'text-primary' : 'text-white/90' }}">{{ $formattedRank }}</span>
-                                <div class="flex items-center text-white/20">
-                                    <span class="material-symbols-outlined text-sm">horizontal_rule</span>
+
+                                {{-- Trend Indicator --}}
+                                <div class="flex items-center justify-center">
+                                    @if ($song->trend === 'UP')
+                                        <span class="material-symbols-outlined text-green-400 text-sm"
+                                            title="Up from #{{ $song->previous_rank }}">arrow_drop_up</span>
+                                    @elseif($song->trend === 'DOWN')
+                                        <span class="material-symbols-outlined text-red-400 text-sm"
+                                            title="Down from #{{ $song->previous_rank }}">arrow_drop_down</span>
+                                    @elseif($song->trend === 'NEW')
+                                        <span class="material-symbols-outlined text-blue-400 text-sm">fiber_new</span>
+                                    @else
+                                        <span class="material-symbols-outlined text-white/20 text-sm">remove</span>
+                                    @endif
                                 </div>
                             </div>
 

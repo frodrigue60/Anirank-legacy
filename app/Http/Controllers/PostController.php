@@ -201,64 +201,31 @@ class PostController extends Controller
 
     public function setScoreSongs($songs, $user = null)
     {
-        $songs->each(function ($song) use ($user) {
+        $format = $user?->score_format ?? 'POINT_100';
 
-            #Inizialided attributes
-            $song->formattedScore = null;
-            $song->rawScore = null;
-            $song->scoreString = null;
+        $denominatorMap = [
+            'POINT_100'        => 100,
+            'POINT_10_DECIMAL' => 10,
+            'POINT_10'         => 10,
+            'POINT_5'          => 5,
+        ];
+        $denominator = $denominatorMap[$format] ?? 100;
 
-            $factor = 1;
-            $isDecimalFormat = false;
-            $denominator = 100; // Por defecto para POINT_100
+        $songs->each(function ($song) use ($user, $format, $denominator) {
+            $song->rawScore        = round($song->averageRating, 1);
+            $song->formattedScore  = $song->formattedAvgScore($format);
+            $song->scoreString     = $this->formatScoreString($song->formattedScore, $format, $denominator);
+
+            $song->formattedUserScore = null;
+            $song->rawUserScore       = null;
 
             if ($user) {
-                #Inizialided attributes
-                $song->formattedUserScore = null;
-                $song->rawUserScore = null;
-
-                switch ($user->score_format) {
-                    case 'POINT_100':
-                        $factor = 1;
-                        $denominator = 100;
-                        break;
-                    case 'POINT_10_DECIMAL':
-                        $factor = 0.1;
-                        $denominator = 10;
-                        $isDecimalFormat = true;
-                        break;
-                    case 'POINT_10':
-                        $factor = 1 / 10;
-                        $denominator = 10;
-                        break;
-                    case 'POINT_5':
-                        $factor = 1 / 20;
-                        $denominator = 5;
-                        $isDecimalFormat = true;
-                        break;
-                }
-
-                if ($userRating = $this->getUserRating($song->id, $user->id)) {
-                    $song->formattedUserScore = $isDecimalFormat
-                        ? round($userRating->rating * $factor, 1)
-                        : (int) round($userRating->rating * $factor);
-
-                    $song->rawUserScore = round($userRating->rating);
+                $userRating = $this->getUserRating($song->id, $user->id);
+                if ($userRating) {
+                    $song->userFormattedScore = $song->formattedUserScore($format, $user->id);
+                    $song->rawUserScore       = round($userRating->rating);
                 }
             }
-
-            $song->rawScore = round($song->averageRating, 1);
-
-            $song->formattedScore = $isDecimalFormat
-                ? round($song->averageRating * $factor, 1)
-                : (int) round($song->averageRating * $factor);
-
-            // Agregar la propiedad scoreString formateada
-            $song->scoreString = $this->formatScoreString(
-                $song->formattedScore,
-                $user->score_format ?? 'POINT_100',
-                $denominator
-            );
         });
 
         return $songs;

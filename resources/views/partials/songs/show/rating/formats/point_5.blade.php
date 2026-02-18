@@ -1,4 +1,4 @@
-<div class="w-full flex flex-col items-center" x-data="{ score: @entangle('ratingValue').defer }">
+<div class="w-full flex flex-col items-center">
     <style>
         .star-gradient-fill {
             background: linear-gradient(135deg, #7f13ec, #a855f7);
@@ -9,7 +9,8 @@
     </style>
 
     <div class="my-6 relative">
-        <div class="text-[84px] font-bold leading-none tracking-tighter text-white drop-shadow-[0_0_20px_rgba(127,19,236,0.3)] text-center" x-text="(score / 20).toFixed(1)">
+        <div class="text-[84px] font-bold leading-none tracking-tighter text-white drop-shadow-[0_0_20px_rgba(127,19,236,0.3)] text-center"
+            x-text="(score / 20).toFixed(1)">
             {{ number_format($ratingValue / 20, 1) }}
         </div>
         <p class="text-sm text-white/40 font-medium uppercase tracking-widest mt-2">Personal Score</p>
@@ -20,7 +21,7 @@
             <button @click="score = {{ $i * 20 }}" class="group p-1 relative">
                 {{-- Empty Star --}}
                 <span class="material-symbols-outlined text-[48px] text-white/10"
-                    :class="Math.round(score/20) >= {{ $i }} ? 'star-gradient-fill filled' : ''">
+                    :class="Math.round(score / 20) >= {{ $i }} ? 'star-gradient-fill filled' : ''">
                     star
                 </span>
             </button>

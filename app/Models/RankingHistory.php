@@ -12,6 +12,7 @@ class RankingHistory extends Model
     protected $fillable = [
         'song_id',
         'rank',
+        'seasonal_rank',
         'score',
         'date',
     ];

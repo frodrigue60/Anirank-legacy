@@ -1,4 +1,4 @@
-<div class="max-w-[1440px] mx-auto px-4 md:px-8 py-8" x-data="{ playlistModalOpen: @entangle('showPlaylistModal'), ratingModalOpen: @entangle('showRatingModal') }">
+<div class="max-w-[1440px] mx-auto px-4 md:px-8 py-8" x-data="{ playlistModalOpen: @entangle('showPlaylistModal'), ratingModalOpen: @entangle('showRatingModal'), score: @entangle('ratingValue') }">
     <div class="space-y-8">
 
         {{-- Video Player Section --}}
@@ -364,7 +364,7 @@
                             class="bg-white/5 hover:bg-white/10 text-white/70 hover:text-white py-3.5 rounded-2xl font-bold text-sm transition-all border border-white/5">
                             Cancel
                         </button>
-                        <button wire:click="rate"
+                        <button @click="$wire.rate(score)"
                             class="bg-primary hover:bg-primary/80 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-[0.98]">
                             Submit Rating
                             <span class="material-symbols-outlined text-[18px]">check</span>

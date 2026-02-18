@@ -304,4 +304,61 @@ class Song extends Model
             ->orderBy('date', 'desc')
             ->value('rank');
     }
+
+    public function getPreviousSeasonalRank()
+    {
+        return $this->rankingHistory()
+            ->where('date', '<', now()->toDateString())
+            ->orderBy('date', 'desc')
+            ->value('seasonal_rank');
+    }
+
+    // -------------------------------------------------------------------------
+    // Score Formatting Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Converts a raw score (0–100) to the given display format.
+     */
+    private function convertScore(float|null $raw, string $format): int|float|null
+    {
+        if ($raw === null) return null;
+
+        return match ($format) {
+            'POINT_100'        => (int) round($raw),
+            'POINT_10'         => (int) round($raw / 10),
+            'POINT_10_DECIMAL' => round($raw / 10, 1),
+            'POINT_5'          => round($raw / 20, 1),
+            default            => (int) round($raw),
+        };
+    }
+
+    /**
+     * Returns the global average score formatted for the given score format.
+     * Respects withAvg('ratings', 'rating') eager loading via the Rateable accessor.
+     *
+     * Usage: $song->formattedAvgScore($user->score_format)
+     */
+    public function formattedAvgScore(string $format = 'POINT_100'): int|float|null
+    {
+        return $this->convertScore($this->averageRating, $format);
+    }
+
+    /**
+     * Returns the personal score of the given user (defaults to auth user)
+     * formatted for the given score format.
+     *
+     * Usage: $song->formattedUserScore($user->score_format)
+     *        $song->formattedUserScore($user->score_format, $user->id)
+     */
+    public function formattedUserScore(string $format = 'POINT_100', ?int $userId = null): int|float|null
+    {
+        $userId ??= auth()->id();
+        if (!$userId) return null;
+
+        // Uses the ratings() relationship from the Rateable trait (polymorphic).
+        $raw = $this->ratings()->where('user_id', $userId)->value('rating');
+
+        return $this->convertScore($raw, $format);
+    }
 }

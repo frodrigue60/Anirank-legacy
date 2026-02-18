@@ -114,6 +114,10 @@ Represents a **theme song** (Opening or Ending) associated with a Post.
 - `getUrl()` → Generates the public URL.
 - `incrementViews()` → Session-aware view counter.
 - `liked()`, `disliked()`, `isFavorited()` → Check user interaction state.
+- `getPreviousRank()`, `getPreviousSeasonalRank()` → Trend calculation helpers.
+- `formattedAvgScore($format)` → Returns average rating formatted per preference.
+- `formattedUserScore($format, $userId)` → Returns user's rating formatted per preference.
+- `toggleFavorite()`.
 
 ---
 
@@ -244,17 +248,21 @@ Time-series snapshot of content performance.
 ### `RankingHistory`
 
 Stores daily ranking snapshots for performance tracking and trend calculation.
+Tracks daily ranking positions for both global and seasonal rankings.
 
-| Field     | Type    | Description                        |
-| --------- | ------- | ---------------------------------- |
-| `song_id` | integer | Foreign key for the song.          |
-| `rank`    | integer | Calculated rank position (1-N).    |
-| `score`   | decimal | The score at the time of tracking. |
-| `date`    | date    | The specific day of the tracking.  |
+| Field           | Type    | Description                        |
+| --------------- | ------- | ---------------------------------- |
+| `song_id`       | integer | Foreign key for the song.          |
+| `rank`          | integer | Calculated rank position (1-N).    |
+| `seasonal_rank` | integer | Calculated seasonal rank position. |
+| `score`         | decimal | The score at the time of tracking. |
+| `date`          | date    | The specific day of the tracking.  |
 
 **Relationships:**
 
-- `belongsTo` → `Song`
+- `RankingHistory`: Created with `fillable` attributes and `song()` relationship. Now includes `seasonal_rank`.
+- `Song`: Added `rankingHistory()` relationship and `getPreviousRank()`, `getPreviousSeasonalRank()` helper methods.
+- **TrackDailyRanking** command: Calculates both global and intra-seasonal rankings daily based on average ratings.
 
 ---
 
@@ -576,7 +584,6 @@ All admin controllers are located in `app/Http/Controllers/Admin/` and are prote
 | `songs($post_id)`      | `GET admin/posts/{id}/songs`     | View songs belonging to this anime.            |
 | `addSong($post_id)`    | `GET admin/posts/{id}/songs/add` | Form to add a new song to this anime.          |
 | `dashboard()`          | `GET admin/dashboard`            | Admin dashboard with statistics.               |
-| `trackRanking()`       | `POST admin/posts/track-ranking` | Manual trigger for daily ranking snapshots.    |
 
 **AniList Integration Methods:**
 
@@ -814,6 +821,17 @@ Manages system roles and permissions.
 | `CommentControl`  | View and moderate comments.                           |
 | `FormatControl`   | CRUD for anime formats (TV, Movie, OVA, etc.).        |
 | `ExternalLinkCon` | CRUD for external links (MAL, AniList, YouTube URLs). |
+
+---
+
+## Console Commands
+
+### `TrackDailyRanking`
+
+Calculates and stores daily rankings for all active songs.
+
+- **Logic**: Calculates global ranks for all songs and seasonal ranks for each unique (season, year) pair.
+- **Frequency**: Intended to run daily via cron.
 
 ---
 

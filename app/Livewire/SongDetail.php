@@ -57,47 +57,19 @@ class SongDetail extends Component
 
     private function calculateScore()
     {
-        $user = Auth::check() ? Auth::user() : null;
         $song = $this->song;
+        $format = Auth::user()?->score_format ?? 'POINT_100';
 
-        $song->formattedScore = null;
-        $song->rawScore = null;
-        $song->scoreString = null;
+        $denominatorMap = [
+            'POINT_100'        => 100,
+            'POINT_10_DECIMAL' => 10,
+            'POINT_10'         => 10,
+            'POINT_5'          => 5,
+        ];
 
-        $factor = 1;
-        $isDecimalFormat = false;
-        $denominator = 100;
-
-        if ($user) {
-            switch ($user->score_format) {
-                case 'POINT_100':
-                    $factor = 1;
-                    $denominator = 100;
-                    break;
-                case 'POINT_10_DECIMAL':
-                    $factor = 0.1;
-                    $denominator = 10;
-                    $isDecimalFormat = true;
-                    break;
-                case 'POINT_10':
-                    $factor = 0.1;
-                    $denominator = 10;
-                    break;
-                case 'POINT_5':
-                    $factor = 0.05;
-                    $denominator = 5;
-                    $isDecimalFormat = true;
-                    break;
-            }
-        }
-
-        $song->rawScore = round($song->averageRating, 1);
-
-        $song->formattedScore = $isDecimalFormat
-            ? round($song->averageRating * $factor, 1)
-            : (int) round($song->averageRating * $factor);
-
-        $song->scoreString = $song->formattedScore . '/' . $denominator;
+        $song->rawScore      = round($song->averageRating, 1);
+        $song->formattedScore = $song->formattedAvgScore($format);
+        $song->scoreString   = $song->formattedScore . '/' . ($denominatorMap[$format] ?? 100);
     }
 
     public function loadVariant()

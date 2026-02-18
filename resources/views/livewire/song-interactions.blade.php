@@ -33,7 +33,7 @@
     @endif
 
     {{-- Rating Modal (Rendered only once per component instance) --}}
-    <div x-data="{ open: @entangle('showRatingModal') }" x-show="open" style="display: none;"
+    <div x-data="{ open: @entangle('showRatingModal'), score: @entangle('ratingValue') }" x-show="open" style="display: none;"
         class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
         @keydown.escape.window="open = false" x-transition.opacity>
         <div class="bg-[#1e1e2e] w-full max-w-sm rounded-3xl border border-white/10 shadow-2xl overflow-hidden"
@@ -82,7 +82,7 @@
                             class="bg-white/5 hover:bg-white/10 text-white/70 hover:text-white py-3.5 rounded-2xl font-bold text-sm transition-all border border-white/5">
                             Cancel
                         </button>
-                        <button wire:click="rate"
+                        <button @click="$wire.rate(score)"
                             class="bg-primary hover:bg-primary/80 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-[0.98]">
                             Submit Rating
                             <span class="material-symbols-outlined text-[18px]">check</span>
