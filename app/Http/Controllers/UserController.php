@@ -27,12 +27,8 @@ class UserController extends Controller
             ['name' => '5 Star (3/5)', 'value' => 'POINT_5'],
         ];
 
-        if (Auth::check()) {
-            $user = Auth::user();
-            return view('public.users.profile', compact('score_formats', 'user'));
-        } else {
-            return redirect()->route('/')->with('warning', 'Please login');
-        }
+        $user = Auth::user();
+        return view('public.users.profile', compact('score_formats', 'user'));
     }
 
     public function create()
@@ -70,11 +66,8 @@ class UserController extends Controller
 
     public function favorites()
     {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
-        return redirect()->route('users.show', Auth::id());
+        $user = Auth::user();
+        return view('public.users.show', compact('user'));
     }
 
     public function paginate($songs, $perPage = 18, $page = null, $options = [])
@@ -174,7 +167,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return redirect(route('profile'))->with('error', 'Invalid file format or size.');
+                return redirect(route('users.profile'))->with('error', 'Invalid file format or size.');
             }
 
             $user = Auth::user();
@@ -193,11 +186,11 @@ class UserController extends Controller
                     Storage::disk('public')->delete($old_image);
                 }
 
-                return redirect(route('profile'))->with('success', 'Profile picture updated successfully!');
+                return redirect(route('users.profile'))->with('success', 'Profile picture updated successfully!');
             }
         }
 
-        return redirect(route('profile'))->with('warning', 'File not found');
+        return redirect(route('users.profile'))->with('warning', 'File not found');
     }
     public function uploadBannerPic(Request $request)
     {
@@ -207,7 +200,7 @@ class UserController extends Controller
             ]);
 
             if ($validator->fails()) {
-                return redirect(route('profile'))->with('error', 'Invalid file format or size.');
+                return redirect(route('users.profile'))->with('error', 'Invalid file format or size.');
             }
 
             $user = Auth::user();
@@ -226,10 +219,10 @@ class UserController extends Controller
                     Storage::disk('public')->delete($old_banner);
                 }
 
-                return redirect(route('profile'))->with('success', 'Banner updated successfully!');
+                return redirect(route('users.profile'))->with('success', 'Banner updated successfully!');
             }
         }
-        return redirect(route('profile'))->with('warning', 'File not found');
+        return redirect(route('users.profile'))->with('warning', 'File not found');
     }
     public function changeScoreFormat(Request $request)
     {

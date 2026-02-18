@@ -1,13 +1,13 @@
 @extends('layouts.app')
 @section('meta')
-    @if (Request::is('home'))
-        <title>Profile {{ Auth::user()->name }} | {{ config('app.name') }}</title>
+    @if (Request::routeIs('users.profile'))
+        <title>Profile {{ $user->name }} | {{ config('app.name') }}</title>
         <meta title="Profile">
     @endif
 @endsection
 
 @section('content')
-    @if (Request::routeIs('profile'))
+    @if (Request::routeIs('users.profile'))
         @include('partials.user.banner')
     @endif
 
@@ -32,7 +32,7 @@
 
 @section('script')
     <script>
-        document.addEventListener('livewire:load', function () {
+        document.addEventListener('livewire:load', function() {
             // Listen for avatar updates
             Livewire.on('avatarUpdated', avatarUrl => {
                 const avatarImg = document.getElementById('avatar-image');

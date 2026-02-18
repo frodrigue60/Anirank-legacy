@@ -291,4 +291,17 @@ class Song extends Model
     {
         return $this->hasMany(Report::class);
     }
+
+    public function rankingHistory()
+    {
+        return $this->hasMany(RankingHistory::class);
+    }
+
+    public function getPreviousRank()
+    {
+        return $this->rankingHistory()
+            ->where('date', '<', now()->toDateString())
+            ->orderBy('date', 'desc')
+            ->value('rank');
+    }
 }

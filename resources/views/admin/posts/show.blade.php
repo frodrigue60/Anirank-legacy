@@ -15,13 +15,19 @@
                 <a href="{{ route('admin.posts.edit', $post->id) }}"
                     class="inline-flex items-center px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-zinc-800 hover:border-zinc-700 shadow-xl">
                     <span class="material-symbols-outlined mr-2">edit</span>
-                    EDIT ENTRY
+                    EDIT
                 </a>
 
                 <a href="{{ route('admin.songs.index', ['post_id' => $post->id]) }}"
                     class="inline-flex items-center px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">
                     <span class="material-symbols-outlined mr-2">music_note</span>
-                    MANAGE SONGS
+                    SONGS
+                </a>
+
+                <a href="{{ route('admin.posts.force.update', $post->id) }}"
+                    class="inline-flex items-center px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-red-600/20 hover:scale-105 active:scale-95">
+                    <span class="material-symbols-outlined mr-2">sync</span>
+                    UPDATE
                 </a>
             </div>
         </div>
@@ -31,10 +37,10 @@
             {{-- Visual Sidebar --}}
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
-                    <div class="aspect-[3/4] relative">
+                    <div class="aspect-3/4 relative">
                         <img src="{{ Storage::url($post->thumbnail) }}" alt="{{ $post->title }}"
                             class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent"></div>
+                        <div class="absolute inset-0 bg-linear-to-t from-zinc-950 via-transparent to-transparent"></div>
                         <div class="absolute bottom-4 left-4 right-4">
                             <span
                                 class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-blue-600 text-white shadow-lg">
@@ -76,7 +82,7 @@
                         <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 px-4 flex items-center">
                             <span class="material-symbols-outlined mr-2 text-blue-500">landscape</span> BANNER ASSET
                         </h3>
-                        <div class="rounded-2xl overflow-hidden aspect-[21/9] border border-zinc-800">
+                        <div class="rounded-2xl overflow-hidden aspect-21/9 border border-zinc-800">
                             <img src="{{ Storage::url($post->banner) }}" alt="" class="w-full h-full object-cover">
                         </div>
                     </div>

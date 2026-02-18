@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Collection;
 
 class RankingTable extends Component
 {
-    use Traits\HasRankingScore;
+    use Traits\HasRankingScore {
+        setScoreSongs as traitSetScoreSongs;
+    }
 
     public $currentSection = 'ALL';
     public $perPage = 15;
@@ -80,6 +82,31 @@ class RankingTable extends Component
         $this->hasMorePages = $songs->count() >= $perPage && $songs->count() < $limit;
 
         return $this->setScoreSongs($songs, Auth::user());
+    }
+
+    public function setScoreSongs($songs, $user)
+    {
+        // Call the trait's method to calculate scores
+        $this->traitSetScoreSongs($songs, $user);
+
+        foreach ($songs as $index => $song) {
+            $song->current_rank = ($this->page - 1) * $this->perPage + $index + 1;
+            $song->previous_rank = $song->getPreviousRank();
+
+            if ($song->previous_rank) {
+                if ($song->current_rank < $song->previous_rank) {
+                    $song->trend = 'UP';
+                } elseif ($song->current_rank > $song->previous_rank) {
+                    $song->trend = 'DOWN';
+                } else {
+                    $song->trend = 'SAME';
+                }
+            } else {
+                $song->trend = 'NEW';
+            }
+        }
+
+        return $songs;
     }
 
     public function render()

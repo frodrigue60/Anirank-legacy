@@ -25,6 +25,7 @@ use GuzzleHttp\Client;
 use App\Services\Breadcrumb;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 class PostController extends Controller
 {
@@ -455,9 +456,9 @@ class PostController extends Controller
 
             $this->updatePostFromAnilistData($post, $json->data->Media);
 
-            return redirect(route('post.show', $post->slug))->with('success', 'Post updated');
+            return redirect(route('admin.posts.show', $post->id))->with('success', 'Post updated');
         } catch (\Throwable $th) {
-            return redirect(route('post.show', $post->slug))->with('error', $th->getMessage());
+            return redirect(route('admin.posts.show', $post->id))->with('error', $th->getMessage());
         }
     }
     public function wipePosts()
@@ -845,6 +846,16 @@ class PostController extends Controller
                     return 'FALL';
                 }
             }
+        }
+    }
+
+    public function trackRanking()
+    {
+        try {
+            Artisan::call('app:track-ranking');
+            return redirect()->back()->with('success', 'Ranking tracking executed successfully.');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Error executing ranking tracking: ' . $th->getMessage());
         }
     }
 }

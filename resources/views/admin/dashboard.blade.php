@@ -12,13 +12,25 @@
                     Platform Analytics & Performance
                 </p>
             </div>
-            <div class="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-2xl">
-                <span class="relative flex h-2 w-2">
-                    <span
-                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">System Live</span>
+            <div class="flex items-center gap-4">
+                <form action="{{ route('admin.posts.track.ranking') }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                        class="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-2xl text-primary transition-all active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-sm group-hover:rotate-12 transition-transform">trending_up</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Recalculate Ranking</span>
+                    </button>
+                </form>
+
+                <div class="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-2xl">
+                    <span class="relative flex h-2 w-2">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">System Live</span>
+                </div>
             </div>
         </div>
 

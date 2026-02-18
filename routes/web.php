@@ -55,11 +55,14 @@ Route::controller(SongController::class)->group(function () {
     Route::get('/song/{post:slug}/{song:slug}', 'showAnimeSong')->name('songs.show.nested')->scopeBindings();
 });
 
-Route::get('/offline', fn() => view('offline'))->name('offline');
+Route::controller(UserController::class)->group(function () {
+    Route::get('/users/{user:slug}', 'show')->name('users.show');
+});
+
+//Route::get('/offline', fn() => view('offline'))->name('offline');
 
 // Resources
 Route::resource('posts', PostController::class);
-Route::resource('users', UserController::class);
 Route::resource('songs', SongController::class);
 Route::resource('artists', ArtistController::class);
 Route::resource('years', YearController::class);
@@ -105,6 +108,7 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
         Route::get('/{post}/force-update', 'forceUpdate')->name('force.update');
         Route::post('/sync-all', 'syncAllFromAnilist')->name('sync.all');
         Route::delete('/wipe', 'wipePosts')->name('wipe');
+        Route::post('/track-ranking', 'trackRanking')->name('track.ranking');
     });
     Route::resource('posts', AdminPostController::class);
 
@@ -142,7 +146,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile/score-format', 'changeScoreFormat')->name('profile.score-format');
         Route::post('/profile/avatar', 'uploadProfilePic')->name('profile.avatar');
         Route::post('/profile/banner', 'uploadBannerPic')->name('profile.banner');
-        Route::get('/profile/favorites', 'favorites')->name('profile.favorites');
+        Route::get('/profile', 'index')->name('users.profile');
+        Route::get('/favorites', 'favorites')->name('users.favorites');
     });
 
     // Song Variants Interactions
