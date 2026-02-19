@@ -9,19 +9,23 @@
             </div>
 
             {{-- View Mode Switcher --}}
-            <div class="flex items-center gap-1 bg-surface-darker/50 p-1 rounded-lg border border-white/5">
-                <button wire:click="setViewMode('grid_small')"
-                    class="p-2 rounded-md transition-all {{ $viewMode === 'grid_small' ? 'bg-primary/20 text-primary' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
+            <div class="flex items-center gap-1 bg-surface-darker/50 p-1 rounded-lg border border-white/5"
+                wire:loading.class="opacity-50 pointer-events-none transition-opacity">
+                <button @if ($viewMode !== 'grid_small') wire:click="setViewMode('grid_small')" @endif
+                    wire:loading.attr="disabled"
+                    class="p-2 rounded-md transition-all {{ $viewMode === 'grid_small' ? 'bg-primary/20 text-primary cursor-default' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
                     title="Small Grid">
                     <span class="material-symbols-outlined text-[20px]">grid_view</span>
                 </button>
-                <button wire:click="setViewMode('grid_large')"
-                    class="p-2 rounded-md transition-all {{ $viewMode === 'grid_large' ? 'bg-primary/20 text-primary' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
+                <button @if ($viewMode !== 'grid_large') wire:click="setViewMode('grid_large')" @endif
+                    wire:loading.attr="disabled"
+                    class="p-2 rounded-md transition-all {{ $viewMode === 'grid_large' ? 'bg-primary/20 text-primary cursor-default' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
                     title="Large Grid">
                     <span class="material-symbols-outlined text-[20px]">window</span>
                 </button>
-                <button wire:click="setViewMode('list')"
-                    class="p-2 rounded-md transition-all {{ $viewMode === 'list' ? 'bg-primary/20 text-primary' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
+                <button @if ($viewMode !== 'list') wire:click="setViewMode('list')" @endif
+                    wire:loading.attr="disabled"
+                    class="p-2 rounded-md transition-all {{ $viewMode === 'list' ? 'bg-primary/20 text-primary cursor-default' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
                     title="List View">
                     <span class="material-symbols-outlined text-[20px]">view_list</span>
                 </button>
@@ -29,8 +33,8 @@
         </div>
 
         {{-- Filters Bar --}}
-        <div
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-surface-dark/30 p-4 rounded-xl border border-white/5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 bg-surface-dark/30 p-4 rounded-xl border border-white/5"
+            wire:loading.class="opacity-50 pointer-events-none transition-opacity">
             {{-- Search --}}
             <div class="relative group">
                 <label
@@ -39,6 +43,7 @@
                     <span
                         class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors">search</span>
                     <input wire:model.live.debounce.300ms="name" type="text" placeholder="Search anime..."
+                        wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
                 </div>
             </div>
@@ -47,7 +52,7 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Year</label>
                 <div class="relative">
-                    <select wire:model.live="year_id"
+                    <select wire:model.live="year_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="">All Years</option>
                         @foreach ($years as $year)
@@ -64,7 +69,7 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Season</label>
                 <div class="relative">
-                    <select wire:model.live="season_id"
+                    <select wire:model.live="season_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="">All Seasons</option>
                         @foreach ($seasons as $season)
@@ -81,11 +86,28 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Format</label>
                 <div class="relative">
-                    <select wire:model.live="format_id"
+                    <select wire:model.live="format_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="">All Formats</option>
                         @foreach ($formats as $format)
                             <option value="{{ $format->id }}">{{ $format->name }}</option>
+                        @endforeach
+                    </select>
+                    <span
+                        class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none text-lg group-focus-within:text-primary transition-colors">expand_more</span>
+                </div>
+            </div>
+
+            {{-- Genre --}}
+            <div class="relative group">
+                <label
+                    class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Genre</label>
+                <div class="relative">
+                    <select wire:model.live="genre_id" wire:loading.attr="disabled"
+                        class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
+                        <option value="">All Genres</option>
+                        @foreach ($all_genres as $genre)
+                            <option value="{{ $genre->id }}">{{ $genre->name }}</option>
                         @endforeach
                     </select>
                     <span
@@ -109,7 +131,7 @@
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     fallback="default-anime.webp" />
 
-                                <div class="absolute top-3 right-3 flex items-end gap-1.5 z-20">
+                                {{-- <div class="absolute top-3 right-3 flex items-end gap-1.5 z-20">
                                     <span
                                         class="px-2 py-1 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
                                         {{ $post->format->name }}
@@ -118,7 +140,7 @@
                                         class="px-2 py-1 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
                                         Songs: {{ $post->songs_count }}
                                     </span>
-                                </div>
+                                </div> --}}
                                 {{-- Hover Overlay --}}
                                 <div
                                     class="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
@@ -127,7 +149,7 @@
                             </div>
                             <h3
                                 class="mt-2 text-sm font-bold text-white leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                                <a href="{{ route('posts.show', $post->id) }}">{{ $post->title }}</a>
+                                <a href="{{ route('posts.show', $post) }}">{{ $post->title }}</a>
                             </h3>
                         </div>
                     @endforeach
@@ -155,8 +177,7 @@
                                     @if ($post->studios->isNotEmpty())
                                         <div class="text-[12px] font-bold text-primary truncate">
                                             @foreach ($post->studios as $studio)
-                                                <a href="{{ route('studios.show', $studio) }}"
-                                                    class="hover:underline transition-all">{{ $studio->name }}</a>{{ !$loop->last ? ', ' : '' }}
+                                                <span>{{ $studio->name }}</span>{{ !$loop->last ? ', ' : '' }}
                                             @endforeach
                                         </div>
                                     @endif
@@ -187,6 +208,18 @@
                                     </div>
                                 </div>
 
+                                {{-- Genres --}}
+                                @if ($post->genres->isNotEmpty())
+                                    <div class="flex flex-wrap gap-1 mb-3">
+                                        @foreach ($post->genres as $genre)
+                                            <span
+                                                class="text-[10px] bg-white/5 border border-white/10 rounded px-1 font-thin uppercase tracking-widest text-white/60">
+                                                {{ $genre->name }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @endif
+
                                 {{-- Body: Description --}}
                                 <div class="text-xs text-white/60 overflow-hidden line-clamp-6 leading-relaxed mb-auto">
                                     {!! strip_tags($post->description) !!}
@@ -201,13 +234,13 @@
                         <div wire:key="anime-list-{{ $post->id }}"
                             class="flex items-center gap-4 bg-surface-dark/30 border border-white/5 p-3 rounded-lg hover:bg-white/5 transition-colors group">
                             {{-- Cover --}}
-                            <div class="w-12 h-12 rounded overflow-hidden shrink-0">
+                            <div class="w-16 h-16 rounded overflow-hidden shrink-0">
                                 <x-ui.image :src="$post->thumbnail_url" :alt="$post->title" loading="lazy"
                                     class="w-full h-full object-cover" fallback="default-anime.webp" />
                             </div>
 
                             {{-- Title & Meta --}}
-                            <div class="flex-1 min-w-0">
+                            <div class="min-w-0 flex flex-col gap-2">
                                 <h3
                                     class="text-sm font-bold text-white leading-tight truncate px-1 group-hover:text-primary transition-colors">
                                     <a href="{{ route('posts.show', $post) }}">{{ $post->title }}</a>
@@ -225,7 +258,16 @@
                                         <span>{{ $post->songs_count }} Songs</span>
                                     @endif
                                 </div>
+                                <div class="flex items-center gap-1.5">
+                                    @foreach ($post->genres as $genre)
+                                        <span
+                                            class="text-[10px] bg-white/5 border border-white/10 rounded px-1 font-thin uppercase tracking-widest text-white/60">
+                                            {{ $genre->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
                             </div>
+
 
                             {{-- Action --}}
                             <div class="ml-auto">

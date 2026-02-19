@@ -9,22 +9,26 @@
                         Leaderboard</span>
                 </div>
                 <h1 class="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter text-white">
-                    Themes - <span class="text-primary uppercase">{{ $seasonName }}</span> {{ $yearName }}
+                    {{ $seasonName }} {{ $yearName }}
                 </h1>
             </div>
 
             {{-- Filter Selector --}}
-            <div class="flex items-center gap-4 bg-surface-dark/50 p-1.5 rounded-2xl border border-white/5">
-                <button wire:click="$set('currentSection', 'ALL')"
-                    class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $currentSection === 'ALL' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/40 hover:text-white/60' }}">
+            <div class="flex items-center gap-4 bg-surface-dark/50 p-1.5 rounded-2xl border border-white/5"
+                wire:loading.class="opacity-50 pointer-events-none transition-opacity">
+                <button @if ($currentSection !== 'ALL') wire:click="$set('currentSection', 'ALL')" @endif
+                    wire:loading.attr="disabled"
+                    class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $currentSection === 'ALL' ? 'bg-primary text-white shadow-lg shadow-primary/20 cursor-default' : 'text-white/40 hover:text-white/60' }}">
                     All
                 </button>
-                <button wire:click="$set('currentSection', 'OP')"
-                    class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $currentSection === 'OP' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/40 hover:text-white/60' }}">
+                <button @if ($currentSection !== 'OP') wire:click="$set('currentSection', 'OP')" @endif
+                    wire:loading.attr="disabled"
+                    class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $currentSection === 'OP' ? 'bg-primary text-white shadow-lg shadow-primary/20 cursor-default' : 'text-white/40 hover:text-white/60' }}">
                     OPs
                 </button>
-                <button wire:click="$set('currentSection', 'ED')"
-                    class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $currentSection === 'ED' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-white/40 hover:text-white/60' }}">
+                <button @if ($currentSection !== 'ED') wire:click="$set('currentSection', 'ED')" @endif
+                    wire:loading.attr="disabled"
+                    class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $currentSection === 'ED' ? 'bg-primary text-white shadow-lg shadow-primary/20 cursor-default' : 'text-white/40 hover:text-white/60' }}">
                     EDs
                 </button>
             </div>
@@ -111,6 +115,7 @@
                                             <span class="material-symbols-outlined text-base filled">play_arrow</span>
                                         </a>
                                         <button wire:click="toggleFavorite({{ $song->id }})"
+                                            wire:loading.attr="disabled"
                                             class="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-red-400 transition-all">
                                             <span
                                                 class="material-symbols-outlined text-base {{ $song->isFavorited() ? 'filled text-red-400' : '' }}">favorite</span>

@@ -1,6 +1,7 @@
 <div wire:init="loadData" x-data="{}" class="flex flex-col gap-8">
     {{-- Search Section --}}
-    <div class="bg-surface-dark/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm">
+    <div class="bg-surface-dark/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm"
+        wire:loading.class="opacity-50 pointer-events-none transition-opacity">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {{-- Search --}}
             <div class="relative group">
@@ -14,6 +15,7 @@
                         search
                     </span>
                     <input wire:model.live.debounce.500ms="search" type="text" id="search"
+                        wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20"
                         placeholder="Search producer...">
                 </div>
@@ -26,7 +28,7 @@
                     Sort By
                 </label>
                 <div class="relative">
-                    <select wire:model.live="sort" id="sort"
+                    <select wire:model.live="sort" id="sort" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="name_asc">Name (A-Z)</option>
                         <option value="name_desc">Name (Z-A)</option>

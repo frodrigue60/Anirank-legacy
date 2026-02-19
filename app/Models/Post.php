@@ -80,6 +80,11 @@ class Post extends Model
         return $this->belongsTo(Format::class);
     }
 
+    public function genres()
+    {
+        return $this->belongsToMany(Genre::class);
+    }
+
     public function externalLinks()
     {
         return $this->belongsToMany(ExternalLink::class);

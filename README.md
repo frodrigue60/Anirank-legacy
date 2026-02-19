@@ -22,6 +22,8 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🖼️ Polymorphic Image System**: Centralized media management allowing multiple image types (thumbnails, banners, avatars) for any model with absolute decouple from legacy columns.
 - **🔍 SEO Centralization**: Single-source meta tag management using Blade partials, eliminating redundancy across views.
 - **⚡ Vite Optimization**: Streamlined asset configuration to minimize production bundle size and improve build performance.
+- **🏷️ Automated Genre System**: Multi-layered categorization with direct AniList synchronization and advanced filtering capabilities across all database views.
+- **🔒 Livewire Request Guard**: Application-wide optimization pattern that blocks redundant requests and disables interactive elements during data loading for a robust UX.
 - **💬 Livewire Request Modal**: Fully interactive and reactive user request system, replacing legacy modal patterns.
 
 ## Tech Stack

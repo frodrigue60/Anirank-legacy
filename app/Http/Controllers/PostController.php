@@ -61,7 +61,7 @@ class PostController extends Controller
 
         $openings = Song::with(['post' => function ($q) {
             $q->select('id', 'title', 'slug');
-        }, 'artists:id,name'])
+        }, 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'OP')
             ->whereHas('post', function ($q) use ($status) {
@@ -73,7 +73,7 @@ class PostController extends Controller
 
         $endings = Song::with(['post' => function ($q) {
             $q->select('id', 'title', 'slug');
-        }, 'artists:id,name'])
+        }, 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'ED')
             ->whereHas('post', function ($q) use ($status) {
@@ -90,7 +90,7 @@ class PostController extends Controller
 
         $featuredSong = Song::with(['post' => function ($q) {
             $q->select('id', 'title', 'slug');
-        }, 'artists:id,name'])
+        }, 'artists:id,name,slug'])
             ->whereHas('post', function ($q) use ($status) {
                 $q->where('status', $status);
             })

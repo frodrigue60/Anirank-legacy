@@ -10,8 +10,8 @@
         </div>
 
         {{-- Filters Bar --}}
-        <div
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 bg-surface-dark/30 p-4 rounded-xl border border-white/5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 bg-surface-dark/30 p-4 rounded-xl border border-white/5"
+            wire:loading.class="opacity-50 pointer-events-none transition-opacity">
             {{-- Search --}}
             <div class="relative group lg:col-span-1">
                 <label
@@ -20,6 +20,7 @@
                     <span
                         class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors">search</span>
                     <input wire:model.live.debounce.300ms="name" type="text" placeholder="Search themes..."
+                        wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white! focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
                 </div>
             </div>
@@ -29,7 +30,7 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Type</label>
                 <div class="relative">
-                    <select wire:model.live="type"
+                    <select wire:model.live="type" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="">All Types</option>
                         @foreach ($types as $typeOption)
@@ -46,7 +47,7 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Year</label>
                 <div class="relative">
-                    <select wire:model.live="year_id"
+                    <select wire:model.live="year_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="">All Years</option>
                         @foreach ($years as $year)
@@ -63,7 +64,7 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Season</label>
                 <div class="relative">
-                    <select wire:model.live="season_id"
+                    <select wire:model.live="season_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="">All Seasons</option>
                         @foreach ($seasons as $season)
@@ -80,7 +81,7 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Sort</label>
                 <div class="relative">
-                    <select wire:model.live="sort"
+                    <select wire:model.live="sort" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         @foreach ($sortMethods as $sortOption)
                             <option value="{{ $sortOption['value'] }}">{{ $sortOption['name'] }}</option>

@@ -14,17 +14,17 @@
                 class="w-full h-full object-cover saturate-[0.8] brightness-[0.6]">
 
             {{-- Scrims & Gradients --}}
-            <div class="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-transparent opacity-90">
+            <div class="absolute inset-0 bg-linear-to-t from-background via-background/90 to-transparent opacity-90">
             </div>
-            <div class="absolute inset-0 bg-gradient-to-b from-background/80 via-transparent to-transparent h-1/3"></div>
+            <div class="absolute inset-0 bg-linear-to-b from-background/80 via-transparent to-transparent h-1/3"></div>
             {{-- Top scrim for Navbar --}}
-            <div class="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background/40"></div>
+            <div class="absolute inset-0 bg-linear-to-r from-background via-transparent to-background/40"></div>
         </div>
 
         <div class="relative max-w-[1440px] mx-auto h-full flex flex-col justify-end px-4 md:px-8 pb-12">
             <div class="flex flex-col md:flex-row items-end gap-8 md:gap-12">
                 {{-- Cover Image in Sidebar position --}}
-                <div class="hidden md:block w-56 h-auto aspect-[2/3] -mb-24 z-20 shrink-0 relative group/poster">
+                <div class="hidden md:block w-56 h-auto aspect-2/3 -mb-24 z-20 shrink-0 relative group/poster">
                     <div
                         class="absolute -inset-1 bg-primary/20 rounded-[22px] blur-xl opacity-0 group-hover/poster:opacity-100 transition-opacity duration-500">
                     </div>
@@ -47,9 +47,21 @@
                             {{ $post->season->name ?? '' }} {{ $post->year->name ?? '' }}
                         </div>
                     </div>
+
+                    {{-- Genres --}}
+                    @if ($post->genres->isNotEmpty())
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            @foreach ($post->genres as $genre)
+                                <span
+                                    class="px-3 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-primary hover:border-primary/30 transition-all cursor-default">
+                                    {{ $genre->name }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
                     <h1
                         class="text-4xl md:text-7xl font-black text-white leading-[1.1] md:leading-[1.05] tracking-tight mb-4 drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
-                        <span class="bg-gradient-to-b from-white to-white/70 bg-clip-text text-transparent">
+                        <span class="bg-linear-to-b from-white to-white/70 bg-clip-text text-transparent">
                             {{ $post->title }}
                         </span>
                     </h1>
@@ -98,7 +110,7 @@
                     {{-- Mobile Thumbnail Only --}}
                     <div class="md:hidden w-full flex justify-center mb-6">
                         <img src="{{ $thumbnail_url }}" alt="{{ $post->title }}"
-                            class="w-48 aspect-[2/3] object-cover rounded-2xl shadow-2xl border border-white/10">
+                            class="w-48 aspect-2/3 object-cover rounded-2xl shadow-2xl border border-white/10">
                     </div>
 
                     {{-- Metadata Cards --}}
@@ -189,7 +201,7 @@
                         </h2>
                         <div class="relative group">
                             <div
-                                class="absolute -inset-4 bg-primary/5 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                class="absolute -inset-4 bg-primary/5 rounded-4xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                             </div>
                             <div
                                 class="relative prose prose-invert prose-p:text-white/60 prose-p:leading-relaxed prose-p:text-lg max-w-none">

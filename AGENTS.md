@@ -68,6 +68,15 @@ To maintain a lean production bundle, `vite.config.mjs` only registers high-leve
 - **Entry Points**: `app.js`, `app.css`, `ajaxSearch.js`, `app.scss`.
 - **Module Resolution**: All other JS files (filters, modules, API config) must be imported within `app.js` or called specifically ONLY if they are standalone entry points. Avoid "orphan" entry points in the Vite config.
 
+### Livewire Search Optimizations
+
+The application implements a request-reduction pattern across all searchable tables.
+
+- **Background Locking**: Filter containers use `wire:loading.class="opacity-50 pointer-events-none"` to prevent interaction during active requests.
+- **Input Disabling**: All search inputs and select dropdowns use `wire:loading.attr="disabled"` to prevent multiple simultaneous requests.
+- **Conditional Handlers**: Action buttons (filters, view switchers) use conditional `wire:click` checks (e.g., `wire:click="$activeFilter !== 'all' ? setFilter('all') : null"`) to block redundant requests when clicking an already active state.
+- **Visual Feedback**: Buttons and inputs reflect their active state and disability status during transitions.
+
 ---
 
 ## Model Reference
@@ -97,9 +106,24 @@ Represents an **anime series**.
 
 - `hasMany` → `Song`, `Report`
 - `belongsTo` → `Year`, `Season`, `Format`
-- `belongsToMany` → `Studio`, `Producer`, `ExternalLink`
+- `belongsToMany` → `Studio`, `Producer`, `ExternalLink`, `Genre`
 - `morphMany` → `Image` (alias via `images()`)
 - Custom: `openings()`, `endings()`, `rankingHistory()`
+
+---
+
+### `Genre`
+
+Represents an **anime genre** (e.g., Action, Romance, Sci-Fi).
+
+| Field  | Type   | Description                     |
+| ------ | ------ | ------------------------------- |
+| `name` | string | The name of the genre.          |
+| `slug` | string | URL-friendly unique identifier. |
+
+**Relationships:**
+
+- `belongsToMany` → `Post`
 
 ---
 

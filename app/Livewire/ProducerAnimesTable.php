@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 
 class ProducerAnimesTable extends Component
 {
+    use WithPagination;
+
     public $producerId;
     public $producer;
 
@@ -28,6 +30,9 @@ class ProducerAnimesTable extends Component
     
     #[Url(except: '')]
     public $format_id = '';
+    
+    #[Url(except: '')]
+    public $genre_id = '';
     
     #[Url(except: 'grid_small')]
     public $viewMode = 'grid_small';
@@ -67,6 +72,11 @@ class ProducerAnimesTable extends Component
         $this->resetPage();
     }
 
+    public function updatingGenreId()
+    {
+        $this->resetPage();
+    }
+
     public function loadMore()
     {
         if ($this->readyToLoad) {
@@ -87,6 +97,7 @@ class ProducerAnimesTable extends Component
                 'years' => collect(),
                 'seasons' => collect(),
                 'formats' => collect(),
+                'all_genres' => collect(),
             ]);
         }
 
@@ -109,12 +120,18 @@ class ProducerAnimesTable extends Component
             ->when($this->format_id, function ($query) {
                 $query->where('format_id', $this->format_id);
             })
+            ->when($this->genre_id, function ($query) {
+                $query->whereHas('genres', function ($q) {
+                    $q->where('genres.id', $this->genre_id);
+                });
+            })
             ->with([
                 'format:id,name',
                 'season:id,name',
                 'year:id,name',
-                'studios:id,name',
-                'producers:id,name'
+                'studios:id,name,slug',
+                'producers:id,name,slug',
+                'genres:id,name'
             ])
             ->orderBy('title', 'asc')
             ->paginate($this->perPage);
@@ -123,9 +140,10 @@ class ProducerAnimesTable extends Component
 
         return view('livewire.producer-animes-table', [
             'posts' => $posts,
-            'years' => Year::orderBy('name', 'desc')->get(['id', 'name']),
-            'seasons' => Season::all(['id', 'name']),
-            'formats' => Format::all(['id', 'name']),
+            'years' => \App\Models\Year::orderBy('name', 'desc')->get(['id', 'name']),
+            'seasons' => \App\Models\Season::all(['id', 'name']),
+            'formats' => \App\Models\Format::all(['id', 'name']),
+            'all_genres' => \App\Models\Genre::orderBy('name')->get(['id', 'name']),
         ]);
     }
 }

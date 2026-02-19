@@ -30,9 +30,14 @@
             </div>
 
             <div class="flex flex-col items-end gap-2 shrink-0 ml-3">
+                @php
+                    $user = auth()->user();
+                    $format = $user?->score_format ?? 'POINT_100';
+                    $score = $song->formattedAvgScore($format);
+                @endphp
                 <div class="flex items-center gap-1 text-yellow-400 text-xs font-bold">
                     <span class="material-symbols-outlined filled text-sm">star</span>
-                    {{ number_format($song->averageRating ?? 0, 1) }}
+                    {{ $score }}
                 </div>
                 <a href="{{ $song->url }}"
                     class="flex items-center justify-center h-9 w-9 rounded-full bg-white/10

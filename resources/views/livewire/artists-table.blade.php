@@ -6,7 +6,8 @@
     <div class="flex flex-col gap-10">
         {{-- Search & Filters Section --}}
         <section class="flex flex-col gap-6">
-            <div class="flex flex-wrap items-center justify-center gap-4">
+            <div class="flex flex-wrap items-center justify-center gap-4"
+                wire:loading.class="opacity-50 pointer-events-none transition-opacity">
                 {{-- Search --}}
                 <div class="relative flex-1 min-w-[300px] group">
                     <label
@@ -14,7 +15,7 @@
                     <div class="relative">
                         <span
                             class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary text-[22px] group-focus-within:scale-110 transition-transform">search</span>
-                        <input wire:model.live.debounce.300ms="name"
+                        <input wire:model.live.debounce.300ms="name" wire:loading.attr="disabled"
                             class="w-full h-11 bg-surface-darker/50 border border-white/10 rounded-xl pl-12 pr-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 placeholder:text-white/20 transition-all"
                             placeholder="Search for an artist..." type="text" />
                     </div>
@@ -25,7 +26,7 @@
                         class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Sort
                         Alphabetical</label>
                     <div class="relative">
-                        <select wire:model.live="sortBy"
+                        <select wire:model.live="sortBy" wire:loading.attr="disabled"
                             class="w-full bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2.5 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">
                             <option value="A-Z">A - Z</option>
                             <option value="Z-A">Z - A</option>

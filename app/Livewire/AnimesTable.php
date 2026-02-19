@@ -10,6 +10,7 @@ use App\Models\Post;
 use App\Models\Season;
 use App\Models\Year;
 use App\Models\Format;
+use App\Models\Genre;
 
 class AnimesTable extends Component
 {
@@ -26,6 +27,9 @@ class AnimesTable extends Component
     
     #[Url(except: '')]
     public $format_id = '';
+
+    #[Url(except: '')]
+    public $genre_id = '';
 
     #[Url(except: 'grid_small')]
     public $viewMode = 'grid_small';
@@ -65,6 +69,11 @@ class AnimesTable extends Component
         $this->resetPage();
     }
 
+    public function updatedGenreId()
+    {
+        $this->resetPage();
+    }
+
     public function setViewMode($mode)
     {
         $this->viewMode = $mode;
@@ -86,6 +95,7 @@ class AnimesTable extends Component
                 'years' => collect(),
                 'seasons' => collect(),
                 'formats' => collect(),
+                'all_genres' => collect(),
             ]);
         }
 
@@ -103,8 +113,13 @@ class AnimesTable extends Component
         if ($this->format_id) {
             $query->where('format_id', $this->format_id);
         }
+        if ($this->genre_id) {
+            $query->whereHas('genres', function ($q) {
+                $q->where('genres.id', $this->genre_id);
+            });
+        }
 
-        $results = $query->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name'])
+        $results = $query->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name'])
             ->withCount('songs')
             ->orderBy('title')
             ->take($this->perPage + 1)
@@ -116,12 +131,14 @@ class AnimesTable extends Component
         $years = Year::orderBy('name', 'desc')->get(['id', 'name']);
         $seasons = Season::all(['id', 'name']);
         $formats = Format::all(['id', 'name']);
+        $all_genres = Genre::orderBy('name')->get(['id', 'name']);
 
         return view('livewire.animes-table', [
             'posts' => $posts,
             'years' => $years,
             'seasons' => $seasons,
             'formats' => $formats,
+            'all_genres' => $all_genres,
         ]);
     }
 }

@@ -419,6 +419,19 @@ class PostController extends Controller
             $post->studios()->sync($idStudios);
             $post->producers()->sync($idProducers);
             $post->externalLinks()->sync($idLinks);
+
+            // Sync Genres
+            if (!empty($item->genres)) {
+                $genreIds = [];
+                foreach ($item->genres as $genreName) {
+                    $genre = Genre::firstOrCreate(
+                        ['slug' => \Illuminate\Support\Str::slug($genreName)],
+                        ['name' => $genreName, 'slug' => \Illuminate\Support\Str::slug($genreName)]
+                    );
+                    $genreIds[] = $genre->id;
+                }
+                $post->genres()->sync($genreIds);
+            }
         }
     }
 

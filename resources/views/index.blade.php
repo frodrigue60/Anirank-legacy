@@ -2,17 +2,17 @@
 
 @section('title', 'Ranking Anime Openings & Endings | ' . config('app.name'))
 
-@section('description', 'The site you were looking for to rate openings and endings of your favorite animes. Discover
+@section('description',
+    'The site you were looking for to rate openings and endings of your favorite animes. Discover
     which are the most popular opening and endings.')
 
 @section('content')
-    {{-- @guest
+    @guest
         <section class="relative h-screen flex items-center justify-center overflow-hidden">
             <div class="absolute inset-0 z-0">
                 <div class="absolute inset-0 bg-linear-to-t from-background-dark via-background-dark/60 to-transparent z-10">
                 </div>
-                <div
-                    class="absolute inset-0 bg-linear-to-r from-background-dark/80 via-transparent to-background-dark/80 z-10">
+                <div class="absolute inset-0 bg-linear-to-r from-background-dark/80 via-transparent to-background-dark/80 z-10">
                 </div>
                 <img class="w-full h-full object-cover scale-105" data-alt="Cinematic wide shot of anime cityscape at night"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4NKMsiVFSxKoMy0QJq1bdQInEoybDwBon5RstY0kyN604vExTI9pu8NcCmoEH1v6KITdZ4av_LtDghv2w-_XaKXQElk4leiUH9GVq1u0IyulYjmeCIqspuNtkNr8PCg2bZhyubZmFlVu3i7A2-Ug2FVNBcK4uF7HEtkwYOOHS-swOGUyTo14YgLkUPJsdetP6SpSqK0fw-RR74Zhd-zOxh-7r1ruGpFQDSftrvuYB_oXOcfl7wzCHPUY-joO8Cn9Nr-6SuEVYS6A" />
@@ -46,11 +46,16 @@
                 <span class="material-symbols-outlined text-3xl">keyboard_double_arrow_down</span>
             </div>
         </section>
-    @endguest --}}
+    @endguest
     <main class="flex-1 w-full max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 px-6 py-8">
         <div class="lg:col-span-9 flex flex-col gap-10">
             {{-- FEATURED THEME --}}
             @isset($featuredSong)
+                @php
+                    $user = auth()->user();
+                    $format = $user?->score_format ?? 'POINT_100';
+                    $score = $featuredSong->formattedAvgScore($format);
+                @endphp
                 <section class="relative w-full rounded-2xl overflow-hidden bg-surface-dark group">
                     <div class="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-overlay transition-transform duration-700 group-hover:scale-105"
                         style="background-image: url('{{ $featuredSong->post->banner_url }}');">
@@ -65,7 +70,7 @@
                                 <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/80 to-transparent p-4 pt-10">
                                     <div class="flex items-center gap-1 text-yellow-400 font-bold text-lg">
                                         <span class="material-symbols-outlined filled">star</span>
-                                        <span>{{ number_format($featuredSong->averageRating ?? 0, 1) }}</span>
+                                        <span>{{ $score }}</span>
                                     </div>
                                 </div>
                             </div>

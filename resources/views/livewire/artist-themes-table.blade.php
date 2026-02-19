@@ -1,6 +1,7 @@
 <div wire:init="loadData" x-data="{}" class="flex flex-col gap-8">
     {{-- Filter Panel --}}
-    <section class="bg-surface-dark/30 p-6 rounded-2xl border border-white/5 shadow-2xl backdrop-blur-md">
+    <section class="bg-surface-dark/30 p-6 rounded-2xl border border-white/5 shadow-2xl backdrop-blur-md"
+        wire:loading.class="opacity-50 pointer-events-none transition-opacity">
         <div class="flex flex-wrap items-center gap-4">
             {{-- Search --}}
             <div class="relative flex-1 min-w-[300px] group">
@@ -10,7 +11,7 @@
                 <div class="relative">
                     <span
                         class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary text-[22px] group-focus-within:scale-110 transition-transform">search</span>
-                    <input wire:model.live.debounce.300ms="name"
+                    <input wire:model.live.debounce.300ms="name" wire:loading.attr="disabled"
                         class="w-full h-11 bg-surface-darker/50 border border-white/10 rounded-xl pl-12 pr-4 text-sm text-white focus:outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/10 placeholder:text-white/20 transition-all"
                         placeholder="Search themes..." type="text" />
                 </div>
@@ -21,7 +22,7 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Type</label>
                 <div class="relative">
-                    <select wire:model.live="type"
+                    <select wire:model.live="type" wire:loading.attr="disabled"
                         class="w-full h-11 bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">
                         <option value="">All Types</option>
                         @foreach ($types as $t)
@@ -38,7 +39,7 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Year</label>
                 <div class="relative">
-                    <select wire:model.live="year_id"
+                    <select wire:model.live="year_id" wire:loading.attr="disabled"
                         class="w-full h-11 bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">
                         <option value="">All Years</option>
                         @foreach ($years as $y)
@@ -55,7 +56,7 @@
                 <label
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Season</label>
                 <div class="relative">
-                    <select wire:model.live="season_id"
+                    <select wire:model.live="season_id" wire:loading.attr="disabled"
                         class="w-full h-11 bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">
                         <option value="">All Seasons</option>
                         @foreach ($seasons as $s)
@@ -73,7 +74,7 @@
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Sort
                     By</label>
                 <div class="relative">
-                    <select wire:model.live="sort"
+                    <select wire:model.live="sort" wire:loading.attr="disabled"
                         class="w-full h-11 bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">
                         @foreach ($sortMethods as $m)
                             <option value="{{ $m['value'] }}">{{ $m['name'] }}</option>
