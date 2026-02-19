@@ -32,12 +32,13 @@
                         <textarea wire:model="editingBody"
                             class="w-full bg-transparent border-none rounded-xl p-3 text-sm text-white placeholder:text-white/20 min-h-[80px] resize-none focus:ring-0"
                             placeholder="Edit your comment..."></textarea>
-                        <div class="flex justify-end items-center px-2 pb-2 gap-2">
-                            <button wire:click="cancelEditing"
+                        <div class="flex justify-end items-center px-2 pb-2 gap-2"
+                            wire:loading.class="opacity-50 pointer-events-none">
+                            <button wire:click="cancelEditing" wire:loading.attr="disabled"
                                 class="text-white/40 hover:text-white px-4 py-1.5 rounded-lg font-bold text-xs transition-colors">
                                 Cancel
                             </button>
-                            <button wire:click="updateComment"
+                            <button wire:click="updateComment" wire:loading.attr="disabled"
                                 class="bg-primary hover:bg-primary/80 text-white px-5 py-1.5 rounded-lg font-bold text-xs transition-all shadow-lg shadow-primary/20">
                                 Save Changes
                             </button>
@@ -53,19 +54,19 @@
                 </p>
 
                 @auth
-                    <div class="flex items-center gap-4 pt-1">
-                        <button wire:click="setReplyTo({{ $comment->id }})"
+                    <div class="flex items-center gap-4 pt-1" wire:loading.class="opacity-50 pointer-events-none">
+                        <button wire:click="setReplyTo({{ $comment->id }})" wire:loading.attr="disabled"
                             class="text-[11px] font-bold text-white/40 hover:text-primary transition-colors flex items-center gap-1">
                             <span class="material-symbols-outlined text-[16px]">reply</span> Reply
                         </button>
 
                         @if ($comment->user_id === Auth::id() || Auth::user()->isAdmin())
-                            <button wire:click="startEditing({{ $comment->id }})"
+                            <button wire:click="startEditing({{ $comment->id }})" wire:loading.attr="disabled"
                                 class="text-[11px] font-bold text-white/20 hover:text-primary transition-colors flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[16px]">edit</span> Edit
                             </button>
 
-                            <button wire:click="deleteComment({{ $comment->id }})"
+                            <button wire:click="deleteComment({{ $comment->id }})" wire:loading.attr="disabled"
                                 onclick="return confirm('Are you sure you want to delete this comment?')"
                                 class="text-[11px] font-bold text-white/20 hover:text-red-400 transition-colors flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[16px]">delete</span> Delete
@@ -84,12 +85,13 @@
                 <textarea wire:model="replyBody"
                     class="w-full bg-transparent border-none rounded-xl p-3 text-sm text-white placeholder:text-white/20 min-h-[80px] resize-none focus:ring-0"
                     placeholder="Write your reply..."></textarea>
-                <div class="flex justify-end items-center px-2 pb-2 gap-2">
-                    <button wire:click="cancelReply"
+                <div class="flex justify-end items-center px-2 pb-2 gap-2"
+                    wire:loading.class="opacity-50 pointer-events-none">
+                    <button wire:click="cancelReply" wire:loading.attr="disabled"
                         class="text-white/40 hover:text-white px-4 py-1.5 rounded-lg font-bold text-xs transition-colors">
                         Cancel
                     </button>
-                    <button wire:click="postComment"
+                    <button wire:click="postComment" wire:loading.attr="disabled"
                         class="bg-primary hover:bg-primary/80 text-white px-5 py-1.5 rounded-lg font-bold text-xs transition-all shadow-lg shadow-primary/20">
                         Post Reply
                     </button>

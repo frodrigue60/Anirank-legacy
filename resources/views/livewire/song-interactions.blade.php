@@ -1,19 +1,19 @@
 <div>
     @if ($mode === 'bar')
-        <div class="flex items-center gap-8">
-            <button wire:click="toggleLike"
+        <div class="flex items-center gap-8" wire:loading.class="opacity-50 pointer-events-none transition-opacity">
+            <button wire:click="toggleLike" wire:loading.attr="disabled"
                 class="flex flex-col items-center gap-1.5 group transition-all {{ $song->liked() ? 'text-primary' : 'text-white/40' }}">
                 <span
                     class="material-symbols-outlined {{ $song->liked() ? 'filled' : '' }} group-hover:text-primary transition-colors">thumb_up</span>
                 <span class="text-[10px] font-bold uppercase tracking-tighter">Like</span>
             </button>
-            <button wire:click="toggleDislike"
+            <button wire:click="toggleDislike" wire:loading.attr="disabled"
                 class="flex flex-col items-center gap-1.5 group transition-all {{ $song->disliked() ? 'text-red-500' : 'text-white/40' }}">
                 <span
                     class="material-symbols-outlined {{ $song->disliked() ? 'filled' : '' }} group-hover:text-red-500 transition-colors">thumb_down</span>
                 <span class="text-[10px] font-bold uppercase tracking-tighter">Dislike</span>
             </button>
-            <button wire:click="toggleFavorite"
+            <button wire:click="toggleFavorite" wire:loading.attr="disabled"
                 class="flex flex-col items-center gap-1.5 group transition-all {{ $song->isFavorited() ? 'text-primary' : 'text-white/40' }}">
                 <span
                     class="material-symbols-outlined {{ $song->isFavorited() ? 'filled' : '' }} hover:text-primary transition-colors">favorite</span>

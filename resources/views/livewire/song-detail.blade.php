@@ -49,7 +49,9 @@
                     @if ($song->songVariants->count() > 1)
                         <div class="flex bg-white/5 rounded-lg p-0.5 backdrop-blur-md">
                             @foreach ($song->songVariants->sortBy('version_number') as $variant)
-                                <button wire:click="switchVariant({{ $variant->id }})"
+                                <button
+                                    {{ $currentVariant && $currentVariant->id !== $variant->id ? "wire:click=switchVariant({$variant->id})" : '' }}
+                                    wire:loading.attr="disabled"
                                     class="px-3 py-1 text-xs font-bold rounded-md transition-all {{ $currentVariant && $currentVariant->id === $variant->id ? 'bg-primary text-white shadow-lg' : 'text-white/60 hover:text-white hover:bg-white/10' }}">
                                     v{{ $variant->version_number }}
                                 </button>
@@ -118,7 +120,7 @@
                 </div>
                 <div class="h-8 w-px bg-white/10"></div>
                 {{-- Rating Trigger --}}
-                <button wire:click="openRatingModal" class="flex flex-col text-left group">
+                <button wire:click="openRatingModal" wire:loading.attr="disabled" class="flex flex-col text-left group">
                     <span
                         class="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Detailed
                         Score</span>
@@ -130,26 +132,26 @@
                 </button>
             </div>
             {{-- Quick Actions --}}
-            <div class="flex items-center gap-3">
-                <button wire:click="toggleLike"
+            <div class="flex items-center gap-3" wire:loading.class="opacity-50 pointer-events-none transition-opacity">
+                <button wire:click="toggleLike" wire:loading.attr="disabled"
                     class="group flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-white/10 transition-all {{ $song->liked() ? 'bg-primary/20 border-primary/50 text-primary shadow-lg shadow-primary/10' : 'bg-surface-dark hover:bg-surface-darker text-white/60 hover:text-white' }}">
                     <span
                         class="material-symbols-outlined {{ $song->liked() ? 'filled' : '' }} text-[20px]">thumb_up</span>
                 </button>
 
-                <button wire:click="toggleDislike"
+                <button wire:click="toggleDislike" wire:loading.attr="disabled"
                     class="group flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-white/10 transition-all {{ $song->disliked() ? 'bg-primary/20 border-primary/50 text-primary shadow-lg shadow-primary/10' : 'bg-surface-dark hover:bg-surface-darker text-white/60 hover:text-white' }}">
                     <span
                         class="material-symbols-outlined {{ $song->disliked() ? 'filled' : '' }} text-[20px]">thumb_down</span>
                 </button>
 
-                <button wire:click="toggleFavorite"
+                <button wire:click="toggleFavorite" wire:loading.attr="disabled"
                     class="group px-4 py-2.5 flex items-center justify-center rounded-2xl border border-white/10 transition-all {{ $song->isFavorited() ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-lg shadow-red-500/10' : 'bg-surface-dark hover:bg-surface-darker text-white/60 hover:text-red-400' }}">
                     <span
                         class="material-symbols-outlined {{ $song->isFavorited() ? 'filled' : '' }} text-[22px]">favorite</span>
                 </button>
 
-                <button wire:click="openPlaylistModal" title="Add to Playlist"
+                <button wire:click="openPlaylistModal" wire:loading.attr="disabled" title="Add to Playlist"
                     class="group w-12 h-11 flex items-center justify-center rounded-2xl border border-white/10 bg-surface-dark hover:bg-primary/20 text-white/60 hover:text-primary transition-all">
                     <span class="material-symbols-outlined text-[22px]">playlist_add</span>
                 </button>
@@ -175,13 +177,14 @@
                     </h2>
 
                     @auth
-                        <div class="bg-surface-darker rounded-3xl p-1 border border-white/5 shadow-inner">
-                            <textarea wire:model="commentBody"
+                        <div class="bg-surface-darker rounded-3xl p-1 border border-white/5 shadow-inner"
+                            wire:loading.class="opacity-50 pointer-events-none transition-opacity">
+                            <textarea wire:model="commentBody" wire:loading.attr="disabled"
                                 class="w-full bg-transparent border-none rounded-2xl p-4 text-sm text-white placeholder:text-white/20 min-h-[100px] resize-none focus:ring-0"
                                 placeholder="What do you think about this song?"></textarea>
                             <div class="flex justify-between items-center px-2 pb-2">
                                 <div class="flex gap-1"></div>
-                                <button wire:click="postComment"
+                                <button wire:click="postComment" wire:loading.attr="disabled"
                                     class="bg-primary hover:bg-primary/80 text-white px-6 py-2 rounded-xl font-bold text-sm transition-all shadow-lg shadow-primary/20">
                                     Post Comment
                                 </button>
@@ -273,9 +276,9 @@
             </div>
             <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
                 @if (count($userPlaylists) > 0)
-                    <div class="space-y-2">
+                    <div class="space-y-2" wire:loading.class="opacity-50 pointer-events-none">
                         @foreach ($userPlaylists as $playlist)
-                            <button wire:click="togglePlaylist({{ $playlist->id }})"
+                            <button wire:click="togglePlaylist({{ $playlist->id }})" wire:loading.attr="disabled"
                                 class="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-colors group text-left">
                                 <span
                                     class="font-medium text-white {{ $playlist->songs_count > 0 ? 'text-primary' : '' }}">{{ $playlist->name }}</span>
@@ -293,14 +296,14 @@
                     <p class="text-white/40 text-center text-sm py-4">No playlists found.</p>
                 @endif
 
-                <div class="pt-4 border-t border-white/5">
+                <div class="pt-4 border-t border-white/5" wire:loading.class="opacity-50 pointer-events-none">
                     <label class="text-xs font-bold text-white/40 uppercase tracking-widest mb-2 block">Create
                         New</label>
                     <div class="flex gap-2">
-                        <input wire:model="newPlaylistName" type="text"
+                        <input wire:model="newPlaylistName" type="text" wire:loading.attr="disabled"
                             class="flex-1 bg-surface-darker border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-white/20"
                             placeholder="My Awesome Playlist">
-                        <button wire:click="createPlaylist"
+                        <button wire:click="createPlaylist" wire:loading.attr="disabled"
                             class="bg-primary hover:bg-primary/90 text-white p-2 rounded-xl transition-colors">
                             <span class="material-symbols-outlined">add</span>
                         </button>
@@ -360,11 +363,11 @@
             @auth
                 <div class="bg-surface-darker p-6 border-t border-white/5">
                     <div class="grid grid-cols-2 gap-4">
-                        <button @click="ratingModalOpen = false"
+                        <button @click="ratingModalOpen = false" wire:loading.attr="disabled"
                             class="bg-white/5 hover:bg-white/10 text-white/70 hover:text-white py-3.5 rounded-2xl font-bold text-sm transition-all border border-white/5">
                             Cancel
                         </button>
-                        <button @click="$wire.rate(score)"
+                        <button @click="$wire.rate(score)" wire:loading.attr="disabled"
                             class="bg-primary hover:bg-primary/80 text-white py-3.5 rounded-2xl font-bold text-sm transition-all shadow-xl shadow-primary/30 flex items-center justify-center gap-2 active:scale-[0.98]">
                             Submit Rating
                             <span class="material-symbols-outlined text-[18px]">check</span>
