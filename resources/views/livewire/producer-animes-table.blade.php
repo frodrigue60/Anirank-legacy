@@ -107,9 +107,8 @@
                             <div
                                 class="aspect-2/3 rounded-lg overflow-hidden bg-surface-darker shadow-lg relative border border-white/5">
                                 {{-- Cover Image --}}
-                                <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" loading="lazy"
-                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
-
+                                <x-ui.image src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}"
+                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                 <div class="absolute top-3 right-3 flex items-end gap-1.5 z-20">
                                     <span
                                         class="px-2 py-1 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
@@ -144,8 +143,8 @@
                             {{-- COVER (Left) --}}
                             <div class="w-[120px] md:w-[180px] shrink-0 relative aspect-2/3">
                                 <a href="{{ route('posts.show', $post) }}" class="block w-full h-full">
-                                    <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" loading="lazy"
-                                        class="w-full h-full object-cover">
+                                    <x-ui.image src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}"
+                                        class="w-full h-full object-cover" />
                                 </a>
 
                                 {{-- Overlay: Title & Studio --}}

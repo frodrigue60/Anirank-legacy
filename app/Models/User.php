@@ -201,4 +201,14 @@ class User extends Authenticatable
         $this->last_login_at = now();
         return $this->save();
     }
+
+    /**
+     * The badges that belong to the user.
+     */
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class)
+            ->withPivot('awarded_at')
+            ->withTimestamps();
+    }
 }

@@ -45,6 +45,7 @@ The application uses a **Modern Dark Theme** with a deep purple aesthetic.
 - `.glass-panel`: Frosted glass effect (`backdrop-filter: blur(12px)`) with transparent background.
 - `.hero-glow`: Purple shadow glow (`box-shadow`) for high-impact sections.
 - `.filled`: Utility class for Material Symbols to use the "FILL" variation.
+- `x-ui.image`: Reusable Blade component for high-performance image rendering. Handles lazy-loading (`loading="lazy"`), error fallbacks (`onerror`), and uses `Storage::url()` internally to ensure CDN/Cloud storage compatibility.
 
 ---
 
@@ -360,15 +361,34 @@ Marks an entity as favorited by a user.
 
 ### Supporting Models
 
-| Model          | Purpose                                                                                    |
-| -------------- | ------------------------------------------------------------------------------------------ |
-| `Year`         | Represents a year (e.g., 2024). Has many Posts, Songs.                                     |
-| `Season`       | Represents a season (Winter, Spring, Summer, Fall).                                        |
-| `Studio`       | Animation studio (creative). Many-to-many with Post. Auto-generates `slug` on `creating`.  |
-| `Producer`     | Production company/committee. Many-to-many with Post. Auto-generates `slug` on `creating`. |
-| `Format`       | Anime format (TV, Movie, OVA). Has many Posts.                                             |
-| `ExternalLink` | External links (MAL, AniList). Many-to-many with Post.                                     |
-| `Report`       | User-submitted reports for SongVariants.                                                   |
+| Model      | Purpose                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| `Year`     | Represents a year (e.g., 2024). Has many Posts, Songs.                                     |
+| `Season`   | Represents a season (Winter, Spring, Summer, Fall).                                        |
+| `Studio`   | Animation studio (creative). Many-to-many with Post. Auto-generates `slug` on `creating`.  |
+| `Producer` | Production company/committee. Many-to-many with Post. Auto-generates `slug` on `creating`. |
+
+### `Badge`
+
+Represents a **reward or achievement** awarded to users.
+
+| Field         | Type    | Description        |
+| ------------- | ------- | ------------------ |
+| `name`        | string  | Badge name.        |
+| `description` | text    | Badge description. |
+| `is_active`   | boolean | Status flag.       |
+
+**Trait:** Uses `HasImages` for its icon.
+
+**Relationships:**
+
+- `belongsToMany` → `User` (via `badge_user` pivot).
+
+---
+
+| `Format` | Anime format (TV, Movie, OVA). Has many Posts. |
+| `ExternalLink` | External links (MAL, AniList). Many-to-many with Post. |
+| `Report` | User-submitted reports for SongVariants. |
 
 #### `user_requests`
 
@@ -1148,6 +1168,36 @@ User comments (polymorphic, with nested replies).
 
 **Commentable Types:** `SongVariant`
 
+#### `badges`
+
+Reward items that can be awarded to users.
+
+| Column        | Type              | Description                   |
+| ------------- | ----------------- | ----------------------------- |
+| `id`          | `bigint` (PK)     | Primary key                   |
+| `name`        | `string`          | Badge name                    |
+| `description` | `text` (nullable) | Badge description             |
+| `is_active`   | `boolean`         | Whether the badge is earnable |
+| `timestamps`  | `datetime`        | Created/updated at            |
+
+> **Icons** are stored in the polymorphic `images` table (type: `icon`). Use `$badge->icon_url`.
+
+---
+
+#### `badge_user`
+
+Pivot table for awarded badges.
+
+| Column       | Type          | Description            |
+| ------------ | ------------- | ---------------------- |
+| `id`         | `bigint` (PK) | Primary key            |
+| `user_id`    | `FK → users`  | Recipient of the badge |
+| `badge_id`   | `FK → badges` | Awarded badge          |
+| `awarded_at` | `timestamp`   | Date/time of award     |
+| `timestamps` | `datetime`    | Created/updated at     |
+
+---
+
 #### `playlists`
 
 User-created playlists.
@@ -1315,6 +1365,7 @@ All admin routes use the `admin.` prefix for naming.
 | `comments` | `Admin\CommentController` | Full CRUD |
 | `studios` | `Admin\StudioController` | Full CRUD |
 | `producers`| `Admin\ProducerController`| Full CRUD |
+| `badges` | `Admin\BadgeController` | Full CRUD |
 | `years` | `Admin\YearController` | Full CRUD + setCurrent (PATCH) |
 | `seasons` | `Admin\SeasonController` | Full CRUD + setCurrent (PATCH) |
 

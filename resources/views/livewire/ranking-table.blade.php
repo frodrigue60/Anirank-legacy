@@ -83,9 +83,9 @@
                                 <div class="flex items-center gap-6">
                                     <div
                                         class="w-16 h-16 rounded-lg overflow-hidden shrink-0 shadow-lg shadow-black/40 border border-white/10">
-                                        <img alt="Cover for {{ $song->post->title }}"
+                                        <x-ui.image :src="$song->post->thumbnail_url" :alt="$song->post->title"
                                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                            src="{{ $song->post->thumbnail_url }}" />
+                                            fallback="default-anime.webp" />
                                     </div>
                                     <div class="min-w-0">
                                         <a href="{{ $song->url }}"

@@ -33,7 +33,8 @@ use App\Http\Controllers\Admin\{
     CommentController as AdminCommentController,
     StudioController as AdminStudioController,
     ProducerController as AdminProducerController,
-    RoleController as AdminRoleController
+    RoleController as AdminRoleController,
+    BadgeController as AdminBadgeController
 };
 
 /*
@@ -141,6 +142,9 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
 
     // Roles
     Route::resource('roles', AdminRoleController::class);
+
+    // Badges
+    Route::resource('badges', AdminBadgeController::class);
 });
 
 /*

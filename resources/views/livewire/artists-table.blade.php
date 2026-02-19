@@ -49,9 +49,8 @@
                             <div
                                 class="relative w-full aspect-square rounded-full overflow-hidden card-shadow ring-4 ring-transparent group-hover:ring-primary/50 transition-all duration-300">
                                 @if ($artist->images()->where('type', 'thumbnail')->exists())
-                                    <img alt="{{ $artist->name }}"
-                                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        src="{{ $artist->thumbnail_url }}" loading="lazy" />
+                                    <x-ui.image src="{{ $artist->thumbnail_url }}" alt="{{ $artist->name }}"
+                                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                 @else
                                     <div
                                         class="w-full h-full bg-surface-darker flex flex-col items-center justify-center text-white/10">

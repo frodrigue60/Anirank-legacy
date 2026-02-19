@@ -62,16 +62,11 @@
             <div class="relative">
                 <button id="user-menu-button" class="relative group flex items-center">
                     @auth
-                        @php
-                            $userImage =
-                                Auth::user()->image && Storage::disk('public')->exists(Auth::user()->image)
-                                    ? Storage::url(Auth::user()->image)
-                                    : 'https://www.gravatar.com/avatar/' .
-                                        md5(strtolower(trim(Auth::user()->email))) .
-                                        '?d=mp';
-                        @endphp
-                        <div class="w-9 h-9 rounded-full bg-cover bg-center ring-2 ring-transparent group-hover:ring-primary transition-all shadow-lg"
-                            style="background-image: url('{{ $userImage }}');"></div>
+                        <div
+                            class="w-9 h-9 rounded-full bg-cover bg-center ring-2 ring-transparent group-hover:ring-primary transition-all shadow-lg">
+                            <x-ui.image :src="Auth::user()->avatar_url" :alt="Auth::user()->name" class="w-9 h-9 rounded-full"
+                                fallback="default-badge.webp" />
+                        </div>
                         <div
                             class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-background-dark">
                         </div>

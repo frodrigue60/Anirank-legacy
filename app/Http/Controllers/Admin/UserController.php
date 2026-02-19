@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Badge;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -98,6 +101,21 @@ class UserController extends Controller
                 }
             }
 
+            // Automate avatar generation for manually created users
+            try {
+                $name = urlencode($user->name);
+                $url = "https://ui-avatars.com/api/?name={$name}&color=fff&background=random&size=512";
+                $response = Http::timeout(5)->get($url);
+                if ($response->successful()) {
+                    $file_name = $user->slug . '-avatar-' . time() . '.png';
+                    $path = 'profile/' . $file_name;
+                    Storage::disk('public')->put($path, $response->body());
+                    $user->updateOrCreateImage($path, 'avatar');
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning("Admin could not fetch avatar for user {$user->id}: " . $e->getMessage());
+            }
+
             return Redirect::route('admin.users.index')->with('success', 'User Created Successfully');
         }
     }
@@ -125,9 +143,10 @@ class UserController extends Controller
             ['name' => 'Users', 'url' => route('admin.users.index')],
             ['name' => 'Edit', 'url' => route('admin.users.edit', $id)],
         ];
-        $user = User::with('roles')->findOrFail($id);
+        $user = User::with(['roles', 'badges'])->findOrFail($id);
         $roles = Role::all();
-        return view('admin.users.edit', compact('user', 'roles', 'breadcrumb'));
+        $badges = Badge::all();
+        return view('admin.users.edit', compact('user', 'roles', 'badges', 'breadcrumb'));
     }
 
     /**
@@ -160,6 +179,13 @@ class UserController extends Controller
                 if ($request->has('role_id')) {
                     $user->roles()->sync($request->role_id);
                 }
+
+                if ($request->has('badge_id')) {
+                    $user->badges()->sync($request->badge_id);
+                } else {
+                    $user->badges()->detach();
+                }
+
                 return Redirect::route('admin.users.index')->with('success', 'User Updated Successfully');
             } else {
                 return Redirect::back()->with('error', 'Something went wrong!');

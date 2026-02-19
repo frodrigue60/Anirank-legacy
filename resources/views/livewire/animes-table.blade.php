@@ -105,8 +105,9 @@
                         <div wire:key="anime-grid-{{ $post->id }}" class="group relative">
                             <div class="aspect-2/3 rounded-lg overflow-hidden bg-surface-darker shadow-lg relative">
                                 {{-- Cover Image --}}
-                                <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" loading="lazy"
-                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                <x-ui.image :src="$post->thumbnail_url" :alt="$post->title" loading="lazy"
+                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    fallback="default-anime.webp" />
 
                                 <div class="absolute top-3 right-3 flex items-end gap-1.5 z-20">
                                     <span
@@ -114,10 +115,8 @@
                                         {{ $post->format->name }}
                                     </span>
                                     <span
-                                        class="px-2 py-1 rounded bg-primary/80 backdrop-blur-md border border-primary/20 text-[10px] font-black uppercase tracking-widest text-white shadow-lg flex items-center gap-1">
-                                        <span
-                                            class="material-symbols-outlined text-[14px] leading-none">music_note</span>
-                                        {{ $post->songs_count }}
+                                        class="px-2 py-1 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
+                                        Songs: {{ $post->songs_count }}
                                     </span>
                                 </div>
                                 {{-- Hover Overlay --}}
@@ -142,8 +141,8 @@
                             {{-- COVER (Left) --}}
                             <div class="w-[120px] md:w-[180px] shrink-0 relative aspect-2/3">
                                 <a href="{{ route('posts.show', $post) }}" class="block w-full h-full">
-                                    <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" loading="lazy"
-                                        class="w-full h-full object-cover">
+                                    <x-ui.image :src="$post->thumbnail_url" :alt="$post->title" loading="lazy"
+                                        class="w-full h-full object-cover" fallback="default-anime.webp" />
                                 </a>
 
                                 {{-- Overlay: Title & Studio --}}
@@ -203,8 +202,8 @@
                             class="flex items-center gap-4 bg-surface-dark/30 border border-white/5 p-3 rounded-lg hover:bg-white/5 transition-colors group">
                             {{-- Cover --}}
                             <div class="w-12 h-12 rounded overflow-hidden shrink-0">
-                                <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" loading="lazy"
-                                    class="w-full h-full object-cover">
+                                <x-ui.image :src="$post->thumbnail_url" :alt="$post->title" loading="lazy"
+                                    class="w-full h-full object-cover" fallback="default-anime.webp" />
                             </div>
 
                             {{-- Title & Meta --}}

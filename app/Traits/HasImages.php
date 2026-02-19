@@ -20,8 +20,8 @@ trait HasImages
      */
     public function getThumbnailUrlAttribute()
     {
-        $image = $this->images()->where('type', 'thumbnail')->first();
-        return $image ? Storage::disk($image->disk)->url($image->path) : asset('img/placeholder-thumbnail.webp');
+        $image = $this->images->where('type', 'thumbnail')->first();
+        return $image ? Storage::disk($image->disk)->url($image->path) : asset('img/placeholders/default-thumbnail.webp');
     }
 
     /**
@@ -29,8 +29,8 @@ trait HasImages
      */
     public function getBannerUrlAttribute()
     {
-        $image = $this->images()->where('type', 'banner')->first();
-        return $image ? Storage::disk($image->disk)->url($image->path) : asset('img/placeholder-banner.webp');
+        $image = $this->images->where('type', 'banner')->first();
+        return $image ? Storage::disk($image->disk)->url($image->path) : asset('img/placeholders/default-banner.webp');
     }
 
     /**
@@ -38,8 +38,14 @@ trait HasImages
      */
     public function getAvatarUrlAttribute()
     {
-        $image = $this->images()->where('type', 'avatar')->first();
-        return $image ? Storage::disk($image->disk)->url($image->path) : asset('img/default-avatar.webp');
+        $image = $this->images->where('type', 'avatar')->first();
+        if ($image) {
+            return Storage::disk($image->disk)->url($image->path);
+        }
+
+        $name = isset($this->name) ? urlencode($this->name) : 'User';
+        // Random background, white text for premium contrast
+        return "https://ui-avatars.com/api/?name={$name}&color=fff&background=random";
     }
 
     /**

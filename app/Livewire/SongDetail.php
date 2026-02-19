@@ -79,7 +79,7 @@ class SongDetail extends Component
 
     public function loadComments()
     {
-        $this->comments = Comment::with(['user', 'replies' => function ($query) {
+        $this->comments = Comment::with(['user', 'user.badges', 'replies' => function ($query) {
             $query->orderBy('created_at', 'asc');
         }, 'replies.user'])
             ->where('commentable_id', $this->song->id)

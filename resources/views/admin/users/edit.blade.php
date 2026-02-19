@@ -77,6 +77,39 @@
                                 @endforeach
                             </div>
                         </div>
+
+                        {{-- User Badges --}}
+                        <div class="space-y-4 col-span-2 pt-6 border-t border-zinc-800/50">
+                            <label
+                                class="block text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center">
+                                <span class="material-symbols-outlined mr-2 text-yellow-500">workspace_premium</span> USER
+                                BADGES
+                            </label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                @php
+                                    $userBadgeIds = $user->badges->pluck('id')->toArray();
+                                @endphp
+                                @foreach ($badges as $badge)
+                                    <label
+                                        class="relative flex flex-col items-center p-4 rounded-2xl bg-zinc-950/50 border border-zinc-800 cursor-pointer group hover:border-yellow-500/50 transition-all text-center">
+                                        <input type="checkbox" name="badge_id[]" value="{{ $badge->id }}"
+                                            {{ in_array($badge->id, old('badge_id', $userBadgeIds)) ? 'checked' : '' }}
+                                            class="absolute top-3 right-3 form-checkbox h-4 w-4 text-yellow-600 rounded-md border-zinc-700 bg-zinc-900 focus:ring-offset-0 focus:ring-yellow-500">
+
+                                        <div
+                                            class="w-12 h-12 rounded-xl bg-zinc-900 border border-zinc-800 mb-3 flex items-center justify-center overflow-hidden shadow-inner group-hover:scale-110 transition-transform">
+                                            <img src="{{ $badge->icon_url }}" alt="{{ $badge->name }}"
+                                                class="w-full h-full object-cover">
+                                        </div>
+
+                                        <span
+                                            class="block text-[10px] font-black text-white group-hover:text-yellow-400 transition-colors uppercase tracking-widest leading-tight">
+                                            {{ $badge->name }}
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
 

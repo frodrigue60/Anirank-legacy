@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class RegisterController extends Controller
 {
@@ -64,10 +67,30 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+
+        try {
+            $name = urlencode($user->name);
+            $url = "https://ui-avatars.com/api/?name={$name}&color=fff&background=random&size=512";
+
+            $response = Http::timeout(5)->get($url);
+
+            if ($response->successful()) {
+                $file_name = $user->slug . '-avatar-' . time() . '.png';
+                $path = 'profile/' . $file_name;
+
+                Storage::disk('public')->put($path, $response->body());
+                $user->updateOrCreateImage($path, 'avatar');
+            }
+        } catch (\Exception $e) {
+            // Log error if needed or just silent fail to allow registration to complete
+            \Illuminate\Support\Facades\Log::warning("Could not fetch avatar for user {$user->id}: " . $e->getMessage());
+        }
+
+        return $user;
     }
 }

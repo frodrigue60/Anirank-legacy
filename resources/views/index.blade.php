@@ -87,8 +87,7 @@
                         <div class="relative shrink-0 hero-glow">
                             <div
                                 class="w-48 h-48 md:w-64 md:h-64 rounded-xl shadow-2xl overflow-hidden relative border-2 border-white/10">
-                                <img src="{{ $featuredSong->post->thumbnail_url }}" alt="Anime cover art"
-                                    class="w-full h-full object-cover">
+                                <x-ui.image :src="$featuredSong->post->thumbnail_url" :alt="$featuredSong->name" class="w-full h-full object-cover" />
                                 <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/80 to-transparent p-4 pt-10">
                                     <div class="flex items-center gap-1 text-yellow-400 font-bold text-lg">
                                         <span class="material-symbols-outlined filled">star</span>
@@ -152,8 +151,8 @@
                                 <div
                                     class="group relative bg-surface-darker p-4 rounded-xl hover:bg-surface-dark transition-colors border border-white/5 flex gap-4 items-center">
                                     <div class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
-                                        <img src="{{ $song->post->thumbnail_url }}" alt="{{ $song->name }}"
-                                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                        <x-ui.image :src="$song->post->thumbnail_url" :alt="$song->name"
+                                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                         <div
                                             class="absolute top-1 left-1 {{ $loop->parent->first && $loop->first ? 'bg-primary' : 'bg-surface-dark' }} text-white text-xs font-bold px-1.5 py-0.5 rounded shadow border border-white/10">
                                             #{{ $loop->iteration }}</div>
@@ -200,17 +199,17 @@
                 <div id="tab-content">
                     <div id="recently" class="tab-pane">
                         <div class="owl-carousel">
-                            @include('partials.songs.cards-v2', ['songs' => $recently])
+                            @include('partials.songs.cards-carousel', ['songs' => $recently])
                         </div>
                     </div>
                     <div id="popular" class="tab-pane hidden">
                         <div class="owl-carousel">
-                            @include('partials.songs.cards-v2', ['songs' => $popular])
+                            @include('partials.songs.cards-carousel', ['songs' => $popular])
                         </div>
                     </div>
                     <div id="viewed" class="tab-pane hidden">
                         <div class="owl-carousel">
-                            @include('partials.songs.cards-v2', ['songs' => $viewed])
+                            @include('partials.songs.cards-carousel', ['songs' => $viewed])
                         </div>
                     </div>
                 </div>
@@ -232,8 +231,8 @@
                                 <div
                                     class="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-colors shrink-0">
                                     @if ($artist->images()->where('type', 'thumbnail')->exists())
-                                        <img src="{{ $artist->thumbnail_url }}" alt="{{ $artist->name }}"
-                                            class="w-full h-full object-cover">
+                                        <x-ui.image :src="$artist->thumbnail_url" :alt="$artist->name"
+                                            class="w-full h-full object-cover" />
                                     @else
                                         <div
                                             class="w-full h-full bg-primary/20 flex items-center justify-center text-primary">

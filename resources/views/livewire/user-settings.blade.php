@@ -17,8 +17,8 @@
                     {{-- Avatar Preview --}}
                     @if ($image)
                         <div class="mb-4 relative w-20 h-20">
-                            <img src="{{ $image->temporaryUrl() }}"
-                                class="w-full h-full object-cover rounded-full border-2 border-primary shadow-lg shadow-primary/20">
+                            <x-ui.image src="{{ $image->temporaryUrl() }}"
+                                class="w-full h-full object-cover rounded-full border-2 border-primary shadow-lg shadow-primary/20" />
                             <div class="absolute -top-1 -right-1 bg-primary text-white rounded-full p-0.5">
                                 <span class="material-symbols-outlined text-xs">sync</span>
                             </div>
@@ -79,7 +79,7 @@
                     @if ($banner)
                         <div
                             class="mb-4 relative w-full aspect-[4/1] rounded-lg overflow-hidden border-2 border-primary shadow-lg shadow-primary/20">
-                            <img src="{{ $banner->temporaryUrl() }}" class="w-full h-full object-cover">
+                            <x-ui.image src="{{ $banner->temporaryUrl() }}" class="w-full h-full object-cover" />
                             <div class="absolute top-2 right-2 bg-primary text-white rounded-full p-1 shadow-lg">
                                 <span class="material-symbols-outlined text-sm">sync</span>
                             </div>

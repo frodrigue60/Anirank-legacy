@@ -9,7 +9,9 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **📊 Seasonal Charts**: Browse the latest themes organized by year and season.
 - **🏆 Global & Seasonal Rankings**: Real-time leaderboards for top-rated and most-viewed openings and endings, with distinct seasonal scoping.
 - **📈 Ranking Trends**: Daily historical snapshots for songs, displaying performance trends (Up/Down/Same/New) with visual indicators for both global and seasonal context.
-- **🔢 Centalized Score Formatting**: Flexible rating display system supporting multiple formats (100-point, 10-point, 10-point decimal, 5-point) with centralized logic in the model layer.
+- **🏅 Badges & Rewards System**: Centralized system to reward user participation with unique badges, managed directly from the admin panel.
+- **🖼️ High-Performance Media Rendering**: Standardized `<x-ui.image>` component with lazy-loading, error fallbacks, and automated avatar generation for users and artists.
+- **🔢 Centralized Score Formatting**: Flexible rating display system supporting multiple formats (100-point, 10-point, 10-point decimal, 5-point) with centralized logic in the model layer.
 - **🎵 Immersive Player**: A dedicated cinema-mode player for seamless theme playback.
 - **📁 User Collections**: Create public/private playlists and maintain a personalized favorites list.
 - **🔐 Dynamic Role Management**: A robust many-to-many role system (`User <-> Role`) with unified middleware for scalable permissions.

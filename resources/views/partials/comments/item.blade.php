@@ -3,14 +3,20 @@
     <div class="flex gap-4">
         <a href="{{ route('users.show', $comment->user) }}"
             class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10 hover:ring-2 hover:ring-primary transition-all">
-            <img src="{{ $comment->user->profile_photo_url }}" alt="{{ $comment->user->name }}"
-                class="w-full h-full object-cover">
+            <x-ui.image :src="$comment->user->avatar_url" :alt="$comment->user->name" class="w-full h-full" fallback="default-avatar.webp" />
         </a>
         <div class="flex-1 space-y-2">
+            {{-- Header --}}
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <a href="{{ route('users.show', $comment->user) }}"
                         class="font-bold text-white text-sm hover:text-primary transition-colors">{{ $comment->user->name }}</a>
+                    @foreach ($comment->user->badges as $badge)
+                        <span class="flex items-center" title="{{ $badge->name }}">
+                            <x-ui.image :src="$badge->icon_url" :alt="$badge->name" class="w-4 h-4 rounded-sm"
+                                fallback="default-badge.webp" />
+                        </span>
+                    @endforeach
                     @if ($comment->parent_id)
                         <span
                             class="text-[10px] text-primary font-bold uppercase tracking-wider bg-primary/10 px-1.5 py-0.5 rounded">Reply</span>

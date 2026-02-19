@@ -12,6 +12,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class ArtistController extends Controller
 {
@@ -95,6 +97,24 @@ class ArtistController extends Controller
         $artist->slug = $this->generateUniqueSlug($request->name);
 
         if ($artist->save()) {
+            // Automate avatar generation for new artists
+            try {
+                $name = urlencode($artist->name);
+                $url = "https://ui-avatars.com/api/?name={$name}&color=fff&background=random&size=512";
+
+                $response = Http::timeout(5)->get($url);
+
+                if ($response->successful()) {
+                    $file_name = $artist->slug . '-avatar-' . time() . '.png';
+                    $path = 'artists/' . $file_name;
+
+                    Storage::disk('public')->put($path, $response->body());
+                    $artist->updateOrCreateImage($path, 'thumbnail');
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning("Could not fetch avatar for artist {$artist->id}: " . $e->getMessage());
+            }
+
             return redirect(route('admin.artists.index'))->with('success', 'Data has been inserted successfully');
         }
 
