@@ -20,6 +20,9 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🔔 Unified Notification System**: Real-time feedback via a custom subtle toast notification system, replacing intrusive popups.
 - **📝 Streamlined Request Workflow**: Simplified user request system with automatic categorization and manual staff-controlled status tracking.
 - **🖼️ Polymorphic Image System**: Centralized media management allowing multiple image types (thumbnails, banners, avatars) for any model with absolute decouple from legacy columns.
+- **🔍 SEO Centralization**: Single-source meta tag management using Blade partials, eliminating redundancy across views.
+- **⚡ Vite Optimization**: Streamlined asset configuration to minimize production bundle size and improve build performance.
+- **💬 Livewire Request Modal**: Fully interactive and reactive user request system, replacing legacy modal patterns.
 
 ## Tech Stack
 

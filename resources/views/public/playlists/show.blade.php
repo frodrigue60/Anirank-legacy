@@ -143,6 +143,7 @@
                         <p id="playlist-description" class="text-white/80 leading-relaxed font-medium">
                             {{ $playlist->description ?? 'No description provided for this collection.' }}
                         </p>
+                        {{-- themes featured here --}}
                         {{-- <div class="mt-6 flex items-center gap-4">
                             <div class="flex -space-x-3">
                                 @foreach ($queue->take(4) as $item)
@@ -606,7 +607,7 @@
                         `
                                                                                                                                                                         <div class="w-6 text-center text-white/20 font-bold text-sm group-hover:text-primary">${(i + 1).toString().padStart(2, '0')}</div>
                                                                                                                                                                         <div class="relative w-20 h-14 rounded-lg overflow-hidden shrink-0 bg-surface-dark border border-white/5">
-                                                                                                                                                                            <img src="${item.thumbnail || '/images/default.jpg'}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
+                                                                                                                                                                            <img src="${item.thumbnail || '/resources/images/song_cover.png'}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity">
                                                                                                                                                                             <div class="active-badge hidden absolute inset-0 bg-primary/20 backdrop-blur-sm flex items-center justify-center">
                                                                                                                                                                                 <span class="material-symbols-outlined text-white text-[18px] animate-pulse">equalizer</span>
                                                                                                                                                                             </div>

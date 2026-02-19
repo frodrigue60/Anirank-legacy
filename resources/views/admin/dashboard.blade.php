@@ -23,6 +23,16 @@
                     </button>
                 </form>
 
+                <form action="{{ route('admin.posts.track.seasonal.ranking') }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                        class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-2xl text-emerald-400 transition-all active:scale-95 group">
+                        <span
+                            class="material-symbols-outlined text-sm group-hover:rotate-12 transition-transform">eco</span>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Seasonal Ranking</span>
+                    </button>
+                </form>
+
                 <div class="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-2xl">
                     <span class="relative flex h-2 w-2">
                         <span

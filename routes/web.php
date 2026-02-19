@@ -123,6 +123,7 @@ Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
         Route::post('/sync-all', 'syncAllFromAnilist')->name('sync.all');
         Route::delete('/wipe', 'wipePosts')->name('wipe');
         Route::post('/track-ranking', 'trackRanking')->name('track.ranking');
+        Route::post('/track-seasonal-ranking', 'trackSeasonalRanking')->name('track.seasonal.ranking');
     });
     Route::resource('posts', AdminPostController::class);
 

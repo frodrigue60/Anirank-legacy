@@ -47,6 +47,26 @@ The application uses a **Modern Dark Theme** with a deep purple aesthetic.
 - `.hero-glow`: Purple shadow glow (`box-shadow`) for high-impact sections.
 - `.filled`: Utility class for Material Symbols to use the "FILL" variation.
 - `x-ui.image`: Reusable Blade component for high-performance image rendering. Handles lazy-loading (`loading="lazy"`), error fallbacks (`onerror`), and uses `Storage::url()` internally to ensure CDN/Cloud storage compatibility.
+- `partials.meta`: Centralized SEO management. All views should use `@section('title')` and `@section('description')` instead of hardcoded meta tags.
+
+---
+
+## Technical Standards
+
+### SEO & Meta Tags
+
+The application uses a **Centralized Meta Tag System** located in `resources/views/partials/meta.blade.php`.
+
+- **Layout Integration**: `layouts.app` includes the partial.
+- **View Usage**: Individual views must define `@section('title')` and `@section('description')`.
+- **Social Media**: OG and Twitter tags are automatically generated based on sections (`og_image`, `og_type`).
+
+### Vite Asset Management
+
+To maintain a lean production bundle, `vite.config.mjs` only registers high-level entry points.
+
+- **Entry Points**: `app.js`, `app.css`, `ajaxSearch.js`, `app.scss`.
+- **Module Resolution**: All other JS files (filters, modules, API config) must be imported within `app.js` or called specifically ONLY if they are standalone entry points. Avoid "orphan" entry points in the Vite config.
 
 ---
 
@@ -606,14 +626,14 @@ Handles like/dislike reactions via API.
 
 ### Other Controllers
 
-| Controller               | Purpose                                           |
-| ------------------------ | ------------------------------------------------- |
-| `YearController`         | Filter content by year.                           |
-| `SeasonController`       | Filter content by season.                         |
-| `FormatController`       | Filter content by anime format (TV, Movie, etc.). |
-| `ReportController`       | Submit user reports for variants with issues.     |
-| `UserRequestController`  | Submit requests to add new anime/songs.           |
-| `ExternalLinkController` | Manage external links (MAL, AniList, YouTube).    |
+| Controller               | Purpose                                                    |
+| ------------------------ | ---------------------------------------------------------- |
+| `YearController`         | Filter content by year.                                    |
+| `SeasonController`       | Filter content by season.                                  |
+| `FormatController`       | Filter content by anime format (TV, Movie, etc.).          |
+| `ReportController`       | Submit user reports for variants with issues.              |
+| `UserRequestController`  | Handles user submissions for missing content via Livewire. |
+| `ExternalLinkController` | Manage external links (MAL, AniList, YouTube).             |
 
 ---
 

@@ -30,7 +30,7 @@
     </div>
 @endsection
 
-@section('script')
+@push('scripts')
     <script>
         document.addEventListener('livewire:load', function() {
             // Listen for avatar updates
@@ -50,4 +50,4 @@
             });
         });
     </script>
-@endsection
+@endpush

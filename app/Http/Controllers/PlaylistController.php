@@ -64,11 +64,9 @@ class PlaylistController extends Controller
             }
 
             // 3. Determinar el thumbnail (preferencia al post)
-            $thumbnail = asset('images/default.jpg');
-            if ($song->post && $song->post->thumbnail && Storage::disk('public')->exists($song->post->thumbnail)) {
-                $thumbnail = Storage::url($song->post->thumbnail);
-            } elseif ($song->thumbnail) {
-                $thumbnail = $song->thumbnail;
+            $thumbnailUrl = $song->post ? $song->post->thumbnail_url : asset('resources/images/song_cover.png');
+            if (!$song->post && $song->thumbnail) {
+                $thumbnailUrl = $song->thumbnail;
             }
 
             // 4. Construir item
@@ -95,7 +93,7 @@ class PlaylistController extends Controller
                     ? $video->embed_url
                     : $video->local_url,
                 'duration'        => $video->duration ?? 0,
-                'thumbnail'       => $thumbnail,
+                'thumbnail'   => $thumbnailUrl,
             ];
         })
             ->filter()

@@ -7,6 +7,6 @@
     <livewire:ranking-table />
 @endsection
 
-@section('script')
+@push('scripts')
     {{-- Livewire handles data fetching and infinite scroll --}}
-@endsection
+@endpush

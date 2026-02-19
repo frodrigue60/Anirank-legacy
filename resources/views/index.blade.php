@@ -2,34 +2,8 @@
 
 @section('title', 'Ranking Anime Openings & Endings | ' . config('app.name'))
 
-@section('meta')
-    <meta name="title" content="Search, play, and rate anime openings and endings">
-    <meta name="description"
-        content="The site you were looking for to rate openings and endings of your favorite animes. Discover which are the most popular opening and endings.">
-    <meta name="keywords"
-        content="top anime openings, top anime endings, ranking openings anime, ranking endings anime, Best Anime Openings Of All Time, openings anime, endings anime">
-    <link rel="canonical" href="{{ url()->current() }}">
-    <meta name="robots" content="index, follow, max-image-preview:standard">
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="{{ asset('resources/images/og-image-wide.png') }}">
-    <meta property="og:image:secure_url" content="{{ asset('resources/images/og-image-wide.png') }}">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="828">
-    <meta property="og:image:height" content="450">
-    <meta property="og:url" content="{{ url()->current() }}" />
-    <meta property="og:image:alt" content="Anirank banner" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:site" content="@frodrigue60" />
-    <meta name="twitter:creator" content="@frodrigue60" />
-    <meta property="og:title" content="Search, play, and rate anime openings and endings" />
-    <meta property="og:description"
-        content="The site you were looking for to rate openings and endings of your favorite animes. Discover which are the most popular opening and endings." />
-@endsection
-
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('resources/owlcarousel/assets/owl.carousel.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('resources/owlcarousel/assets/owl.theme.default.min.css') }}">
-@endpush
+@section('description', 'The site you were looking for to rate openings and endings of your favorite animes. Discover
+    which are the most popular opening and endings.')
 
 @section('content')
     {{-- @guest
@@ -135,10 +109,11 @@
                         <span class="material-symbols-outlined text-primary">leaderboard</span>
                         Weekly Rankings
                     </h2>
-                    {{-- <div class="bg-surface-darker p-1 rounded-lg flex items-center border border-white/5 self-start sm:self-auto">
-                        <button class="px-4 py-1.5 rounded-md bg-primary text-white text-sm font-bold shadow-sm transition-all">Openings (OP)</button>
-                        <button class="px-4 py-1.5 rounded-md text-white/60 hover:text-white text-sm font-medium transition-all">Endings (ED)</button>
-                    </div> --}}
+                    <a href="{{ route('songs.ranking') }}"
+                        class="flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-wide hover:underline transition-colors">
+                        View Full Ranking
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </a>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @foreach ($weaklyRanking->chunk(ceil($weaklyRanking->count() / 2)) as $chunk)
@@ -148,29 +123,58 @@
                                     {{ $loop->first ? 'Openings' : 'Endings' }}</span>
                             </div>
                             @foreach ($chunk as $song)
+                                @php
+                                    $rankNum = $loop->iteration;
+                                    $isTopThree = $rankNum <= 3;
+                                    $medalColors = [
+                                        1 => 'border-primary/50 bg-primary/10',
+                                        2 => 'border-primary/30 bg-primary/5',
+                                        3 => 'border-primary/20 bg-primary/[0.03]',
+                                    ];
+                                    $badgeColors = [
+                                        1 => 'bg-primary text-white',
+                                        2 => 'bg-primary/70 text-white',
+                                        3 => 'bg-primary/50 text-white',
+                                    ];
+                                    $cardClass = $isTopThree
+                                        ? $medalColors[$rankNum] ?? ''
+                                        : 'border-white/5 bg-surface-darker';
+                                    $badgeClass = $isTopThree
+                                        ? $badgeColors[$rankNum] ?? 'bg-surface-dark text-white'
+                                        : 'bg-surface-dark text-white';
+
+                                    $user = auth()->user();
+                                    $format = $user?->score_format ?? 'POINT_100';
+                                    $score = $song->formattedAvgScore($format);
+                                @endphp
                                 <div
-                                    class="group relative bg-surface-darker p-3 rounded-xl hover:bg-surface-dark transition-colors border border-white/5 flex gap-4 items-center">
+                                    class="group relative p-3 rounded-xl hover:bg-surface-dark transition-colors border flex gap-4 items-center {{ $cardClass }}">
                                     <div class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
                                         <x-ui.image :src="$song->post->thumbnail_url" :alt="$song->name"
                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                         <div
-                                            class="absolute top-1 left-1 {{ $loop->parent->first && $loop->first ? 'bg-primary' : 'bg-surface-dark' }} text-white text-xs font-bold px-1.5 py-0.5 rounded shadow border border-white/10">
-                                            #{{ $loop->iteration }}</div>
+                                            class="absolute top-1 left-1 {{ $badgeClass }} text-xs font-bold px-1.5 py-0.5 rounded shadow">
+                                            #{{ $rankNum }}</div>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center justify-between">
+                                        <div class="flex items-center justify-between gap-2">
                                             <a href="{{ route('songs.show.nested', ['post' => $song->post->slug, 'song' => $song->slug]) }}"
                                                 class="font-bold text-white truncate text-lg hover:text-primary transition-colors">{{ $song->name }}</a>
                                             <div
-                                                class="flex items-center gap-1 bg-surface-dark text-yellow-400 text-xs font-bold">
-                                                <span class="material-symbols-outlined filled">star</span>
-                                                <span>{{ number_format($song->averageRating ?? 0, 1) }}</span>
+                                                class="flex items-center gap-1 bg-surface-dark/80 text-yellow-400 text-xs font-bold px-2 py-1 rounded-lg border border-white/5 shrink-0">
+                                                <span class="material-symbols-outlined filled text-sm">star</span>
+                                                <span>{{ $score }}</span>
                                             </div>
                                         </div>
                                         <p class="text-sm text-primary font-medium truncate">{{ $song->post->title }}</p>
                                         <p class="text-xs text-white/50 truncate">
                                             @foreach ($song->artists as $artist)
-                                                {{ $artist->name }}{{ !$loop->last ? ', ' : '' }}
+                                                @if ($artist->slug)
+                                                    <a href="{{ route('artists.show', $artist->slug) }}"
+                                                        class="hover:text-primary transition-colors">{{ $artist->name }}</a>{{ !$loop->last ? ', ' : '' }}
+                                                @else
+                                                    {{ $artist->name }}{{ !$loop->last ? ', ' : '' }}
+                                                @endif
                                             @endforeach
                                         </p>
                                     </div>
@@ -183,33 +187,50 @@
 
             {{-- TABS SECTION --}}
             <section class="pb-12">
-                <div class="border-b border-white/5 mb-6">
-                    <div class="flex gap-8" id="tabs">
+                <div class="border-b border-white/5 mb-6 flex justify-between items-center">
+                    <div class="flex gap-8 items-center" id="tabs">
                         <button id="recently-tab"
-                            class="pb-4 border-b-2 border-primary text-white font-bold text-sm tracking-wide transition-all active-tab-link">Recently
+                            class="py-4 border-b-2 border-primary text-white font-bold text-sm tracking-wide transition-all active-tab-link leading-none">Recently
                             Added</button>
                         <button id="popular-tab"
-                            class="pb-4 border-b-2 border-transparent text-white/40 hover:text-white font-medium text-sm tracking-wide transition-colors">Most
+                            class="py-4 border-b-2 border-transparent text-white/40 hover:text-white font-medium text-sm tracking-wide transition-colors leading-none">Most
                             Popular</button>
                         <button id="viewed-tab"
-                            class="pb-4 border-b-2 border-transparent text-white/40 hover:text-white font-medium text-sm tracking-wide transition-colors">Most
+                            class="py-4 border-b-2 border-transparent text-white/40 hover:text-white font-medium text-sm tracking-wide transition-colors leading-none">Most
                             Viewed</button>
+                    </div>
+                    <div class="flex items-center">
+                        <button
+                            class="prev-tab border border-white/5 text-white/50 hover:text-white text-md h-9 w-9 m-1 flex items-center justify-center rounded-lg transition-colors bg-white/5"><span
+                                class="material-symbols-outlined text-xl">chevron_left</span></button>
+                        <button
+                            class="next-tab border border-white/5 text-white/50 hover:text-white text-md h-9 w-9 m-1 flex items-center justify-center rounded-lg transition-colors bg-white/5"><span
+                                class="material-symbols-outlined text-xl">chevron_right</span></button>
                     </div>
                 </div>
                 <div id="tab-content">
                     <div id="recently" class="tab-pane">
-                        <div class="owl-carousel">
-                            @include('partials.songs.cards-carousel', ['songs' => $recently])
+                        <div class="custom-carousel-wrapper relative group/carousel">
+                            <div
+                                class="custom-carousel flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth py-2 px-1 pb-4">
+                                @include('partials.songs.cards-carousel', ['songs' => $recently])
+                            </div>
                         </div>
                     </div>
                     <div id="popular" class="tab-pane hidden">
-                        <div class="owl-carousel">
-                            @include('partials.songs.cards-carousel', ['songs' => $popular])
+                        <div class="custom-carousel-wrapper relative group/carousel">
+                            <div
+                                class="custom-carousel flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth py-2 px-1 pb-4">
+                                @include('partials.songs.cards-carousel', ['songs' => $popular])
+                            </div>
                         </div>
                     </div>
                     <div id="viewed" class="tab-pane hidden">
-                        <div class="owl-carousel">
-                            @include('partials.songs.cards-carousel', ['songs' => $viewed])
+                        <div class="custom-carousel-wrapper relative group/carousel">
+                            <div
+                                class="custom-carousel flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth py-2 px-1 pb-4">
+                                @include('partials.songs.cards-carousel', ['songs' => $viewed])
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -217,7 +238,7 @@
         </div>
 
         {{-- SIDEBAR --}}
-        <aside class="lg:col-span-3 flex flex-col gap-8">
+        <aside class="lg:col-span-3 flex flex-col gap-8 sm:max-w-[400px] sm:mx-auto">
             <div class="bg-surface-darker rounded-2xl p-6 border border-white/5">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="font-bold text-white text-lg">Featured Artists</h3>
@@ -285,52 +306,87 @@
 @endsection
 
 @push('scripts')
-    @if (config('app.env') === 'local')
-        <script src="{{ asset('resources/js/jquery-3.6.3.slim.min.js') }}"></script>
-    @else
-        <script src="https://code.jquery.com/jquery-3.6.3.slim.min.js"
-            integrity="sha256-ZwqZIVdD3iXNyGHbSYdsmWP//UBokj2FHAxKuSBKDSo=" crossorigin="anonymous"></script>
-    @endif
+    <style>
+        .custom-carousel {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
 
-    <script src="{{ asset('resources/owlcarousel/owl.carousel.min.js') }}"></script>
-    <script src="{{ asset('resources/js/owCarouselConfig.js') }}"></script>
+        .custom-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .custom-carousel>* {
+            snap-align: start;
+        }
+    </style>
 
     <script>
-        $(function() {
-            const $tabs = $('#tabs button');
-            const $panes = $('#tab-content .tab-pane');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab Switching Logic
+            const tabs = document.querySelectorAll('#tabs button');
+            const panes = document.querySelectorAll('#tab-content .tab-pane');
 
-            function setActiveTab($clickedTab) {
-                // Update button styles
-                $tabs.removeClass('border-primary text-white font-bold active-tab-link')
-                    .addClass('border-transparent text-white/40 font-medium');
+            function setActiveTab(clickedTab) {
+                tabs.forEach(tab => {
+                    tab.classList.remove('border-primary', 'text-white', 'font-bold', 'active-tab-link');
+                    tab.classList.add('border-transparent', 'text-white/40', 'font-medium');
+                });
 
-                $clickedTab.addClass('border-primary text-white font-bold active-tab-link')
-                    .removeClass('border-transparent text-white/40 font-medium');
+                clickedTab.classList.add('border-primary', 'text-white', 'font-bold', 'active-tab-link');
+                clickedTab.classList.remove('border-transparent', 'text-white/40', 'font-medium');
 
-                // Show/Hide panes
-                const targetId = $clickedTab.attr('id').replace('-tab', '');
-                $panes.addClass('hidden');
-                $('#' + targetId).removeClass('hidden');
-
-                // Refresh and Reset Owl Carousel in the active pane
-                setTimeout(() => {
-                    window.dispatchEvent(new Event('resize'));
-                    const $activeCarousel = $('#' + targetId + ' .owl-carousel');
-                    $activeCarousel.trigger('to.owl.carousel', [0, 0]);
-                    $activeCarousel.trigger('refresh.owl.carousel');
-                }, 50);
+                const targetId = clickedTab.id.replace('-tab', '');
+                panes.forEach(pane => {
+                    if (pane.id === targetId) {
+                        pane.classList.remove('hidden');
+                    } else {
+                        pane.classList.add('hidden');
+                    }
+                });
             }
 
-            $tabs.on('click', function(e) {
-                e.preventDefault();
-                setActiveTab($(this));
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    setActiveTab(tab);
+                });
             });
 
-            // Set initial state
-            if ($tabs.length > 0) {
-                setActiveTab($tabs.first());
+            // Carousel Navigation Logic
+            const prevBtns = document.querySelectorAll('.prev-tab');
+            const nextBtns = document.querySelectorAll('.next-tab');
+
+            function getActiveCarousel() {
+                const activePane = document.querySelector('#tab-content .tab-pane:not(.hidden)');
+                return activePane ? activePane.querySelector('.custom-carousel') : null;
             }
+
+            prevBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const carousel = getActiveCarousel();
+                    if (carousel) {
+                        const scrollAmount = carousel.offsetWidth * 0.8;
+                        carousel.scrollBy({
+                            left: -scrollAmount,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            nextBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const carousel = getActiveCarousel();
+                    if (carousel) {
+                        const scrollAmount = carousel.offsetWidth * 0.8;
+                        carousel.scrollBy({
+                            left: scrollAmount,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
         });
     </script>
 @endpush

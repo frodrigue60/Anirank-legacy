@@ -105,7 +105,7 @@
                                 class="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
                                 <span class="material-symbols-outlined text-[18px]">playlist_play</span> Playlists
                             </a>
-                            <button onclick="window.showModal('requestModal')"
+                            <button onclick="Livewire.dispatch('openRequestModal')"
                                 class="w-full flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
                                 <span class="material-symbols-outlined text-[18px]">campaign</span> Request
                             </button>

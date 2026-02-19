@@ -1,20 +1,9 @@
 @extends('layouts.app')
 
-@section('meta')
-    @php
-        $thumbnail_url = $post->thumbnail_url;
-        $banner_url = $post->banner_url;
-    @endphp
-    <title>{{ $post->title }} - Themes List</title>
-    <meta name="title" content="{{ $post->title }} Themes - Anirank">
-    <meta name="description" content="Explore and listen to the openings and endings of {{ $post->title }}.">
-    <meta name="robots" content="index, follow, max-image-preview:standard">
-    <link rel="canonical" href="{{ url()->current() }}">
-    <meta property="og:type" content="article">
-    <meta property="og:title" content="{{ $post->title }} Themes">
-    <meta property="og:image" content="{{ $thumbnail_url }}">
-    <meta property="og:url" content="{{ url()->current() }}">
-@endsection
+@section('title', $post->title . ' - Themes List')
+@section('description', 'Explore and listen to the openings and endings of ' . $post->title . '.')
+@section('og_image', $post->thumbnail_url)
+@section('og_type', 'article')
 
 @section('content')
     {{-- Hero Section --}}

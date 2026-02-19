@@ -31,18 +31,19 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @forelse ($playlists as $playlist)
                     @php
-                        $cover = asset('images/default.jpg');
+                        $cover = asset('resources/images/song_cover.png');
                         $firstSong = $playlist->songs->first();
-                        if ($firstSong && $firstSong->post && $firstSong->post->thumbnail && Storage::disk('public')->exists($firstSong->post->thumbnail)) {
-                            $cover = Storage::url($firstSong->post->thumbnail);
+                        if ($firstSong && $firstSong->post) {
+                            $cover = $firstSong->post->thumbnail_url;
                         }
                     @endphp
                     <div
                         class="group relative bg-surface-dark/30 rounded-2xl border border-white/5 p-5 backdrop-blur-sm hover:bg-surface-dark/50 transition-all flex flex-col gap-4 overflow-hidden">
 
                         {{-- Cover Image Background --}}
-                        <div class="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
-                            <img src="{{ $cover }}" class="w-full h-full object-cover blur-sm scale-110">
+                        <div
+                            class="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                            <x-ui.image src="{{ $cover }}" class="w-full h-full object-cover blur-sm scale-110" />
                             <div class="absolute inset-0 bg-gradient-to-b from-surface-darker/80 to-surface-darker"></div>
                         </div>
 
@@ -50,7 +51,7 @@
                             <div class="flex items-center gap-4 flex-1 min-w-0">
                                 <div
                                     class="w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-lg group-hover:border-primary/50 transition-colors">
-                                    <img src="{{ $cover }}" class="w-full h-full object-cover">
+                                    <x-ui.image src="{{ $cover }}" class="w-full h-full object-cover" />
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h3
@@ -71,7 +72,8 @@
                                     title="Edit Playlist">
                                     <span class="material-symbols-outlined text-[18px]">edit</span>
                                 </a>
-                                <form action="{{ route('playlists.destroy', $playlist->id) }}" method="POST" class="inline">
+                                <form action="{{ route('playlists.destroy', $playlist->id) }}" method="POST"
+                                    class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -107,7 +109,8 @@
                         <p class="text-xl font-bold">No playlists yet</p>
                         <p class="text-sm font-medium mt-2">Create your first playlist and start collecting your favorite
                             themes!</p>
-                        <a href="{{ route('playlists.create') }}" class="mt-6 text-primary font-bold hover:underline">Create
+                        <a href="{{ route('playlists.create') }}"
+                            class="mt-6 text-primary font-bold hover:underline">Create
                             Playlist</a>
                     </div>
                 @endforelse

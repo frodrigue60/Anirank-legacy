@@ -19,6 +19,6 @@
     </div>
 @endsection
 
-@section('script')
+@push('scripts')
     {{-- Legacy AJAX filter scripts removed --}}
-@endsection
+@endpush

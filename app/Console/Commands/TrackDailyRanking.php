@@ -14,7 +14,7 @@ class TrackDailyRanking extends Command
      *
      * @var string
      */
-    protected $signature = 'app:track-ranking';
+    protected $signature = 'app:track-ranking {--seasonal-only : Only recalculate seasonal rankings}';
 
     /**
      * The console command description.
@@ -30,29 +30,43 @@ class TrackDailyRanking extends Command
      */
     public function handle()
     {
-        $this->info('Starting ranking tracking...');
+        $seasonalOnly = $this->option('seasonal-only');
+        $this->info($seasonalOnly ? 'Starting seasonal-only ranking tracking...' : 'Starting ranking tracking...');
 
         $date = now()->toDateString();
 
-        // 1. Calculate Global Rankings
-        $allSongs = Song::query()
-            ->withAvg('ratings', 'rating')
-            ->whereHas('post', function ($query) {
-                $query->where('status', true);
-            })
-            ->orderByDesc('ratings_avg_rating')
-            ->get();
-
-        $this->info("Found {$allSongs->count()} total active songs for global ranking.");
-
-        // We prepare a map to bulk update/create or just a way to store results
         $rankings = [];
 
-        foreach ($allSongs as $index => $song) {
-            $rankings[$song->id] = [
-                'rank' => $index + 1,
-                'score' => $song->ratings_avg_rating ?? 0,
-            ];
+        // 1. Calculate Global Rankings (skip if --seasonal-only)
+        if (!$seasonalOnly) {
+            $allSongs = Song::query()
+                ->withAvg('ratings', 'rating')
+                ->whereHas('post', function ($query) {
+                    $query->where('status', true);
+                })
+                ->orderByDesc('ratings_avg_rating')
+                ->get();
+
+            $this->info("Found {$allSongs->count()} total active songs for global ranking.");
+
+            foreach ($allSongs as $index => $song) {
+                $rankings[$song->id] = [
+                    'rank' => $index + 1,
+                    'score' => $song->ratings_avg_rating ?? 0,
+                ];
+            }
+        } else {
+            // Pre-populate rankings map with existing global data so we can attach seasonal
+            $allSongs = Song::query()
+                ->withAvg('ratings', 'rating')
+                ->whereHas('post', fn($q) => $q->where('status', true))
+                ->get();
+
+            foreach ($allSongs as $song) {
+                $rankings[$song->id] = [
+                    'score' => $song->ratings_avg_rating ?? 0,
+                ];
+            }
         }
 
         // 2. Calculate Seasonal Rankings
@@ -91,16 +105,16 @@ class TrackDailyRanking extends Command
         $bar->start();
 
         foreach ($rankings as $songId => $data) {
+            $updateData = $seasonalOnly
+                ? ['seasonal_rank' => $data['seasonal_rank'] ?? null, 'score' => $data['score']]
+                : ['rank' => $data['rank'], 'seasonal_rank' => $data['seasonal_rank'] ?? null, 'score' => $data['score']];
+
             RankingHistory::updateOrCreate(
                 [
                     'song_id' => $songId,
                     'date' => $date
                 ],
-                [
-                    'rank' => $data['rank'],
-                    'seasonal_rank' => $data['seasonal_rank'] ?? null,
-                    'score' => $data['score']
-                ]
+                $updateData
             );
 
             $bar->advance();

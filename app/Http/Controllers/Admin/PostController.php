@@ -851,4 +851,14 @@ class PostController extends Controller
             return redirect()->back()->with('error', 'Error executing ranking tracking: ' . $th->getMessage());
         }
     }
+
+    public function trackSeasonalRanking()
+    {
+        try {
+            Artisan::call('app:track-ranking', ['--seasonal-only' => true]);
+            return redirect()->back()->with('success', 'Seasonal ranking recalculated successfully.');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('error', 'Error executing seasonal ranking: ' . $th->getMessage());
+        }
+    }
 }

@@ -42,13 +42,23 @@
                 </h4>
                 <ul class="space-y-4">
                     <li><a href="#"
-                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Terms &
-                            Privacy</a></li>
-                    <li><a href="#"
                             class="text-white/40 hover:text-primary transition-colors text-sm font-medium">About Us</a>
                     </li>
                     <li><a href="#"
-                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Support</a>
+                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Cookie
+                            Policy</a>
+                    </li>
+                    <li><a href="#"
+                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Privacy
+                            Policy</a>
+                    </li>
+                    <li><a href="#"
+                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Terms and
+                            Conditions</a>
+                    </li>
+                    <li><a href="#"
+                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">DMCA
+                            Disclaimer</a>
                     </li>
                 </ul>
             </div>
@@ -68,6 +78,12 @@
                     <li><a href="{{ route('songs.index') }}"
                             class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Themes</a>
                     </li>
+                    <li><a href="{{ route('studios.index') }}"
+                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Studios</a>
+                    </li>
+                    <li><a href="{{ route('producers.index') }}"
+                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Producers</a>
+                    </li>
                 </ul>
             </div>
 
@@ -81,9 +97,15 @@
                             class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Report
                             Error</a></li>
                     <li><a href="#"
-                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">DMCA</a></li>
+                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">
+                            Abuse</a></li>
                     <li><a href="#"
-                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Contact</a>
+                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Contact
+                            Us</a>
+                    </li>
+
+                    <li><a href="#"
+                            class="text-white/40 hover:text-primary transition-colors text-sm font-medium">Support</a>
                     </li>
                 </ul>
             </div>

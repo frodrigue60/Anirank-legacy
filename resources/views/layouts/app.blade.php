@@ -8,14 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta http-equiv="Content-Security-Policy" content="block-all-mixed-content">
 
-    <title>@yield('title', config('app.name'))</title>
-
-    {{-- Meta Tags & SEO --}}
-    <meta name="author" content="Luis Rodz">
-    <meta name="base-url" content="{{ config('app.url') }}">
-    <meta property="og:site_name" content="{{ config('app.name') }}">
-    <meta property="fb:app_id" content="1363850827699525" />
-    @yield('meta')
+    @include('partials.meta')
 
     {{-- Favicons --}}
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('resources/images/favicon-32x32.png') }}">
@@ -34,7 +27,7 @@
     <meta name="msapplication-TileColor" content="#0E3D5F">
 
     {{-- Theme Detection (Blocking to prevent flickers) --}}
-    <script>
+    {{-- <script>
         (function() {
             const theme = localStorage.getItem('theme') || 'dark';
             if (theme === 'dark') {
@@ -43,23 +36,14 @@
                 document.documentElement.classList.remove('dark');
             }
         })();
-    </script>
+    </script> --}}
 
     {{-- Main Assets (Vite) --}}
-    @vite(['resources/css/app.css', 'resources/css/userProfile.css', 'resources/css/post.css', 'resources/css/ranking.css', 'resources/css/fivestars.css', 'resources/js/app.js', 'resources/js/ajaxSearch.js', 'resources/js/theme_switch.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/ajaxSearch.js'])
 
     @auth
-        @vite(['resources/js/make_request.js'])
-    @endauth
 
-    {{-- Third Party & Conditional Styles --}}
-    @if (config('app.env') === 'local')
-        <link rel="stylesheet" href="{{ asset('resources/font-awesome-6.4.2/css/all.min.css') }}">
-    @else
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-            integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
-            crossorigin="anonymous" referrerpolicy="no-referrer" />
-    @endif
+    @endauth
 
     @livewireStyles
     <style>
@@ -75,13 +59,7 @@
     <div id="app">
         @include('layouts.navbar')
 
-        <main class="">
-            @isset($breadcrumb)
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-                    @include('layouts.breadcrumb')
-                </div>
-            @endisset
-
+        <main>
             @include('layouts.alerts')
 
             @yield('content')
@@ -89,7 +67,7 @@
             @include('layouts.modal-search')
 
             @auth
-                @include('partials.user.modal-request')
+                <livewire:request-modal />
                 <livewire:report-modal />
             @endauth
         </main>
@@ -98,20 +76,8 @@
 
         <x-toast />
     </div>
-
-    {{-- Scripts --}}
-    @if (config('app.env') === 'local')
-        <script src="{{ asset('resources/font-awesome-6.4.2/js/all.min.js') }}"></script>
-    @else
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"
-            integrity="sha512-uKQ39gEGiyUJl4AI6L+ekBdGKpGw4xJ55+xyJG7YFlJokPNYegn9KwQ3P8A7aFQAUtUsAQHep+d/lrGqrbPIDQ=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    @endif
-
     @livewireScripts
     @stack('scripts')
-    @yield('script')
-
 </body>
 
 </html>
