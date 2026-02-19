@@ -38,8 +38,7 @@
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
                     <div class="aspect-3/4 relative">
-                        <img src="{{ Storage::url($post->thumbnail) }}" alt="{{ $post->title }}"
-                            class="w-full h-full object-cover">
+                        <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-linear-to-t from-zinc-950 via-transparent to-transparent"></div>
                         <div class="absolute bottom-4 left-4 right-4">
                             <span
@@ -77,13 +76,13 @@
                     </div>
                 </div>
 
-                @if ($post->banner)
+                @if ($post->images()->where('type', 'banner')->exists())
                     <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-4 shadow-xl">
                         <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 px-4 flex items-center">
                             <span class="material-symbols-outlined mr-2 text-blue-500">landscape</span> BANNER ASSET
                         </h3>
                         <div class="rounded-2xl overflow-hidden aspect-21/9 border border-zinc-800">
-                            <img src="{{ Storage::url($post->banner) }}" alt="" class="w-full h-full object-cover">
+                            <img src="{{ $post->banner_url }}" alt="" class="w-full h-full object-cover">
                         </div>
                     </div>
                 @endif

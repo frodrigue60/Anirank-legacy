@@ -14,6 +14,17 @@ class Producer extends Model
         'slug'
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($producer) {
+            if (empty($producer->slug)) {
+                $producer->slug = \Illuminate\Support\Str::slug($producer->name);
+            }
+        });
+    }
+
     public function posts()
     {
         return $this->belongsToMany(Post::class);

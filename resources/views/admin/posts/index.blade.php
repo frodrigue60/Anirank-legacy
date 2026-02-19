@@ -147,7 +147,7 @@
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-14 bg-zinc-800 rounded-md overflow-hidden shrink-0 border border-zinc-700">
-                                                <img src="{{ Storage::url($post->thumbnail) }}" alt=""
+                                                <img src="{{ $post->thumbnail_url }}" alt=""
                                                     class="w-full h-full object-cover">
                                             </div>
                                             <a href="{{ route('admin.posts.show', $post->id) }}"
@@ -159,13 +159,13 @@
                                     <td class="px-6 py-4">
                                         <div class="flex flex-wrap gap-1.5">
                                             @isset($post->season->id)
-                                                <a href="{{ route('seasons.show', $post->season->id) }}"
+                                                <a href="{{ route('admin.seasons.show', $post->season->id) }}"
                                                     class="px-2.5 py-1 bg-zinc-800 text-zinc-300 text-[10px] font-bold uppercase rounded-md hover:bg-blue-600 hover:text-white transition-all">
                                                     {{ $post->season->name }}
                                                 </a>
                                             @endisset
                                             @isset($post->year->id)
-                                                <a href="{{ route('years.show', $post->year->id) }}"
+                                                <a href="{{ route('admin.years.show', $post->year->id) }}"
                                                     class="px-2.5 py-1 bg-zinc-800 text-zinc-300 text-[10px] font-bold uppercase rounded-md hover:bg-blue-600 hover:text-white transition-all">
                                                     {{ $post->year->name }}
                                                 </a>

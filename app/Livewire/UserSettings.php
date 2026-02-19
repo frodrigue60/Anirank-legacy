@@ -42,21 +42,16 @@ class UserSettings extends Component
         $this->validateOnly('image');
 
         try {
-            $old_image = $this->user->image;
             $extension = $this->image->extension();
             $file_name = $this->user->slug . '-' . time() . '.' . $extension;
-            $path = 'profile';
+            $path = 'profile/' . $file_name;
 
-            $storedPath = $this->image->storeAs($path, $file_name, 'public');
+            $storedPath = $this->image->storeAs('profile', $file_name, 'public');
 
             if ($storedPath) {
-                $this->user->update(['image' => $storedPath]);
+                $this->user->updateOrCreateImage($storedPath, 'avatar');
 
-                if ($old_image && Storage::disk('public')->exists($old_image)) {
-                    Storage::disk('public')->delete($old_image);
-                }
-
-                $this->dispatch('avatarUpdated', url: Storage::url($storedPath));
+                $this->dispatch('avatarUpdated', url: $this->user->avatar_url);
                 session()->flash('avatar_success', 'Avatar updated successfully!');
                 $this->reset('image');
             }
@@ -70,21 +65,16 @@ class UserSettings extends Component
         $this->validateOnly('banner');
 
         try {
-            $old_banner = $this->user->banner;
             $extension = $this->banner->extension();
             $file_name = $this->user->slug . '-' . time() . '.' . $extension;
-            $path = 'banner';
+            $path = 'banner/' . $file_name;
 
-            $storedPath = $this->banner->storeAs($path, $file_name, 'public');
+            $storedPath = $this->banner->storeAs('banner', $file_name, 'public');
 
             if ($storedPath) {
-                $this->user->update(['banner' => $storedPath]);
+                $this->user->updateOrCreateImage($storedPath, 'banner');
 
-                if ($old_banner && Storage::disk('public')->exists($old_banner)) {
-                    Storage::disk('public')->delete($old_banner);
-                }
-
-                $this->dispatch('bannerUpdated', url: Storage::url($storedPath));
+                $this->dispatch('bannerUpdated', url: $this->user->banner_url);
                 session()->flash('banner_success', 'Banner updated successfully!');
                 $this->reset('banner');
             }

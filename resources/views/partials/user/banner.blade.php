@@ -1,15 +1,6 @@
 @php
-    // Robust URL resolution
-    $profileUrl = asset('resources/images/default-avatar.jpg');
-    $bannerUrl = asset('resources/images/default-banner.jpg');
-
-    if ($user->image && Storage::disk('public')->exists($user->image)) {
-        $profileUrl = Storage::url($user->image);
-    }
-
-    if ($user->banner && Storage::disk('public')->exists($user->banner)) {
-        $bannerUrl = Storage::url($user->banner);
-    }
+    $profileUrl = $user->avatar_url;
+    $bannerUrl = $user->banner_url;
 @endphp
 
 <div class="relative w-full overflow-hidden">

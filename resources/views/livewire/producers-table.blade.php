@@ -51,7 +51,7 @@
                     <a wire:key="prod-{{ $producer->id }}" href="{{ route('producers.show', $producer) }}"
                         class="group relative overflow-hidden rounded-xl bg-slate-800 aspect-16/10 border border-transparent hover:border-primary/50 transition-all cursor-pointer shadow-lg shadow-black/20">
                         <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                            style="background-image: url('{{ Storage::url($featuredPost->banner) }}');filter: brightness(0.5);">
+                            style="background-image: url('{{ $featuredPost->banner_url }}');filter: brightness(0.5);">
                         </div>
                         <div
                             class="absolute inset-0 bg-linear-to-t from-background-dark/95 via-background-dark/40 to-transparent">

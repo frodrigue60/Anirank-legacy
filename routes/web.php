@@ -50,6 +50,7 @@ Route::controller(PostController::class)->group(function () {
 });
 
 Route::controller(SongController::class)->group(function () {
+    Route::get('/songs', 'index')->name('songs.index');
     Route::get('/songs/seasonal', 'seasonal')->name('songs.seasonal');
     Route::get('/songs/ranking', 'ranking')->name('songs.ranking');
     Route::get('/song/{post:slug}/{song:slug}', 'showAnimeSong')->name('songs.show.nested')->scopeBindings();
@@ -59,20 +60,31 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/users/{user:slug}', 'show')->name('users.show');
 });
 
-//Route::get('/offline', fn() => view('offline'))->name('offline');
+Route::controller(ArtistController::class)->group(function () {
+    Route::get('/artists/{artist:slug}', 'show')->name('artists.show');
+    Route::get('/artists', 'index')->name('artists.index');
+});
+
+Route::controller(StudioController::class)->group(function () {
+    Route::get('/studios/{studio:slug}', 'show')->name('studios.show');
+    Route::get('/studios', 'index')->name('studios.index');
+});
+
+Route::controller(ProducerController::class)->group(function () {
+    Route::get('/producers/{producer:slug}', 'show')->name('producers.show');
+    Route::get('/producers', 'index')->name('producers.index');
+});
+
+
 
 // Resources
-Route::resource('posts', PostController::class);
-Route::resource('songs', SongController::class);
-Route::resource('artists', ArtistController::class);
-Route::resource('years', YearController::class);
-Route::resource('seasons', SeasonController::class);
-Route::resource('studios', StudioController::class);
-Route::resource('producers', ProducerController::class);
-Route::resource('playlists', PlaylistController::class);
+// Only write methods — index/show are handled by the manual slug routes above
+Route::resource('posts', PostController::class)->only(['store', 'update', 'destroy']);
+Route::resource('songs', SongController::class)->only(['store', 'update', 'destroy']);
 Route::resource('variants', SongVariantController::class);
 Route::resource('requests', UserRequestController::class);
 Route::resource('reports', ReportController::class);
+Route::resource('playlists', PlaylistController::class);
 
 /*
 |--------------------------------------------------------------------------

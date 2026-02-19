@@ -94,7 +94,7 @@
                     <div wire:key="user-fav-{{ $song->id }}"
                         class="group relative overflow-hidden rounded-xl h-48 card-hover transition-all duration-300 border border-white/5 bg-surface-dark/30">
                         <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                            style="background-image: url('{{ Storage::url($song->post->banner) }}'); filter: brightness(0.4);">
+                            style="background-image: url('{{ $song->post->banner_url }}'); filter: brightness(0.4);">
                         </div>
                         <div
                             class="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/80 to-transparent">

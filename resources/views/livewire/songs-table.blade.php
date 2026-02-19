@@ -102,7 +102,7 @@
                         class="group relative overflow-hidden rounded-xl h-48 card-hover transition-all duration-300 border border-primary/10 bg-background-dark">
                         <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
                             data-alt="Anime banner for {{ $song->post->title }}"
-                            style="background-image: url('{{ Storage::url($song->post->thumbnail) }}'); filter: brightness(0.5);">
+                            style="background-image: url('{{ $song->post->banner_url }}'); filter: brightness(0.5);">
                         </div>
                         <div
                             class="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/80 to-transparent">
@@ -117,8 +117,8 @@
                                     {{ $song->name }}</h3>
                                 <div class="text-slate-300 text-sm font-medium">
                                     @foreach ($song->artists as $artist)
-                                        <span
-                                            class="hover:text-primary transition-colors cursor-pointer text-xs">{{ $artist->name }}</span>
+                                        <a href="{{ route('artists.show', $artist) }}"
+                                            class="hover:text-primary transition-colors cursor-pointer text-xs">{{ $artist->name }}</a>
                                         @if (!$loop->last)
                                             <span class="text-white/20">,</span>
                                         @endif

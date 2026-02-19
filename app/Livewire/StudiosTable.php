@@ -14,10 +14,10 @@ class StudiosTable extends Component
 
     #[Url(except: '')]
     public $search = '';
-    
+
     #[Url(except: 'name_asc')]
     public $sort = 'name_asc';
-    
+
     public $perPage = 18;
     public $hasMorePages = false;
     public $readyToLoad = false;
@@ -67,7 +67,7 @@ class StudiosTable extends Component
                 if (!Auth::check() || !Auth::user()->isStaff()) {
                     $query->where('status', true);
                 }
-                $query->select(['posts.id', 'posts.banner', 'posts.thumbnail']);
+                $query->select(['posts.id']);
             }])
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%');

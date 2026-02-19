@@ -2,17 +2,8 @@
 
 @section('meta')
     @php
-        if ($post->thumbnail != null && Storage::disk('public')->exists($post->thumbnail)) {
-            $thumbnail_url = Storage::url($post->thumbnail);
-        } else {
-            $thumbnail_url = $post->thumbnail_src;
-        }
-
-        if ($post->banner != null && Storage::disk('public')->exists($post->banner)) {
-            $banner_url = Storage::url($post->banner);
-        } else {
-            $banner_url = $post->banner_src;
-        }
+        $thumbnail_url = $post->thumbnail_url;
+        $banner_url = $post->banner_url;
     @endphp
     <title>{{ $post->title }} - Themes List</title>
     <meta name="title" content="{{ $post->title }} Themes - Anirank">

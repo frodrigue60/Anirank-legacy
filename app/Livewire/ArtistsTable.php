@@ -14,13 +14,13 @@ class ArtistsTable extends Component
 
     #[Url(except: '')]
     public $name = '';
-    
+
     #[Url(except: 'A-Z')]
     public $sortBy = 'A-Z';
-    
+
     #[Url(except: 'Most Themes')]
     public $sortByThemes = 'Most Themes';
-    
+
     public $perPage = 24;
     public $hasMorePages = false;
     public $readyToLoad = false;
@@ -67,7 +67,7 @@ class ArtistsTable extends Component
         }
 
         $query = Artist::query()
-            ->select(['id', 'name', 'slug', 'thumbnail'])
+            ->select(['id', 'name', 'slug'])
             ->withCount('songs');
 
         if ($this->name) {

@@ -97,7 +97,7 @@ class UserFavoritesTable extends Component
         }
 
         $query = Song::query()
-            ->with(['post:id,title,slug,banner,thumbnail', 'artists:id,name,slug'])
+            ->with(['post:id,title,slug', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->favoritedBy($this->userId)
             ->when($this->type, function ($query) {

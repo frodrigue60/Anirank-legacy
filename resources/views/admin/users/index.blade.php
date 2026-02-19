@@ -80,15 +80,11 @@
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700 overflow-hidden">
-                                                @if ($user->avatar)
-                                                    <img src="{{ asset('storage/' . $user->avatar) }}" alt=""
-                                                        class="w-full h-full object-cover">
-                                                @else
-                                                    <span class="material-symbols-outlined">person</span>
-                                                @endif
+                                                <img src="{{ $user->avatar_url }}" alt=""
+                                                    class="w-full h-full object-cover">
                                             </div>
                                             <div class="flex flex-col">
-                                                <a href="{{ route('users.list', $user->slug) }}"
+                                                <a href="{{ route('admin.users.show', $user->id) }}"
                                                     class="text-sm font-bold text-white hover:text-blue-400 transition-colors">
                                                     {{ $user->name }}
                                                 </a>

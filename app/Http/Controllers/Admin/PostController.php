@@ -624,13 +624,13 @@ class PostController extends Controller
             $imageContent = $response->getBody()->getContents();
 
             if (extension_loaded('gd')) {
-                $imageContent = Image::make($imageContent)->encode('webp', 100); //->resize(150, 212)
+                $imageContent = Image::make($imageContent)->encode('webp', 100);
                 $file_name = Str::slug($post->slug) . '-' . time() . '.webp';
             }
             $path = 'thumbnails/' . $file_name;
             $this->storeSingleImage($path, $imageContent);
-            $post->thumbnail = $path;
-            $post->thumbnail_src = $item->coverImage->extraLarge;
+
+            $post->updateOrCreateImage($path, 'thumbnail');
         }
         return $post;
     }
@@ -645,12 +645,12 @@ class PostController extends Controller
 
             if (extension_loaded('gd')) {
                 $file_name = Str::slug($post->slug) . '-' . time() . '.webp';
-                $imageContent = Image::make($imageContent)->encode('webp', 100); //->resize(150, 212)
+                $imageContent = Image::make($imageContent)->encode('webp', 100);
             }
             $path = 'anime_banner/' . $file_name;
             $this->storeSingleImage($path, $imageContent);
-            $post->banner = $path;
-            $post->banner_src = $item->bannerImage;
+
+            $post->updateOrCreateImage($path, 'banner');
         }
         return $post;
     }
@@ -682,12 +682,10 @@ class PostController extends Controller
             }
             $path = 'thumbnails/' . $file_name;
             $this->storeSingleImage($path, $imageContent);
-            $post->thumbnail = $path;
+            $post->updateOrCreateImage($path, 'thumbnail');
         } else {
             /* Thumbnail witn url store */
             if ($request->thumbnail_src != null) {
-
-                $post->thumbnail_src = $request->thumbnail_src;
 
                 $client = new Client();
                 $response = $client->get($request->thumbnail_src);
@@ -713,10 +711,7 @@ class PostController extends Controller
 
                 $path = 'thumbnails/' . $file_name;
                 $this->storeSingleImage($path, $imageContent);
-                $post->thumbnail = $path;
-            } else {
-                $request->flash();
-                return Redirect::back()->with('error', "Post not created, thumbnail image not found");
+                $post->updateOrCreateImage($path, 'thumbnail');
             }
         }
 
@@ -744,12 +739,10 @@ class PostController extends Controller
             }
             $path = 'anime_banner/' . $file_name;
             $this->storeSingleImage($path, $imageContent);
-            $post->banner = $path;
+            $post->updateOrCreateImage($path, 'banner');
         } else {
             /* Bannter with url store */
             if ($request->banner_src != null) {
-
-                $post->banner_src = $request->banner_src;
 
                 $client = new Client();
                 $response = $client->get($request->banner_src);
@@ -766,14 +759,14 @@ class PostController extends Controller
                         'image/png'  => 'png',
                         'image/gif'  => 'gif',
                         'image/webp' => 'webp',
-                        default      => 'bin', // Extensión por defecto si no se reconoce
+                        default      => 'bin',
                     };
 
                     $file_name = Str::slug($request->title) . '-' . time() . '.' . $extension;
                 }
                 $path = 'anime_banner/' . $file_name;
                 $this->storeSingleImage($path, $imageContent);
-                $post->banner = $path;
+                $post->updateOrCreateImage($path, 'banner');
             }
         }
         return $post;

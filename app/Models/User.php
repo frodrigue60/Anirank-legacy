@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, \App\Traits\HasImages;
 
     /**
      * The attributes that are mass assignable.
@@ -26,8 +26,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'image',
-        'banner',
         'score_format',
         'slug'
     ];
@@ -179,6 +177,20 @@ class User extends Authenticatable
     public function getTotalPlaylistPostsAttribute()
     {
         return $this->playlists()->withCount('posts')->get()->sum('posts_count');
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($user) {
+            foreach ($user->images as $image) {
+                if ($image->disk && \Illuminate\Support\Facades\Storage::disk($image->disk)->exists($image->path)) {
+                    \Illuminate\Support\Facades\Storage::disk($image->disk)->delete($image->path);
+                }
+                $image->delete();
+            }
+        });
     }
 
     /**

@@ -79,7 +79,7 @@
             @isset($featuredSong)
                 <section class="relative w-full rounded-2xl overflow-hidden bg-surface-dark group">
                     <div class="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-overlay transition-transform duration-700 group-hover:scale-105"
-                        style="background-image: url('{{ Storage::url($featuredSong->post->banner) }}');">
+                        style="background-image: url('{{ $featuredSong->post->banner_url }}');">
                     </div>
                     <div class="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/80 to-transparent">
                     </div>
@@ -87,7 +87,7 @@
                         <div class="relative shrink-0 hero-glow">
                             <div
                                 class="w-48 h-48 md:w-64 md:h-64 rounded-xl shadow-2xl overflow-hidden relative border-2 border-white/10">
-                                <img src="{{ Storage::url($featuredSong->post->thumbnail) }}" alt="Anime cover art"
+                                <img src="{{ $featuredSong->post->thumbnail_url }}" alt="Anime cover art"
                                     class="w-full h-full object-cover">
                                 <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/80 to-transparent p-4 pt-10">
                                     <div class="flex items-center gap-1 text-yellow-400 font-bold text-lg">
@@ -152,7 +152,7 @@
                                 <div
                                     class="group relative bg-surface-darker p-4 rounded-xl hover:bg-surface-dark transition-colors border border-white/5 flex gap-4 items-center">
                                     <div class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
-                                        <img src="{{ Storage::url($song->post->thumbnail) }}" alt="{{ $song->name }}"
+                                        <img src="{{ $song->post->thumbnail_url }}" alt="{{ $song->name }}"
                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                         <div
                                             class="absolute top-1 left-1 {{ $loop->parent->first && $loop->first ? 'bg-primary' : 'bg-surface-dark' }} text-white text-xs font-bold px-1.5 py-0.5 rounded shadow border border-white/10">
@@ -231,8 +231,8 @@
                             <a href="{{ route('artists.show', $artist->slug) }}" class="flex items-center gap-3 min-w-0">
                                 <div
                                     class="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-colors shrink-0">
-                                    @if ($artist->image)
-                                        <img src="{{ Storage::url($artist->image) }}" alt="{{ $artist->name }}"
+                                    @if ($artist->images()->where('type', 'thumbnail')->exists())
+                                        <img src="{{ $artist->thumbnail_url }}" alt="{{ $artist->name }}"
                                             class="w-full h-full object-cover">
                                     @else
                                         <div

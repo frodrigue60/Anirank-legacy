@@ -1,10 +1,6 @@
 @foreach ($songs as $song)
     @php
-        $thumbnailUrl = $song->post->thumbnail_src;
-
-        if ($song->post->thumbnail && Storage::disk('public')->exists($song->post->thumbnail)) {
-            $thumbnailUrl = Storage::url($song->post->thumbnail);
-        }
+        $thumbnailUrl = $song->post->thumbnail_url;
     @endphp
     <article class="tarjeta">
         <div class="textos">

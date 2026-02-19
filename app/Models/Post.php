@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\HasImages;
 
     protected $fillable = [
         'title',
@@ -17,10 +17,6 @@ class Post extends Model
         'description',
         'anilist_id',
         'status',
-        'thumbnail',
-        'thumbnail_src',
-        'banner',
-        'banner_src',
         'year_id',
         'season_id',
         'format_id',
@@ -31,12 +27,11 @@ class Post extends Model
         parent::boot();
 
         static::deleting(function ($post) {
-            if ($post->thumbnail_src != null && Storage::disk('public')->exists($post->thumbnail)) {
-                Storage::disk('public')->delete($post->thumbnail);
-            }
-
-            if ($post->banner_src != null && Storage::disk('public')->exists($post->banner)) {
-                Storage::disk('public')->delete($post->banner);
+            foreach ($post->images as $image) {
+                if (Storage::disk($image->disk)->exists($image->path)) {
+                    Storage::disk($image->disk)->delete($image->path);
+                }
+                $image->delete();
             }
         });
     }

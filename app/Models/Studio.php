@@ -15,6 +15,17 @@ class Studio extends Model
         'slug'
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($studio) {
+            if (empty($studio->slug)) {
+                $studio->slug = \Illuminate\Support\Str::slug($studio->name);
+            }
+        });
+    }
+
     public function posts()
     {
         return $this->belongsToMany(Post::class);

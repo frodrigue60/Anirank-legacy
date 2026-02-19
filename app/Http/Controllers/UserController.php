@@ -138,21 +138,15 @@ class UserController extends Controller
             }
 
             $user = Auth::user();
-            $old_image = $user->image;
 
             $extension = $request->image->extension();
             $file_name = $user->slug . '-' . time() . '.' . $extension;
-            $path = 'profile';
+            $path = 'profile/' . $file_name;
 
-            $storedPath = $request->image->storeAs($path, $file_name, 'public');
+            $storedPath = $request->image->storeAs('profile', $file_name, 'public');
 
             if ($storedPath) {
-                $user->update(['image' => $storedPath]);
-
-                if ($old_image && Storage::disk('public')->exists($old_image)) {
-                    Storage::disk('public')->delete($old_image);
-                }
-
+                $user->updateOrCreateImage($storedPath, 'avatar');
                 return redirect(route('users.profile'))->with('success', 'Profile picture updated successfully!');
             }
         }
@@ -171,21 +165,15 @@ class UserController extends Controller
             }
 
             $user = Auth::user();
-            $old_banner = $user->banner;
 
             $extension = $request->banner->extension();
             $file_name = $user->slug . '-' . time() . '.' . $extension;
-            $path = 'banner';
+            $path = 'banner/' . $file_name;
 
-            $storedPath = $request->banner->storeAs($path, $file_name, 'public');
+            $storedPath = $request->banner->storeAs('banner', $file_name, 'public');
 
             if ($storedPath) {
-                $user->update(['banner' => $storedPath]);
-
-                if ($old_banner && Storage::disk('public')->exists($old_banner)) {
-                    Storage::disk('public')->delete($old_banner);
-                }
-
+                $user->updateOrCreateImage($storedPath, 'banner');
                 return redirect(route('users.profile'))->with('success', 'Banner updated successfully!');
             }
         }

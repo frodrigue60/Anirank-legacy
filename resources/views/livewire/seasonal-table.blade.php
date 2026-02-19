@@ -81,7 +81,7 @@
                                     class="w-16 h-16 rounded-lg overflow-hidden shrink-0 shadow-lg shadow-black/40 border border-white/10">
                                     <img alt="Cover for {{ $song->post->title }}"
                                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        src="{{ Storage::url($song->post->thumbnail) }}" />
+                                        src="{{ $song->post->thumbnail_url }}" />
                                 </div>
                                 <div class="min-w-0">
                                     <a href="{{ $song->url }}"
@@ -92,11 +92,12 @@
                                             class="text-primary font-bold truncate hover:underline">{{ $song->post->title }}</a>
 
                                         <span class="text-white/60 truncate">
-                                            @if ($song->artists->isNotEmpty())
-                                                {{ implode(', ', $song->artists->pluck('name')->toArray()) }}
-                                            @else
+                                            @forelse ($song->artists as $artist)
+                                                <a href="{{ route('artists.show', $artist) }}"
+                                                    class="hover:text-primary transition-colors cursor-pointer">{{ $artist->name }}</a>{{ !$loop->last ? ', ' : '' }}
+                                            @empty
                                                 N/A
-                                            @endif
+                                            @endforelse
                                         </span>
                                     </div>
                                 </div>

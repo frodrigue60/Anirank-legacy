@@ -17,6 +17,7 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🛠️ Standardized Admin Panel**: Robust CRUD control with unified search patterns and RESTful state management.
 - **🔔 Unified Notification System**: Real-time feedback via a custom subtle toast notification system, replacing intrusive popups.
 - **📝 Streamlined Request Workflow**: Simplified user request system with automatic categorization and manual staff-controlled status tracking.
+- **🖼️ Polymorphic Image System**: Centralized media management allowing multiple image types (thumbnails, banners, avatars) for any model with absolute decouple from legacy columns.
 
 ## Tech Stack
 

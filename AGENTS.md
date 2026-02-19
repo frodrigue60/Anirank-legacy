@@ -58,26 +58,25 @@ This section provides detailed documentation for all Eloquent models in `app/Mod
 
 Represents an **anime series**.
 
-| Field           | Type    | Description                              |
-| --------------- | ------- | ---------------------------------------- |
-| `title`         | string  | The name of the anime.                   |
-| `slug`          | string  | URL-friendly unique identifier.          |
-| `description`   | text    | Synopsis/description (nullable).         |
-| `anilist_id`    | bigint  | ID from the AniList API (nullable).      |
-| `status`        | boolean | Published status (0=draft, 1=published). |
-| `thumbnail`     | string  | Local path to the cover image.           |
-| `thumbnail_src` | string  | External URL for the cover image.        |
-| `banner`        | string  | Local path to the banner image.          |
-| `banner_src`    | string  | External URL for the banner image.       |
-| `year_id`       | FK      | References `years.id`.                   |
-| `season_id`     | FK      | References `seasons.id`.                 |
-| `format_id`     | FK      | References `formats.id`.                 |
+| Field         | Type    | Description                              |
+| ------------- | ------- | ---------------------------------------- |
+| `title`       | string  | The name of the anime.                   |
+| `slug`        | string  | URL-friendly unique identifier.          |
+| `description` | text    | Synopsis/description (nullable).         |
+| `anilist_id`  | bigint  | ID from the AniList API (nullable).      |
+| `status`      | boolean | Published status (0=draft, 1=published). |
+| `year_id`     | FK      | References `years.id`.                   |
+| `season_id`   | FK      | References `seasons.id`.                 |
+| `format_id`   | FK      | References `formats.id`.                 |
+
+**Trait:** Uses `HasImages`.
 
 **Relationships:**
 
 - `hasMany` → `Song`, `Report`
 - `belongsTo` → `Year`, `Season`, `Format`
 - `belongsToMany` → `Studio`, `Producer`, `ExternalLink`
+- `morphMany` → `Image` (alias via `images()`)
 - Custom: `openings()`, `endings()`, `rankingHistory()`
 
 ---
@@ -172,17 +171,40 @@ Represents the **actual video file** for a SongVariant.
 
 Represents a **musician or band**.
 
-| Field           | Type   | Description                      |
-| --------------- | ------ | -------------------------------- |
-| `name`          | string | Artist name (romanized/English). |
-| `name_jp`       | string | Japanese name (nullable).        |
-| `slug`          | string | URL-friendly identifier.         |
-| `thumbnail`     | string | Local path to artist image.      |
-| `thumbnail_src` | string | External URL for artist image.   |
+| Field     | Type   | Description                      |
+| --------- | ------ | -------------------------------- |
+| `name`    | string | Artist name (romanized/English). |
+| `name_jp` | string | Japanese name (nullable).        |
+| `slug`    | string | URL-friendly identifier.         |
+
+**Trait:** Uses `HasImages`.
+
+**Boot Behavior:** The `creating` event automatically generates a `slug` from the `name` field using `Str::slug()` if no slug is provided.
 
 **Relationships:**
 
 - `belongsToMany` → `Song`
+- `morphMany` → `Image` (via `HasImages` trait)
+
+---
+
+### `Image`
+
+Polymorphic storage for all media assets (Post covers/banners, Artist thumbnails, User avatars).
+
+| Field            | Type        | Description                                     |
+| ---------------- | ----------- | ----------------------------------------------- |
+| `id`             | bigint (PK) | Primary key.                                    |
+| `path`           | string      | Relative path in storage.                       |
+| `type`           | string      | `thumbnail`, `banner`, or `avatar`.             |
+| `imageable_id`   | bigint      | Polymorphic ID.                                 |
+| `imageable_type` | string      | Polymorphic type (`Post`, `Artist`, or `User`). |
+| `disk`           | string      | Storage disk (default: `public`).               |
+| `timestamps`     | datetime    | Created/updated at.                             |
+
+**Relationships:**
+
+- `morphTo` → `imageable` (Post, Artist, or User).
 
 ---
 
@@ -196,15 +218,16 @@ Standard Laravel user model with extensions.
 | `email`         | string   | User's email address.                         |
 | `password`      | string   | Hashed password.                              |
 | `roles`         | M:M      | Many-to-Many relationship with `Role` model.  |
-| `image`         | string   | Path to profile picture.                      |
-| `banner`        | string   | Path to profile banner.                       |
 | `score_format`  | string   | User's preferred rating display format.       |
 | `last_login_at` | datetime | Timestamp of the user's most recent activity. |
 | `slug`          | string   | URL-friendly identifier.                      |
 
+**Trait:** Uses `HasImages`.
+
 **Relationships:**
 
 - `hasMany` → `UserRequest`, `Comment`, `Favorite`, `Reaction`, `Playlist`
+- `morphMany` → `Image` (alias via `images()`)
 
 **Key Methods:**
 
@@ -337,15 +360,15 @@ Marks an entity as favorited by a user.
 
 ### Supporting Models
 
-| Model          | Purpose                                                |
-| -------------- | ------------------------------------------------------ |
-| `Year`         | Represents a year (e.g., 2024). Has many Posts, Songs. |
-| `Season`       | Represents a season (Winter, Spring, Summer, Fall).    |
-| `Studio`       | Animation studio (creative). Many-to-many with Post.   |
-| `Producer`     | Production company/committee. Many-to-many with Post.  |
-| `Format`       | Anime format (TV, Movie, OVA). Has many Posts.         |
-| `ExternalLink` | External links (MAL, AniList). Many-to-many with Post. |
-| `Report`       | User-submitted reports for SongVariants.               |
+| Model          | Purpose                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------ |
+| `Year`         | Represents a year (e.g., 2024). Has many Posts, Songs.                                     |
+| `Season`       | Represents a season (Winter, Spring, Summer, Fall).                                        |
+| `Studio`       | Animation studio (creative). Many-to-many with Post. Auto-generates `slug` on `creating`.  |
+| `Producer`     | Production company/committee. Many-to-many with Post. Auto-generates `slug` on `creating`. |
+| `Format`       | Anime format (TV, Movie, OVA). Has many Posts.                                             |
+| `ExternalLink` | External links (MAL, AniList). Many-to-many with Post.                                     |
+| `Report`       | User-submitted reports for SongVariants.                                                   |
 
 #### `user_requests`
 
@@ -966,15 +989,15 @@ Video files associated with song variants.
 
 Musicians and bands.
 
-| Column          | Type                | Description             |
-| --------------- | ------------------- | ----------------------- |
-| `id`            | `bigint` (PK)       | Primary key             |
-| `name`          | `string`            | Artist name (romanized) |
-| `name_jp`       | `string` (nullable) | Artist name (Japanese)  |
-| `slug`          | `string` (unique)   | URL-friendly name       |
-| `thumbnail`     | `string` (nullable) | Artist image path       |
-| `thumbnail_src` | `string` (nullable) | Artist image source URL |
-| `timestamps`    | `datetime`          | Created/updated at      |
+| Column       | Type                | Description                                              |
+| ------------ | ------------------- | -------------------------------------------------------- |
+| `id`         | `bigint` (PK)       | Primary key                                              |
+| `name`       | `string`            | Artist name (romanized)                                  |
+| `name_jp`    | `string` (nullable) | Artist name (Japanese)                                   |
+| `slug`       | `string` (unique)   | URL-friendly name (auto-generated from `name` on create) |
+| `timestamps` | `datetime`          | Created/updated at                                       |
+
+> **Images** are stored in the polymorphic `images` table. Use `$artist->thumbnail_url` / `$artist->banner_url`.
 
 ---
 
@@ -1205,32 +1228,33 @@ Routes are defined in `routes/web.php` and `routes/api.php`.
 
 #### Public Routes
 
-| Route                   | Method | Controller / Action        | Name              | Description               |
-| ----------------------- | ------ | -------------------------- | ----------------- | ------------------------- |
-| `/`                     | GET    | `PostController@index`     | `/`               | Homepage with top OPs/EDs |
-| `/songs`                | GET    | `SongController@index`     | `songs.index`     | Browse all themes         |
-| `/anime/{slug}`         | GET    | `PostController@show`      | `post.show`       | Anime detail page         |
-| `/animes`               | GET    | `PostController@animes`    | `animes`          | Browse all anime          |
-| `/anime/{anime}/{song}` | GET    | `SongController@show`      | `songs.show`      | Song detail page          |
-| `/songs/seasonal`       | GET    | `SongController@seasonal`  | `songs.seasonal`  | Seasonal songs view       |
-| `/songs/ranking`        | GET    | `SongController@ranking`   | `songs.ranking`   | Song rankings             |
-| `/welcome`              | GET    | `UserController@welcome`   | `welcome`         | Welcome/onboarding page   |
-| `/users/{slug}`         | GET    | `UserController@userList`  | `user.list`       | User's rated themes list  |
-| `/profile`              | GET    | `UserController@index`     | `profile`         | Current user's profile    |
-| `/favorites`            | GET    | `UserController@favorites` | `favorites`       | Current user's favorites  |
-| `/producers`            | GET    | `ProducerController@index` | `producers.index` | Browse all producers      |
-| `/offline`              | GET    | (view)                     | —                 | Offline fallback page     |
+| Route                           | Method | Controller / Action            | Name                | Description               |
+| ------------------------------- | ------ | ------------------------------ | ------------------- | ------------------------- |
+| `/`                             | GET    | `PostController@index`         | `home`              | Homepage with top OPs/EDs |
+| `/songs`                        | GET    | `SongController@index`         | `songs.index`       | Browse all themes         |
+| `/songs/seasonal`               | GET    | `SongController@seasonal`      | `songs.seasonal`    | Seasonal songs view       |
+| `/songs/ranking`                | GET    | `SongController@ranking`       | `songs.ranking`     | Song rankings             |
+| `/song/{post:slug}/{song:slug}` | GET    | `SongController@showAnimeSong` | `songs.show.nested` | Song detail page (scoped) |
+| `/animes`                       | GET    | `PostController@animes`        | `posts.animes`      | Browse all anime          |
+| `/anime/{post:slug}`            | GET    | `PostController@show`          | `posts.show`        | Anime detail page         |
+| `/artists`                      | GET    | `ArtistController@index`       | `artists.index`     | Browse all artists        |
+| `/artists/{artist:slug}`        | GET    | `ArtistController@show`        | `artists.show`      | Artist profile page       |
+| `/studios`                      | GET    | `StudioController@index`       | `studios.index`     | Browse all studios        |
+| `/studios/{studio:slug}`        | GET    | `StudioController@show`        | `studios.show`      | Studio profile page       |
+| `/producers`                    | GET    | `ProducerController@index`     | `producers.index`   | Browse all producers      |
+| `/producers/{producer:slug}`    | GET    | `ProducerController@show`      | `producers.show`    | Producer profile page     |
+| `/users/{user:slug}`            | GET    | `UserController@show`          | `users.show`        | Public user profile       |
 
 #### Resource Routes (Public)
 
-| Resource    | Controller           | Actions         |
-| ----------- | -------------------- | --------------- |
-| `artists`   | `ArtistController`   | `index`, `show` |
-| `years`     | `YearController`     | Full resource   |
-| `seasons`   | `SeasonController`   | Full resource   |
-| `studios`   | `StudioController`   | Full resource   |
-| `producers` | `ProducerController` | Full resource   |
-| `playlists` | `PlaylistController` | Full resource   |
+| Resource    | Controller              | Methods (write-only)       | Notes                                    |
+| ----------- | ----------------------- | -------------------------- | ---------------------------------------- |
+| `posts`     | `PostController`        | `store`,`update`,`destroy` | Read routes are defined manually by slug |
+| `songs`     | `SongController`        | `store`,`update`,`destroy` | Read routes are defined manually by slug |
+| `variants`  | `SongVariantController` | Full resource              |                                          |
+| `requests`  | `UserRequestController` | Full resource              |                                          |
+| `reports`   | `ReportController`      | Full resource              |                                          |
+| `playlists` | `PlaylistController`    | Full resource              |                                          |
 
 #### User Interaction Routes
 
@@ -1441,7 +1465,10 @@ The application heavily utilizes **Livewire** for reactive UI components, especi
     - **Views**: Tracked in `DailyMetric` (daily snapshots) and `songs.views` (total).
     - **User Activity**: Automated via `UpdateLastLogin` listener on `Illuminate\Auth\Events\Login`.
 4.  **Configuration**: Always use `config()` instead of `env()` in views and application code.
-5.  **Routes**: Grouped by context (`public`, `admin.`) with resource controllers where applicable.
+5.  **Routes**:
+    - Public read routes for `Post`, `Song`, `Artist`, `Studio`, and `Producer` are **manually defined** using `{model:slug}` explicit binding — never via `Route::resource` for `index`/`show`.
+    - `Route::resource` for `posts` and `songs` is scoped to **write-only** (`store`, `update`, `destroy`) to avoid name conflicts with the manually defined slug routes.
+    - Adding a new public entity? Define `GET /{entity}` (index) and `GET /{entity}/{entity:slug}` (show) manually in the appropriate controller group.
 
 ---
 

@@ -85,7 +85,7 @@ class SongsTable extends Component
         }
 
         $query = Song::query()
-            ->with(['post:id,title,slug,banner,thumbnail', 'artists:id,name,slug'])
+            ->with(['post:id,title,slug', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->withCount('likes')
             ->whereHas('post', function ($q) {

@@ -107,10 +107,11 @@
                             <div class="space-y-2">
                                 <label for="thumbnail_src" class="block text-sm font-bold text-zinc-400">Thumbnail
                                     URL</label>
-                                @if ($post->image)
+                                @if ($post->images()->where('type', 'thumbnail')->exists())
                                     <div
                                         class="w-20 h-28 bg-zinc-800 rounded-xl overflow-hidden mb-2 border border-zinc-700">
-                                        <img src="{{ $post->image }}" alt="" class="w-full h-full object-cover">
+                                        <img src="{{ $post->thumbnail_url }}" alt=""
+                                            class="w-full h-full object-cover">
                                     </div>
                                 @endif
                                 <input type="text" name="thumbnail_src" id="thumbnail_src"
@@ -131,7 +132,7 @@
                             <div class="space-y-2">
                                 <label for="banner_src" class="block text-sm font-bold text-zinc-400">Banner URL</label>
                                 <input type="text" name="banner_src" id="banner_src"
-                                    value="{{ old('banner_src', $post->banner_src) }}"
+                                    value="{{ old('banner_src', $post->images()->where('type', 'banner')->exists() ? '' : $post->banner_src) }}"
                                     class="block w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
                                     placeholder="https://...">
                             </div>

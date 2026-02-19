@@ -107,8 +107,7 @@
                             <div
                                 class="aspect-2/3 rounded-lg overflow-hidden bg-surface-darker shadow-lg relative border border-white/5">
                                 {{-- Cover Image --}}
-                                <img src="{{ Storage::url($post->thumbnail) }}" alt="{{ $post->title }}"
-                                    loading="lazy"
+                                <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" loading="lazy"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
 
                                 <div class="absolute top-3 right-3 flex items-end gap-1.5 z-20">
@@ -145,8 +144,8 @@
                             {{-- COVER (Left) --}}
                             <div class="w-[120px] md:w-[180px] shrink-0 relative aspect-2/3">
                                 <a href="{{ route('posts.show', $post) }}" class="block w-full h-full">
-                                    <img src="{{ Storage::url($post->thumbnail) }}" alt="{{ $post->title }}"
-                                        loading="lazy" class="w-full h-full object-cover">
+                                    <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" loading="lazy"
+                                        class="w-full h-full object-cover">
                                 </a>
 
                                 {{-- Overlay: Title & Studio --}}
@@ -158,7 +157,10 @@
                                     </h3>
                                     @if ($post->studios->isNotEmpty())
                                         <div class="text-[12px] font-bold text-primary truncate">
-                                            {{ $post->studios->first()->name }}
+                                            @foreach ($post->studios as $studio)
+                                                <a href="{{ route('studios.show', $studio) }}"
+                                                    class="hover:underline transition-all">{{ $studio->name }}</a>{{ !$loop->last ? ', ' : '' }}
+                                            @endforeach
                                         </div>
                                     @endif
                                 </div>
@@ -203,8 +205,7 @@
                             class="flex items-center gap-4 bg-surface-dark/30 border border-white/5 p-3 rounded-lg hover:bg-white/5 transition-colors group">
                             {{-- Cover --}}
                             <div class="w-12 h-12 rounded overflow-hidden shrink-0">
-                                <img src="{{ Storage::url($post->thumbnail) }}" alt="{{ $post->title }}"
-                                    loading="lazy"
+                                <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}" loading="lazy"
                                     class="w-full h-full object-cover text-white/10 text-[8px] flex items-center justify-center">
                             </div>
 

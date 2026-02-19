@@ -85,7 +85,7 @@
                             <div
                                 class="bg-zinc-950/50 border border-zinc-800 rounded-2xl p-4 flex items-center gap-4 group hover:border-zinc-700 transition-all">
                                 <div class="w-12 h-16 rounded-lg bg-zinc-900 overflow-hidden shrink-0">
-                                    <img src="{{ Storage::url($song->post->thumbnail) }}"
+                                    <img src="{{ $song->post->thumbnail_url }}"
                                         class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
                                         alt="">
                                 </div>

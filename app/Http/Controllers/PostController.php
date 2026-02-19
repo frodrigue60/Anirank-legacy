@@ -29,7 +29,7 @@ class PostController extends Controller
         $status = true;
 
         $recently = Song::with(['post' => function ($q) {
-            $q->select('id', 'title', 'slug', 'banner', 'thumbnail');
+            $q->select('id', 'title', 'slug');
         }])
             ->whereHas('post', function ($query) use ($status) {
                 $query->where('status', $status);
@@ -39,7 +39,7 @@ class PostController extends Controller
             ->get();
 
         $popular = Song::with(['post' => function ($q) {
-            $q->select('id', 'title', 'slug', 'banner', 'thumbnail');
+            $q->select('id', 'title', 'slug');
         }])
             ->withCount('likes')
             ->whereHas('post', function ($query) use ($status) {
@@ -50,7 +50,7 @@ class PostController extends Controller
             ->get();
 
         $viewed = Song::with(['post' => function ($q) {
-            $q->select('id', 'title', 'slug', 'banner', 'thumbnail');
+            $q->select('id', 'title', 'slug');
         }])
             ->whereHas('post', function ($query) use ($status) {
                 $query->where('status', $status);
@@ -60,7 +60,7 @@ class PostController extends Controller
             ->get();
 
         $openings = Song::with(['post' => function ($q) {
-            $q->select('id', 'title', 'slug', 'banner', 'thumbnail');
+            $q->select('id', 'title', 'slug');
         }, 'artists:id,name'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'OP')
@@ -72,7 +72,7 @@ class PostController extends Controller
             ->get();
 
         $endings = Song::with(['post' => function ($q) {
-            $q->select('id', 'title', 'slug', 'banner', 'thumbnail');
+            $q->select('id', 'title', 'slug');
         }, 'artists:id,name'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'ED')
@@ -86,10 +86,10 @@ class PostController extends Controller
         $weaklyRanking = $openings->concat($endings);
         $weaklyRanking = $this->setScoreSongs($weaklyRanking, $user);
 
-        $artists = Artist::select('id', 'name', 'slug', 'thumbnail')->latest()->take(20)->get();
+        $artists = Artist::select('id', 'name', 'slug')->latest()->take(20)->get();
 
         $featuredSong = Song::with(['post' => function ($q) {
-            $q->select('id', 'title', 'slug', 'banner', 'thumbnail');
+            $q->select('id', 'title', 'slug');
         }, 'artists:id,name'])
             ->whereHas('post', function ($q) use ($status) {
                 $q->where('status', $status);
