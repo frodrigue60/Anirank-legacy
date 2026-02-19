@@ -13,17 +13,20 @@ class ReportModal extends Component
     public $songId;
     public $title;
     public $content;
+    public $isSubmitting = false;
 
     #[On('openReportModal')]
     public function openReportModal($songId = null)
     {
-        $this->reset(['title', 'content']);
+        $this->reset(['title', 'content', 'isSubmitting']);
         $this->songId = $songId;
         $this->showModal = true;
     }
 
     public function submitReport()
     {
+        if ($this->isSubmitting) return;
+        $this->isSubmitting = true;
         \Illuminate\Support\Facades\Log::info('submitReport triggered', [
             'songId' => $this->songId,
             'title' => $this->title,
@@ -71,7 +74,7 @@ class ReportModal extends Component
 
             $this->dispatch(
                 'toast',
-                message: "Thanks for your report! [ID: #{$report->id} | Song #{$this->songId}]",
+                message: "Thanks for your report!",
                 type: 'success'
             );
         } catch (\Throwable $th) {

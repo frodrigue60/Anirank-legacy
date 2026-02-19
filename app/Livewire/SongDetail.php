@@ -68,7 +68,7 @@ class SongDetail extends Component
         ];
 
         $song->rawScore      = round($song->averageRating, 1);
-        $song->formattedScore = $song->formattedAvgScore($format);
+        $song->formattedScore = $song->score ?? $song->formattedAvgScore($format);
         $song->scoreString   = $song->formattedScore . '/' . ($denominatorMap[$format] ?? 100);
     }
 

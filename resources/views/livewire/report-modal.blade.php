@@ -73,6 +73,7 @@
                             Cancel
                         </button>
                         <button type="submit" wire:loading.attr="disabled" wire:target="submitReport"
+                            :disabled="$isSubmitting"
                             class="flex-1 px-4 py-3 rounded-xl bg-red-600 text-white font-bold shadow-lg shadow-red-900/20 hover:bg-red-500 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                             <span wire:loading.remove wire:target="submitReport">Submit Report</span>
                             <span wire:loading wire:target="submitReport">Submitting...</span>

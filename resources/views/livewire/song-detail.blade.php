@@ -125,9 +125,13 @@
                         class="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">Detailed
                         Score</span>
                     <div class="flex items-center gap-2">
+                        @php
+                            $user = auth()->user();
+                            $format = $user?->score_format ?? 'POINT_100';
+                            $score = $song->score ?? $song->formattedAvgScore($format);
+                        @endphp
                         <span class="material-symbols-outlined text-yellow-400 text-[20px] filled">star</span>
-                        <span
-                            class="text-yellow-400 font-black text-xl">{{ number_format($song->averageRating, 1) ?? 'N/A' }}</span>
+                        <span class="text-yellow-400 font-black text-xl">{{ number_format($score, 1) }}</span>
                     </div>
                 </button>
             </div>
@@ -157,7 +161,7 @@
                 </button>
 
                 @auth
-                    <button type="button" onclick="Livewire.dispatch('openReportModal', { songId: {{ $song->id }} })"
+                    <button type="button" @click="$dispatch('openReportModal', { songId: {{ $song->id }} })"
                         title="Report Issue"
                         class="group w-12 h-11 flex items-center justify-center rounded-2xl border border-white/10 bg-surface-dark hover:bg-red-500/20 text-white/60 hover:text-red-500 transition-all">
                         <span class="material-symbols-outlined text-[22px]">report_problem</span>

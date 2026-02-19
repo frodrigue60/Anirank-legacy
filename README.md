@@ -24,6 +24,7 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **⚡ Vite Optimization**: Streamlined asset configuration to minimize production bundle size and improve build performance.
 - **🏷️ Automated Genre System**: Multi-layered categorization with direct AniList synchronization and advanced filtering capabilities across all database views.
 - **🔒 Livewire Request Guard**: Application-wide optimization pattern that blocks redundant requests and disables interactive elements during data loading for a robust UX.
+- **🚀 Optimized Dispatching**: Migrated inter-component events (like modal triggers) to client-side dispatches, eliminating unnecessary server roundtrips.
 - **💬 Livewire Request Modal**: Fully interactive and reactive user request system, replacing legacy modal patterns.
 
 ## Tech Stack

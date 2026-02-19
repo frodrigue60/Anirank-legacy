@@ -70,12 +70,15 @@ To maintain a lean production bundle, `vite.config.mjs` only registers high-leve
 
 ### Livewire Search Optimizations
 
-The application implements a request-reduction pattern across all searchable tables.
-
+- **🔒 Livewire Request Guard**: Application-wide optimization pattern that blocks redundant requests and disables interactive elements during data loading for a robust UX.
+- **🚀 Optimized Dispatching**: Improved performance by migrating inter-component events (like modal triggers) to Alpine-based `@click` dispatches, reducing server roundtrips.
+- **💬 Livewire Request Modal**: Fully interactive and reactive user request system, replacing legacy modal patterns.
 - **Background Locking**: Filter containers use `wire:loading.class="opacity-50 pointer-events-none"` to prevent interaction during active requests.
 - **Input Disabling**: All search inputs and select dropdowns use `wire:loading.attr="disabled"` to prevent multiple simultaneous requests.
-- **Conditional Handlers**: Action buttons (filters, view switchers) use conditional `wire:click` checks (e.g., `wire:click="$activeFilter !== 'all' ? setFilter('all') : null"`) to block redundant requests when clicking an already active state.
-- **Visual Feedback**: Buttons and inputs reflect their active state and disability status during transitions.
+- **Interactive Guards**: High-frequency buttons (Like, Dislike, Favorite, Variant Switchers) use `wire:loading.attr="disabled"` to prevent spamming. Containers use `wire:loading.class="opacity-50 pointer-events-none"` for visual consistency.
+- **Conditional Handlers**: Action buttons use conditional `wire:click` checks (e.g., `wire:click="$activeFilter !== 'all' ? setFilter('all') : null"`) to block redundant requests when clicking an already active state.
+- **Client-Side Dispatching**: For component-to-component communication (like opening modals), we use Alpine's `@click="$dispatch('event')"` instead of `wire:click="$dispatch('event')"`. This bypasses the unnecessary server roundtrip of the origin component, sending the request directly to the target listener.
+- **Server-Side Submission Guards**: Sensitive actions (like submitting reports) implement a protected `$isSubmitting` boolean state to prevent double-processing on the backend.
 
 ---
 
