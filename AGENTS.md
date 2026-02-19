@@ -32,6 +32,7 @@ The application uses a **Modern Dark Theme** with a deep purple aesthetic.
 - **Display**: `Spline Sans` (Headings, UI labels)
 - **Body**: `Noto Sans` (Descriptions, content)
 - **Icons**: Google Material Symbols (Outlined)
+    - ⚠️ **No hardcoded `font-size`**: The `.material-symbols-outlined` class in `fonts.css` must **NOT** set a fixed `font-size`. Icons inherit their size from the parent container or from Tailwind classes (`text-sm`, `text-lg`, `text-2xl`, etc.). Adding a fixed `font-size` will break icon sizing across the entire app.
 
 ### Color Palette
 

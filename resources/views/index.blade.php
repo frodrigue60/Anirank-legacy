@@ -149,7 +149,7 @@
                             </div>
                             @foreach ($chunk as $song)
                                 <div
-                                    class="group relative bg-surface-darker p-4 rounded-xl hover:bg-surface-dark transition-colors border border-white/5 flex gap-4 items-center">
+                                    class="group relative bg-surface-darker p-3 rounded-xl hover:bg-surface-dark transition-colors border border-white/5 flex gap-4 items-center">
                                     <div class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
                                         <x-ui.image :src="$song->post->thumbnail_url" :alt="$song->name"
                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />

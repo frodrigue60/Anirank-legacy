@@ -102,7 +102,7 @@
     font-family: "Material Symbols Outlined";
     font-weight: normal;
     font-style: normal;
-    font-size: 24px;
+    /* font-size deliberately omitted: inherits from container or Tailwind classes (text-sm, text-lg, etc.) */
     line-height: 1;
     display: inline-block;
     text-transform: none !important;
