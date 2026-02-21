@@ -91,11 +91,11 @@ class PostController extends Controller
 
     public function index(Request $request)
     {
-        // $q = $request->q;
         $season_id = $request->season_id;
         $year_id = $request->year_id;
         $name = $request->name;
         $format_id = $request->format_id;
+        $genre_id = $request->genre_id;
 
         $status = true;
 
@@ -112,7 +112,15 @@ class PostController extends Controller
             ->when($format_id, function ($query, $format_id) {
                 $query->where('format_id', $format_id);
             })
-            ->paginate(15);
+            ->when($genre_id, function ($query, $genre_id) {
+                $query->whereHas('genres', function ($q) use ($genre_id) {
+                    $q->where('genres.id', $genre_id);
+                });
+            })
+            ->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name'])
+            ->withCount('songs')
+            ->orderBy('title')
+            ->paginate($request->input('per_page', 15));
 
         return response()->json($posts);
     }

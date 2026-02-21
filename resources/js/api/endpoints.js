@@ -3,7 +3,12 @@ import API_BASE_URL from "@api/config.js";
 const ENDPOINTS = {
     AUTH: {
         LOGIN: `${API_BASE_URL}/auth/login`,
+        REGISTER: `${API_BASE_URL}/auth/register`,
+        ME: `${API_BASE_URL}/auth/me`,
         LOGOUT: `${API_BASE_URL}/auth/logout`,
+    },
+    CONFIG: {
+        INIT: `${API_BASE_URL}/init`,
     },
     USERS: {
         BASE: `${API_BASE_URL}/users`,
@@ -27,6 +32,7 @@ const ENDPOINTS = {
     },
     POSTS: {
         ANIMES: `${API_BASE_URL}/animes`,
+        HOME: `${API_BASE_URL}/home`,
         SEARCH: (q) => `${API_BASE_URL}/search?q=${q}`,
     },
     ARTISTS: {

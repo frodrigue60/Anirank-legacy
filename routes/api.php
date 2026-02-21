@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\ArtistController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\InitController;
 use App\Http\Controllers\Api\PlaylistController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\ReportController;
@@ -13,15 +15,20 @@ use App\Http\Controllers\Api\UserRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Auth (Public)
+Route::controller(AuthController::class)->prefix('auth')->group(function () {
+    Route::post('register', 'register')->name('api.auth.register');
+    Route::post('login', 'login')->name('api.auth.login');
 });
 
-// Posts
+// Initialization (SPA Config)
+Route::get('init', [InitController::class, 'index'])->name('api.init');
+
+// Posts / Animes
 Route::controller(PostController::class)->group(function () {
     Route::get('home', 'home')->name('api.home');
     Route::get('search', 'globalSearch')->name('api.search');
-    Route::get('posts', 'index')->name('api.posts.index');
+    Route::get('animes', 'index')->name('api.animes.index');
     Route::get('posts/{post}', 'show')->name('api.posts.show');
 });
 
@@ -61,6 +68,12 @@ Route::get('studios/{studio}/animes', [StudioController::class, 'animes'])->name
 
 // Auth Routes
 Route::middleware(['auth:sanctum'])->group(function () {
+    // Auth
+    Route::controller(AuthController::class)->prefix('auth')->group(function () {
+        Route::post('logout', 'logout')->name('api.auth.logout');
+        Route::get('me', 'me')->name('api.auth.me');
+    });
+
     // Playlists
     Route::controller(PlaylistController::class)->group(function () {
         Route::get('playlists', 'index')->name('api.playlists.index');
