@@ -3,24 +3,33 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Song;
 use App\Models\Artist;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Year;
-use App\Models\Season;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
+use App\Models\Song;
 use App\Models\SongVariant;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ArtistController extends Controller
 {
-    public function songsFilter(Request $request, $id)
+    public function index()
     {
-        $artist = Artist::where('id', $id)->first();
+        $artists = Artist::paginate(18);
 
+        return response()->json([
+            'artists' => $artists,
+        ]);
+    }
+
+    public function show(Artist $artist)
+    {
+        return response()->json([
+            'artist' => $artist,
+        ]);
+    }
+
+    public function songs(Request $request, Artist $artist)
+    {
         $user = Auth::check() ? Auth::user() : null;
         $status = true;
         $type = $request->type;
@@ -29,7 +38,7 @@ class ArtistController extends Controller
         $year_id = $request->year_id;
         $season_id = $request->season_id;
 
-        $songs = Song::whereHas('artists', function ($query) use ($artist) {
+        $query = Song::whereHas('artists', function ($query) use ($artist) {
             $query->where('artists.id', $artist->id);
         })
             ->when($year_id, function ($query) use ($year_id) {
@@ -41,121 +50,30 @@ class ArtistController extends Controller
             ->whereHas('post', function ($query) use ($name, $status) {
                 $query->where('status', $status)
                     ->when($name, function ($query) use ($name) {
-                        $query->where('title', 'like', '%' . $name . '%');
+                        $query->where('title', 'like', '%'.$name.'%');
                     });
             })
             ->when($type, function ($query) use ($type) {
                 $query->where('type', $type);
-            })
-            ->get();
+            });
 
-        $songs = $this->setScoreSongs($songs, $user);
-        $songs = $this->sortSongs($sort, $songs);
-        $songs = $this->paginate($songs, 15);
+        // Ordenamos por base de datos antes de paginar
+        if ($sort === 'averageRating') {
+            $query->orderByDesc('averageRating');
+        } elseif ($sort === 'view_count') {
+            $query->orderByDesc('viewCount');
+        } elseif ($sort === 'recent') {
+            $query->orderByDesc('created_at');
+        } else {
+            // Unir con posts para ordenar por título si es necesario, o usar orden por defecto
+            $query->orderByDesc('id');
+        }
+
+        $songs = $query->paginate(18);
 
         return response()->json([
-            'html' => view('partials.songs.cards-v2', compact('songs'))->render(),
-            'songs' => $songs
+            'songs' => $songs,
         ]);
-    }
-
-    public function sortVariants($sort, $songVariants)
-    {
-        switch ($sort) {
-            case 'title':
-                $songVariants = $songVariants->sortBy(function ($song_variant) {
-                    return $song_variant->song->post->title;
-                });
-                return $songVariants;
-                break;
-
-            case 'averageRating':
-                $songVariants = $songVariants->sortByDesc('averageRating');
-                return $songVariants;
-                break;
-
-            case 'view_count':
-                $songVariants = $songVariants->sortByDesc('views');
-                return $songVariants;
-                break;
-
-            case 'likeCount':
-                $songVariants = $songVariants->sortByDesc('likeCount');
-                return $songVariants;
-                break;
-
-            case 'recent':
-                $songVariants = $songVariants->sortByDesc('created_at');
-                return $songVariants;
-                break;
-
-            default:
-                $songVariants = $songVariants->sortBy(function ($song_variant) {
-                    return $song_variant->song->post->title;
-                });
-                return $songVariants;
-                break;
-        }
-    }
-
-    public function setScoreOnlyVariants($variants, $user = null)
-    {
-        $variants->each(function ($variant) use ($user) {
-            $variant->userScore = null;
-            $factor = 1;
-            $isDecimalFormat = false;
-            $denominator = 100;
-
-            if ($user) {
-                switch ($user->score_format) {
-                    case 'POINT_100':
-                        $factor = 1;
-                        $denominator = 100;
-                        break;
-                    case 'POINT_10_DECIMAL':
-                        $factor = 0.1;
-                        $denominator = 10;
-                        $isDecimalFormat = true;
-                        break;
-                    case 'POINT_10':
-                        $factor = 1 / 10;
-                        $denominator = 10;
-                        break;
-                    case 'POINT_5':
-                        $factor = 1 / 20;
-                        $denominator = 5;
-                        $isDecimalFormat = true;
-                        break;
-                }
-
-                if ($userRating = $this->getUserRating($variant->id, $user->id)) {
-                    $variant->userScore = $isDecimalFormat
-                        ? round($userRating->rating * $factor, 1)
-                        : (int) round($userRating->rating * $factor);
-                }
-            }
-
-            $variant->score = $isDecimalFormat
-                ? round($variant->averageRating * $factor, 1)
-                : (int) round($variant->averageRating * $factor);
-
-            $variant->scoreString = $this->formatScoreString(
-                $variant->score,
-                $user->score_format ?? 'POINT_100',
-                $denominator
-            );
-        });
-
-        return $variants;
-    }
-
-    public function paginate($collection, $perPage = 18, $page = null, $options = [])
-    {
-        $page = Paginator::resolveCurrentPage();
-        $options = ['path' => Paginator::resolveCurrentPath()];
-        $items = $collection instanceof Collection ? $collection : Collection::make($collection);
-        $collection = new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
-        return $collection;
     }
 
     public function getUserRating(int $song_variant_id, int $user_id)
@@ -171,15 +89,15 @@ class ArtistController extends Controller
     {
         switch ($format) {
             case 'POINT_100':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_10_DECIMAL':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             case 'POINT_10':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_5':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             default:
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
         }
     }
 
@@ -190,21 +108,26 @@ class ArtistController extends Controller
                 $songs = $songs->sortBy(function ($song) {
                     return $song->post->title;
                 });
+
                 return $songs;
                 break;
             case 'averageRating':
                 $songs = $songs->sortByDesc('averageRating');
+
                 return $songs;
             case 'view_count':
                 $songs = $songs->sortByDesc('view_count');
+
                 return $songs;
 
             case 'likeCount':
                 $songs = $songs->sortByDesc('likeCount');
+
                 return $songs;
                 break;
             case 'recent':
                 $songs = $songs->sortByDesc('created_at');
+
                 return $songs;
                 break;
 
@@ -212,6 +135,7 @@ class ArtistController extends Controller
                 $songs = $songs->sortBy(function ($song) {
                     return $song->post->title;
                 });
+
                 return $songs;
                 break;
         }

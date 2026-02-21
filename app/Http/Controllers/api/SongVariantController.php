@@ -4,18 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\SongVariant;
-use Illuminate\Http\Request;
-use App\Models\Year;
-use App\Models\Season;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 
 class SongVariantController extends Controller
 {
+    public function index()
+    {
+        $variants = SongVariant::with('video', 'song.post')->paginate(18);
+
+        return response()->json([
+            'variants' => $variants,
+        ]);
+    }
+
     public function setScoreOnlyVariants($variants, $user = null)
     {
         $variants->each(function ($variant) use ($user) {
@@ -74,26 +75,31 @@ class SongVariantController extends Controller
                 $songVariants = $songVariants->sortBy(function ($song_variant) {
                     return $song_variant->song->post->title;
                 });
+
                 return $songVariants;
                 break;
 
             case 'averageRating':
                 $songVariants = $songVariants->sortByDesc('averageRating');
+
                 return $songVariants;
                 break;
 
             case 'view_count':
                 $songVariants = $songVariants->sortByDesc('views');
+
                 return $songVariants;
                 break;
 
             case 'likeCount':
                 $songVariants = $songVariants->sortByDesc('likeCount');
+
                 return $songVariants;
                 break;
 
             case 'recent':
                 $songVariants = $songVariants->sortByDesc('created_at');
+
                 return $songVariants;
                 break;
 
@@ -101,33 +107,25 @@ class SongVariantController extends Controller
                 $songVariants = $songVariants->sortBy(function ($song_variant) {
                     return $song_variant->song->post->title;
                 });
+
                 return $songVariants;
                 break;
         }
-    }
-
-    public function paginate($collection, $perPage = 18, $page = null, $options = [])
-    {
-        $page = Paginator::resolveCurrentPage();
-        $options = ['path' => Paginator::resolveCurrentPath()];
-        $items = $collection instanceof Collection ? $collection : Collection::make($collection);
-        $collection = new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
-        return $collection;
     }
 
     protected function formatScoreString($score, $format, $denominator)
     {
         switch ($format) {
             case 'POINT_100':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_10_DECIMAL':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             case 'POINT_10':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_5':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             default:
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
         }
     }
 
@@ -140,13 +138,13 @@ class SongVariantController extends Controller
             ->first(['rating']);
     }
 
-    public function getVideos(SongVariant $variant)
+    public function video(SongVariant $variant)
     {
         $video = $variant->video;
-        $video->publicUrl = Storage::url($video->video_src);
+        $video->video_url = Storage::url($video->video_src);
 
         return response()->json([
-            'video' => $video
+            'video' => $video,
         ]);
     }
 }

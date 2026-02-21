@@ -93,7 +93,7 @@ Route::resource('playlists', PlaylistController::class);
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('staff')->prefix('admin')->as('admin.')->group(function () {
+Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->group(function () {
     Route::get('/dashboard', [AdminPostController::class, 'dashboard'])->name('dashboard');
 
     // Songs & Variants

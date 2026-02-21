@@ -3,15 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Post;
+use App\Models\Song;
 use App\Models\Studio;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Song;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use App\Models\Post;
 
 class StudioController extends Controller
 {
@@ -22,7 +18,11 @@ class StudioController extends Controller
      */
     public function index()
     {
-        //
+        $studios = Studio::withCount('posts')->paginate(18);
+
+        return response()->json([
+            'studios' => $studios,
+        ]);
     }
 
     /**
@@ -38,7 +38,6 @@ class StudioController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -52,9 +51,13 @@ class StudioController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Studio $studio)
     {
-        //
+        // $studio->load('posts');
+
+        return response()->json([
+            'studio' => $studio,
+        ]);
     }
 
     /**
@@ -71,7 +74,6 @@ class StudioController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -91,69 +93,21 @@ class StudioController extends Controller
         //
     }
 
-    public function songsFilter(Request $request, $id)
+    public function animes(Request $request, Studio $studio)
     {
-
-        $studio = Studio::findOrFail($id);
-
-        $user = Auth::check() ? Auth::user() : null;
-        $status = true;
-        $type = $request->type;
-        $sort = $request->sort;
-        $name = $request->name;
-        $year_id = $request->year_id; //this receive an ID, not a name
-        $season_id = $request->season_id; //this receive an ID, not a name
-
-        $songs = Song::whereHas('post', function ($query) use ($name, $status, $studio) {
-            $query->where('status', $status)
-                ->when($name, function ($query) use ($name) {
-                    $query->where('title', 'like', '%' . $name . '%');
-                })
-                ->whereHas('studios', function ($query) use ($studio) {
-                    $query->where('studios.id', $studio->id);
-                });
-        })
-            ->when($year_id, function ($query) use ($year_id) {
-                $query->where('year_id', $year_id);
-            })
-            ->when($season_id, function ($query) use ($season_id) {
-                $query->where('season_id', $season_id);
-            })
-
-            ->when($type, function ($query) use ($type) {
-                $query->where('type', $type);
-            })
-            ->get();
-
-        $songs = $this->setScoreSongs($songs, $user);
-        $songs = $this->sortSongs($sort, $songs);
-        $songs = $this->paginate($songs, 15);
-
-        return response()->json([
-            'html' => view('partials.songs.cards-v2', compact('songs'))->render(),
-            'songs' => $songs
-        ]);
-    }
-
-    public function postsFilter(Request $request, $id)
-    {
-
-        $studio = Studio::findOrFail($id);
-
-        //$user = Auth::check() ? Auth::user() : null;
         $status = true;
         $format_id = $request->format_id;
-        $sort = $request->sort;
         $name = $request->name;
-        $year_id = $request->year_id; //this receive an ID, not a name
-        $season_id = $request->season_id; //this receive an ID, not a name
+        $year_id = $request->year_id;
+        $season_id = $request->season_id;
+        $sort = $request->sort ?? 'title';
 
-        $posts = Post::where('status', $status)
+        $query = Post::where('status', $status)
             ->whereHas('studios', function ($query) use ($studio) {
                 $query->where('studios.id', $studio->id);
             })
             ->when($name, function ($query) use ($name) {
-                $query->where('title', 'like', '%' . $name . '%');
+                $query->where('title', 'like', '%'.$name.'%');
             })
             ->when($year_id, function ($query) use ($year_id) {
                 $query->where('year_id', $year_id);
@@ -163,46 +117,22 @@ class StudioController extends Controller
             })
             ->when($format_id, function ($query) use ($format_id) {
                 $query->where('format_id', $format_id);
-            })
-            ->get();
+            });
 
-        //$songs = $this->setScoreSongs($songs, $user);
-        //$songs = $this->sortSongs($sort, $songs);
-        $posts = $this->paginate($posts, 15);
+        // Aplicamos el ordenamiento antes de paginar
+        if ($sort === 'title') {
+            $query->orderBy('title');
+        } else {
+            // Aquí puedes añadir más casos según lo que necesites (ej. averageRating)
+            $query->orderBy('created_at', 'desc');
+        }
 
-        return response()->json([
-            'html' => view('partials.posts.cards-v2', compact('posts'))->render(),
-            'posts' => $posts
-        ]);
-    }
-
-    public function filter(Request $request)
-    {
-        $name = $request->name;
-        $studios = Studio::when($name, function ($query, $name) {
-            $query->where('name', 'LIKE', '%' . $name . '%');
-        })
-            ->get();
-
-        $studios = $studios->sortBy(function ($studio) {
-            return $studio->name;
-        });
-
-        $studios = $this->paginate($studios, 15);
+        $posts = $query->paginate(18);
 
         return response()->json([
-            'studios' => $studios,
-            'html' => view('partials.studios.cards-v2', compact('studios'))->render(),
+            'posts' => $posts,
+            'studio' => $studio,
         ]);
-    }
-
-    public function paginate($collection, $perPage = 18, $page = null, $options = [])
-    {
-        $page = Paginator::resolveCurrentPage();
-        $options = ['path' => Paginator::resolveCurrentPath()];
-        $items = $collection instanceof Collection ? $collection : Collection::make($collection);
-        $collection = new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
-        return $collection;
     }
 
     public function getUserRating(int $song_id, int $user_id)
@@ -218,41 +148,46 @@ class StudioController extends Controller
     {
         switch ($format) {
             case 'POINT_100':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_10_DECIMAL':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             case 'POINT_10':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_5':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             default:
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
         }
     }
 
-    public function sortSongs($sort, $songs)
+    public function sortPosts($sort, $posts)
     {
         switch ($sort) {
             case 'title':
 
-                $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                $posts = $posts->sortBy(function ($post) {
+                    return $post->title;
                 });
-                return $songs;
+
+                return $posts;
                 break;
             case 'averageRating':
-                $songs = $songs->sortByDesc('averageRating');
-                return $songs;
+                $posts = $posts->sortByDesc('averageRating');
+
+                return $posts;
             case 'view_count':
-                $songs = $songs->sortByDesc('view_count');
+                $posts = $posts->sortByDesc('view_count');
+
                 return $songs;
 
             case 'likeCount':
                 $songs = $songs->sortByDesc('likeCount');
+
                 return $songs;
                 break;
             case 'recent':
                 $songs = $songs->sortByDesc('created_at');
+
                 return $songs;
                 break;
 
@@ -260,6 +195,7 @@ class StudioController extends Controller
                 $songs = $songs->sortBy(function ($song) {
                     return $song->post->title;
                 });
+
                 return $songs;
                 break;
         }
@@ -269,7 +205,7 @@ class StudioController extends Controller
     {
         $songs->each(function ($song) use ($user) {
 
-            #Inizialided attributes
+            // Inizialided attributes
             $song->formattedScore = null;
             $song->rawScore = null;
             $song->scoreString = null;
@@ -279,7 +215,7 @@ class StudioController extends Controller
             $denominator = 100; // Por defecto para POINT_100
 
             if ($user) {
-                #Inizialided attributes
+                // Inizialided attributes
                 $song->formattedUserScore = null;
                 $song->rawUserScore = null;
 

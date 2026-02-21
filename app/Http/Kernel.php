@@ -64,10 +64,10 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
-        'admin' => \App\Http\Middleware\RoleMiddleware::class . ':admin',
-        'editor' => \App\Http\Middleware\RoleMiddleware::class . ':admin,editor',
-        'creator' => \App\Http\Middleware\RoleMiddleware::class . ':admin,editor,creator',
-        'staff' => \App\Http\Middleware\RoleMiddleware::class . ':admin,editor,creator',
+        'admin' => \App\Http\Middleware\RoleMiddleware::class, 
+        'editor' => \App\Http\Middleware\RoleMiddleware::class,
+        'creator' => \App\Http\Middleware\RoleMiddleware::class,
+        'staff' => \App\Http\Middleware\RoleMiddleware::class,
         'cors' => \App\Http\Middleware\Cors::class,
     ];
 
@@ -89,10 +89,10 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
-        'admin' => \App\Http\Middleware\RoleMiddleware::class . ':admin',
-        'editor' => \App\Http\Middleware\RoleMiddleware::class . ':admin,editor',
-        'creator' => \App\Http\Middleware\RoleMiddleware::class . ':admin,editor,creator',
-        'staff' => \App\Http\Middleware\RoleMiddleware::class . ':admin,editor,creator',
+        'admin' => \App\Http\Middleware\RoleMiddleware::class,
+        'editor' => \App\Http\Middleware\RoleMiddleware::class,
+        'creator' => \App\Http\Middleware\RoleMiddleware::class,
+        'staff' => \App\Http\Middleware\RoleMiddleware::class,
         'cors' => \App\Http\Middleware\Cors::class,
     ];
 }

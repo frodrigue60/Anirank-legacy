@@ -3,41 +3,67 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
+use App\Models\Reaction;
+use App\Models\Song;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Comment;
-use App\Models\User;
-use App\Models\Reaction;
 
 class CommentController extends Controller
 {
-    public function destroy($id)
+    public function index()
     {
-        $comment = Comment::findOrFail($id);
-        try {
-            $user = Auth::check() ? Auth::user() : null;
+        $comments = Comment::with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(18);
 
-            if (($comment->user_id == $user->id) || $user->isAdmin()) {
-                $comment->delete();
-            }
-
-            return response()->json([
-                'message' => 'Comment deleted successfully',
-                'success' => true,
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'Ah error has been occurred',
-                'success' => false,
-                'th' => $th
-            ]);
-        }
+        return response()->json($comments);
     }
 
-    public function like($comment_id)
+    public function show(Comment $comment)
+    {
+        $comment->load('user');
+
+        return response()->json($comment);
+    }
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'content' => 'required|string|max:255',
+            'song_id' => 'required|exists:songs,id',
+        ]);
+
+        $comment = Comment::create([
+            'content' => $validatedData['content'],
+            'user_id' => Auth::id(),
+            'commentable_id' => $validatedData['song_id'],
+            'commentable_type' => Song::class,
+        ]);
+
+        return response()->json($comment->load('user'), 201);
+    }
+
+    public function destroy(Comment $comment)
+    {
+        if ($comment->user_id !== Auth::id() && ! Auth::user()->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized action.',
+            ], 403);
+        }
+
+        $comment->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Comment deleted successfully',
+        ], 200);
+    }
+
+    public function like(Comment $comment)
     {
         try {
-            $comment = Comment::findOrFail($comment_id);
             $this->handleReaction($comment, 1);
             $comment->updateReactionCounters();
 
@@ -45,17 +71,16 @@ class CommentController extends Controller
                 'success' => true,
                 'comment' => $comment,
                 'likesCount' => $comment->likesCount,
-                'dislikesCount' => $comment->dislikesCount
+                'dislikesCount' => $comment->dislikesCount,
             ]);
         } catch (\Throwable $th) {
             return response()->json(['success' => false, 'error' => $th]);
         }
     }
 
-    public function dislike($comment_id)
+    public function dislike(Comment $comment)
     {
         try {
-            $comment = Comment::findOrFail($comment_id);
             $this->handleReaction($comment, -1);
             $comment->updateReactionCounters();
 
@@ -63,14 +88,14 @@ class CommentController extends Controller
                 'success' => true,
                 'comment' => $comment,
                 'likesCount' => $comment->likesCount,
-                'dislikesCount' => $comment->dislikesCount
+                'dislikesCount' => $comment->dislikesCount,
             ]);
         } catch (\Throwable $th) {
             return response()->json(['success' => false, 'error' => $th]);
         }
     }
 
-    private function handleReaction($comment, $type)
+    private function handleReaction(Comment $comment, $type)
     {
         $user = Auth::user();
 
@@ -95,30 +120,33 @@ class CommentController extends Controller
         }
     }
 
-    public function reply(Request $request, Comment $parentComment)
+    public function update(Request $request, Comment $comment)
     {
-        try {
-            $request->validate(['content' => 'required|string']);
-
-            $reply = new Comment();
-            $reply->content = $request->content;
-            $reply->user_id = Auth::User()->id;
-            $reply->parent_id = $parentComment->id;
-            $reply->commentable_type = $parentComment->commentable_type;
-            $reply->commentable_id = $parentComment->commentable_id;
-
-            $reply->save();
-
-            return response()->json([
-                'success' => true,
-                'html' => view('partials.songs.show.comments.comment', ['comment' => $reply])->render(),
-                'parentComment' => $reply->parent_id
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'error' => $th->getMessage(),
-                'request' => $request->all()
-            ]);
+        if ($comment->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        $request->validate(['content' => 'required|string|max:255']);
+        $comment->update(['content' => $request->content]);
+
+        return response()->json($comment);
+    }
+
+    public function reply(Request $request, Comment $comment)
+    {
+        $request->validate(['content' => 'required|string']);
+
+        $reply = Comment::create([
+            'content' => $request->content,
+            'user_id' => Auth::id(),
+            'parent_id' => $comment->id,
+            'commentable_type' => $comment::class,
+            'commentable_id' => $comment->id,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'reply' => $reply->load('user'),
+        ], 201);
     }
 }

@@ -1,9 +1,9 @@
-import API_BASE_URL from '@api/config.js';
+import API_BASE_URL from "@api/config.js";
 
 const ENDPOINTS = {
     AUTH: {
         LOGIN: `${API_BASE_URL}/auth/login`,
-        LOGOUT: `${API_BASE_URL}/auth/logout`
+        LOGOUT: `${API_BASE_URL}/auth/logout`,
     },
     USERS: {
         BASE: `${API_BASE_URL}/users`,
@@ -27,7 +27,7 @@ const ENDPOINTS = {
     },
     POSTS: {
         ANIMES: `${API_BASE_URL}/animes`,
-        SEARCH: (q) => `${API_BASE_URL}/search/${q}`,
+        SEARCH: (q) => `${API_BASE_URL}/search?q=${q}`,
     },
     ARTISTS: {
         FILTER: `${API_BASE_URL}/artists/filter`,
@@ -37,10 +37,10 @@ const ENDPOINTS = {
         DELETE: (id) => `${API_BASE_URL}/comments/${id}`,
         LIKE: (id) => `${API_BASE_URL}/comments/${id}/like`,
         DISLIKE: (id) => `${API_BASE_URL}/comments/${id}/dislike`,
-        REPLY: (id) => `${API_BASE_URL}/comments/${id}/reply`
+        REPLY: (id) => `${API_BASE_URL}/comments/${id}/reply`,
     },
     VARIANTS: {
-        GETVIDEOS: (id) => `${API_BASE_URL}/variants/${id}/get-videos`
+        GETVIDEOS: (id) => `${API_BASE_URL}/variants/${id}/get-videos`,
     },
     REQUESTS: {
         STORE: `${API_BASE_URL}/requests`,
@@ -52,8 +52,9 @@ const ENDPOINTS = {
     },
     PLAYLISTS: {
         BASE: `${API_BASE_URL}/playlists`,
-        TOGGLE_SONG: (playlistId) => `${API_BASE_URL}/playlists/${playlistId}/toggle-song`,
-    }
+        TOGGLE_SONG: (playlistId) =>
+            `${API_BASE_URL}/playlists/${playlistId}/toggle-song`,
+    },
 };
 
 export default ENDPOINTS;

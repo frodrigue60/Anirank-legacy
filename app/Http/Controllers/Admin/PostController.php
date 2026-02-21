@@ -2,34 +2,32 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Post;
-use App\Models\Artist;
 use App\Http\Controllers\Controller;
+use App\Models\Artist;
+use App\Models\DailyMetric;
 use App\Models\ExternalLink;
 use App\Models\Format;
+use App\Models\Post;
 use App\Models\Producer;
 use App\Models\Season;
-use App\Models\Studio;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Redirect;
-use Intervention\Image\ImageManagerStatic as Image;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Year;
 use App\Models\Song;
+use App\Models\Studio;
 use App\Models\User;
-use App\Models\DailyMetric;
-use GuzzleHttp\Client;
+use App\Models\Year;
 use App\Services\Breadcrumb;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Intervention\Image\ImageManagerStatic as Image;
 
 class PostController extends Controller
 {
-
     public function index(Request $request)
     {
         $breadcrumb = Breadcrumb::generate([
@@ -65,7 +63,7 @@ class PostController extends Controller
 
         $postStatus = [
             ['name' => 'Stagged', 'value' => false],
-            ['name' => 'Published', 'value' => true]
+            ['name' => 'Published', 'value' => true],
         ];
 
         $breadcrumb = Breadcrumb::generate([
@@ -84,7 +82,7 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        //dd($request->all());
+        // dd($request->all());
         /* return redirect()->back()
                          ->with('error', 'Hubo un error al procesar el formulario.')
                          ->withInput(); */
@@ -117,15 +115,18 @@ class PostController extends Controller
             $this->storePostImages($post, $request);
 
             if ($post->save()) {
-                //$post->retag($request->tags);
+                // $post->retag($request->tags);
                 $msg = 'Post created successfully';
+
                 return redirect(route('admin.songs.index', ['post_id' => $post->id]))->with('success', $msg);
             } else {
                 $msg = 'Somethis was wrong!';
+
                 return redirect(route('admin.posts.index'))->with('error', $msg);
             }
         } else {
             $error = 'User is not authorized!';
+
             return redirect(route('admin.posts.index'))->with('error', $error);
         }
     }
@@ -154,7 +155,7 @@ class PostController extends Controller
                 return $song->type === 'ED';
             });
 
-            //dd($ops, $eds);
+            // dd($ops, $eds);
             return view('admin.posts.show', compact('post', 'score_format', 'ops', 'eds', 'breadcrumb'));
         }
     }
@@ -174,7 +175,7 @@ class PostController extends Controller
 
         $postStatus = [
             ['name' => 'Stagged', 'value' => false],
-            ['name' => 'Published', 'value' => true]
+            ['name' => 'Published', 'value' => true],
         ];
 
         $breadcrumb = Breadcrumb::generate([
@@ -191,10 +192,9 @@ class PostController extends Controller
         return view('admin.posts.edit', compact('post', 'types', 'artists', 'postStatus', 'breadcrumb', 'years', 'seasons'));
     }
 
-
     public function update(Request $request, $id)
     {
-        //dd($request->all());
+        // dd($request->all());
         $user = Auth::User()->type;
         if ($user == 'admin' || $user == 'editor' || $user == 'creator') {
             $post = Post::find($id);
@@ -203,7 +203,6 @@ class PostController extends Controller
             $post->title = $request->title;
             $post->slug = Str::slug($request->title);
             $post->description = $request->description;
-
 
             switch (Auth::user()->type) {
                 case 'creator':
@@ -230,12 +229,14 @@ class PostController extends Controller
                 if ($old_banner && $old_banner !== $post->banner) {
                     Storage::disk('public')->delete($old_banner);
                 }
+
                 return redirect(route('admin.posts.index'))->with('success', 'Post Updated Successfully');
             } else {
                 return redirect(route('admin.posts.index'))->with('error', 'Something has wrong');
             }
         } else {
             $error = 'User is not authorized!';
+
             return redirect(route('admin.posts.index'))->with('error', $error);
         }
     }
@@ -256,7 +257,7 @@ class PostController extends Controller
         try {
             $post->toggleStatus();
 
-            return redirect()->back()->with('success', 'Post status updated: ' . $post->id);
+            return redirect()->back()->with('success', 'Post status updated: '.$post->id);
         } catch (\Throwable $th) {
             return redirect(route('admin.posts.index'))->with('error', $th->getMessage());
         }
@@ -284,12 +285,12 @@ class PostController extends Controller
 
         $query = $this->buildGraphQLQuerySearch();
 
-        $client = new Client();
+        $client = new Client;
         $response = $client->post('https://graphql.anilist.co', [
             'json' => [
                 'query' => $query,
                 'variables' => $variables,
-            ]
+            ],
         ]);
 
         $body = $response->getBody()->__toString();
@@ -303,10 +304,11 @@ class PostController extends Controller
 
         return view('admin.posts.select', compact('posts', 'breadcrumb', 'q'));
     }
+
     public function getById($anilist_id)
     {
         $variables = [
-            "id" => $anilist_id
+            'id' => $anilist_id,
         ];
 
         $client = new \GuzzleHttp\Client;
@@ -314,30 +316,32 @@ class PostController extends Controller
             'json' => [
                 'query' => $this->buildGraphQLQueryId(),
                 'variables' => $variables,
-            ]
+            ],
         ]);
         $body = $response->getBody()->__toString();
         $json = json_decode($body);
 
         $data[] = $json->data->Media;
-        //dd($data);
+        // dd($data);
         $this->generateMassive($data);
         $success = 'Single post created successfully';
+
         return redirect(route('admin.posts.index'))->with('success', $success);
     }
+
     public function syncAllFromAnilist()
     {
         $posts = Post::whereNotNull('anilist_id')->get();
-        $client = new Client();
+        $client = new Client;
 
         foreach ($posts as $post) {
             try {
-                $variables = ["id" => $post->anilist_id];
+                $variables = ['id' => $post->anilist_id];
                 $response = $client->post('https://graphql.anilist.co', [
                     'json' => [
                         'query' => $this->buildGraphQLQueryId(),
                         'variables' => $variables,
-                    ]
+                    ],
                 ]);
                 $body = $response->getBody()->__toString();
                 $json = json_decode($body);
@@ -369,13 +373,13 @@ class PostController extends Controller
             if ($value->isAnimationStudio) {
                 $studio = Studio::firstOrCreate(
                     ['slug' => Str::slug($value->name)],
-                    ['name' =>  $value->name, 'slug' => Str::slug($value->name)]
+                    ['name' => $value->name, 'slug' => Str::slug($value->name)]
                 );
                 array_push($idStudios, $studio->id);
             } else {
                 $producer = Producer::firstOrCreate(
                     ['slug' => Str::slug($value->name)],
-                    ['name' =>  $value->name, 'slug' => Str::slug($value->name)]
+                    ['name' => $value->name, 'slug' => Str::slug($value->name)]
                 );
                 array_push($idProducers, $producer->id);
             }
@@ -384,14 +388,14 @@ class PostController extends Controller
         foreach ($externalLinks as $key => $value) {
             $externalLink = ExternalLink::firstOrCreate(
                 ['url' => $value->url],
-                ['icon' => $value->icon, 'name' =>  $value->site, 'type' => $value->type, 'url' => $value->url]
+                ['icon' => $value->icon, 'name' => $value->site, 'type' => $value->type, 'url' => $value->url]
             );
             array_push($idLinks, $externalLink->id);
         }
 
         $format = Format::firstOrCreate(
             ['slug' => Str::slug($format_name)],
-            ['name' =>  $format_name, 'slug' => Str::slug($format_name)]
+            ['name' => $format_name, 'slug' => Str::slug($format_name)]
         );
 
         $post->format()->associate($format);
@@ -399,19 +403,19 @@ class PostController extends Controller
         $this->saveAnimeBanner($item, $post);
         $this->saveAnimeThumbnail($item, $post);
 
-        if (!empty($item->season) && !empty($item->seasonYear)) {
-            $season = Season::firstOrCreate(['name' =>  $item->season]);
+        if (! empty($item->season) && ! empty($item->seasonYear)) {
+            $season = Season::firstOrCreate(['name' => $item->season]);
             $post->season_id = $season->id;
-            $year = Year::firstOrCreate(['name' =>  $item->seasonYear]);
+            $year = Year::firstOrCreate(['name' => $item->seasonYear]);
             $post->year_id = $year->id;
-        } else if (!$item->season and !$item->seasonYear && isset($item->startDate->month)) {
+        } elseif (! $item->season and ! $item->seasonYear && isset($item->startDate->month)) {
             $month_al = $item->startDate->month;
             $year_al = $item->startDate->year;
 
-            $season = Season::firstOrCreate(['name' =>  $this->assignSeason($month_al)]);
+            $season = Season::firstOrCreate(['name' => $this->assignSeason($month_al)]);
             $post->season_id = $season->id;
 
-            $year = Year::firstOrCreate(['name' =>  $year_al]);
+            $year = Year::firstOrCreate(['name' => $year_al]);
             $post->year_id = $year->id;
         }
 
@@ -421,7 +425,7 @@ class PostController extends Controller
             $post->externalLinks()->sync($idLinks);
 
             // Sync Genres
-            if (!empty($item->genres)) {
+            if (! empty($item->genres)) {
                 $genreIds = [];
                 foreach ($item->genres as $genreName) {
                     $genre = Genre::firstOrCreate(
@@ -456,13 +460,13 @@ class PostController extends Controller
         $post = Post::find($id);
 
         try {
-            $variables = ["id" => $post->anilist_id];
+            $variables = ['id' => $post->anilist_id];
             $client = new \GuzzleHttp\Client;
             $response = $client->post('https://graphql.anilist.co', [
                 'json' => [
                     'query' => $this->buildGraphQLQueryId(),
                     'variables' => $variables,
-                ]
+                ],
             ]);
             $body = $response->getBody()->__toString();
             $json = json_decode($body);
@@ -474,6 +478,7 @@ class PostController extends Controller
             return redirect(route('admin.posts.show', $post->id))->with('error', $th->getMessage());
         }
     }
+
     public function wipePosts()
     {
         $posts = Post::all();
@@ -489,9 +494,11 @@ class PostController extends Controller
         Storage::disk('public')->delete($banner_files);
 
         $success = 'All posts deleted';
+
         return redirect(route('admin.posts.index'))->with('success', $success);
     }
-    function buildGraphQLQuerySearch()
+
+    public function buildGraphQLQuerySearch()
     {
         $query = '
             query ($search: String, $format_in: [MediaFormat]) {
@@ -511,9 +518,11 @@ class PostController extends Controller
                 }
             }
         ';
+
         return $query;
     }
-    function buildGraphQLQuerySeasonal()
+
+    public function buildGraphQLQuerySeasonal()
     {
         $query = '
             query ($year: Int, $season: MediaSeason, $page: Int, $perPage: Int, $format_in: [MediaFormat]) {
@@ -575,9 +584,11 @@ class PostController extends Controller
                             }
                         }
             }';
+
         return $query;
     }
-    function buildGraphQLQueryId()
+
+    public function buildGraphQLQueryId()
     {
         $query = '
         query ($id: Int) { # Define which variables will be used in the query (id)
@@ -626,45 +637,48 @@ class PostController extends Controller
             }
         }
         ';
+
         return $query;
     }
 
-    function saveAnimeThumbnail($item, $post)
+    public function saveAnimeThumbnail($item, $post)
     {
         if ($item->coverImage->extraLarge != null) {
-            $client = new Client();
+            $client = new Client;
             $response = $client->get($item->coverImage->extraLarge);
             $imageContent = $response->getBody()->getContents();
 
             if (extension_loaded('gd')) {
                 $imageContent = Image::make($imageContent)->encode('webp', 100);
-                $file_name = Str::slug($post->slug) . '-' . time() . '.webp';
+                $file_name = Str::slug($post->slug).'-'.time().'.webp';
             }
-            $path = 'thumbnails/' . $file_name;
+            $path = 'thumbnails/'.$file_name;
             $this->storeSingleImage($path, $imageContent);
 
             $post->updateOrCreateImage($path, 'thumbnail');
         }
+
         return $post;
     }
 
-    function saveAnimeBanner($item, $post)
+    public function saveAnimeBanner($item, $post)
     {
         if ($item->bannerImage != null) {
 
-            $client = new Client();
+            $client = new Client;
             $response = $client->get($item->bannerImage);
             $imageContent = $response->getBody()->getContents();
 
             if (extension_loaded('gd')) {
-                $file_name = Str::slug($post->slug) . '-' . time() . '.webp';
+                $file_name = Str::slug($post->slug).'-'.time().'.webp';
                 $imageContent = Image::make($imageContent)->encode('webp', 100);
             }
-            $path = 'anime_banner/' . $file_name;
+            $path = 'anime_banner/'.$file_name;
             $this->storeSingleImage($path, $imageContent);
 
             $post->updateOrCreateImage($path, 'banner');
         }
+
         return $post;
     }
 
@@ -674,12 +688,13 @@ class PostController extends Controller
         if ($request->hasFile('file')) {
 
             $validator = Validator::make($request->all(), [
-                'file' => 'mimes:png,jpg,jpeg,webp|max:2048'
+                'file' => 'mimes:png,jpg,jpeg,webp|max:2048',
             ]);
 
             if ($validator->fails()) {
                 $errors = $validator->getMessageBag();
                 $request->flash();
+
                 return Redirect::back()
                     ->with('error', $errors);
             }
@@ -687,25 +702,25 @@ class PostController extends Controller
             $imageContent = $request->file;
 
             if (extension_loaded('gd')) {
-                $file_name = Str::slug($request->title) . '-' . time() . '.' . 'webp';
+                $file_name = Str::slug($request->title).'-'.time().'.'.'webp';
                 $imageContent = Image::make($request->file)->encode('webp', 100);
             } else {
                 $file_extension = $request->file->extension();
-                $file_name = Str::slug($request->title) . '-' . time() . '.' . $file_extension;
+                $file_name = Str::slug($request->title).'-'.time().'.'.$file_extension;
             }
-            $path = 'thumbnails/' . $file_name;
+            $path = 'thumbnails/'.$file_name;
             $this->storeSingleImage($path, $imageContent);
             $post->updateOrCreateImage($path, 'thumbnail');
         } else {
             /* Thumbnail witn url store */
             if ($request->thumbnail_src != null) {
 
-                $client = new Client();
+                $client = new Client;
                 $response = $client->get($request->thumbnail_src);
                 $imageContent = $response->getBody()->getContents();
 
                 if (extension_loaded('gd')) {
-                    $file_name = Str::slug($request->title) . '-' . time() . '.' . 'webp';
+                    $file_name = Str::slug($request->title).'-'.time().'.'.'webp';
                     $imageContent = Image::make($imageContent)->encode('webp', 100);
                 } else {
                     $headers = $response->getHeaders();
@@ -713,16 +728,16 @@ class PostController extends Controller
 
                     $extension = match ($contentType) {
                         'image/jpeg' => 'jpg',
-                        'image/png'  => 'png',
-                        'image/gif'  => 'gif',
+                        'image/png' => 'png',
+                        'image/gif' => 'gif',
                         'image/webp' => 'webp',
-                        default      => 'bin',
+                        default => 'bin',
                     };
 
-                    $file_name = Str::slug($request->title) . '-' . time() . '.' . $extension;
+                    $file_name = Str::slug($request->title).'-'.time().'.'.$extension;
                 }
 
-                $path = 'thumbnails/' . $file_name;
+                $path = 'thumbnails/'.$file_name;
                 $this->storeSingleImage($path, $imageContent);
                 $post->updateOrCreateImage($path, 'thumbnail');
             }
@@ -731,12 +746,13 @@ class PostController extends Controller
         /* Banner with file store */
         if ($request->hasFile('banner')) {
             $validator = Validator::make($request->all(), [
-                'banner' => 'mimes:png,jpg,jpeg,webp|max:2048'
+                'banner' => 'mimes:png,jpg,jpeg,webp|max:2048',
             ]);
 
             if ($validator->fails()) {
                 $errors = $validator->getMessageBag();
                 $request->flash();
+
                 return Redirect::back()
                     ->with('error', $errors);
             }
@@ -744,44 +760,45 @@ class PostController extends Controller
             $imageContent = $request->banner;
 
             if (extension_loaded('gd')) {
-                $file_name = Str::slug($request->title) . '-' . time() . '.' . 'webp';
+                $file_name = Str::slug($request->title).'-'.time().'.'.'webp';
                 $imageContent = Image::make($request->banner)->encode('webp', 100);
             } else {
                 $extension = $request->file->extension();
-                $file_name = Str::slug($request->title) . '-' . time() . '.' . $extension;
+                $file_name = Str::slug($request->title).'-'.time().'.'.$extension;
             }
-            $path = 'anime_banner/' . $file_name;
+            $path = 'anime_banner/'.$file_name;
             $this->storeSingleImage($path, $imageContent);
             $post->updateOrCreateImage($path, 'banner');
         } else {
             /* Bannter with url store */
             if ($request->banner_src != null) {
 
-                $client = new Client();
+                $client = new Client;
                 $response = $client->get($request->banner_src);
                 $imageContent = $response->getBody()->getContents();
 
                 if (extension_loaded('gd')) {
-                    $file_name = Str::slug($request->title) . '-' . time() . '.' . 'webp';
+                    $file_name = Str::slug($request->title).'-'.time().'.'.'webp';
                     $imageContent = Image::make($imageContent)->encode('webp', 100);
                 } else {
                     $headers = $response->getHeaders();
                     $contentType = $headers['Content-Type'][0] ?? null;
                     $extension = match ($contentType) {
                         'image/jpeg' => 'jpg',
-                        'image/png'  => 'png',
-                        'image/gif'  => 'gif',
+                        'image/png' => 'png',
+                        'image/gif' => 'gif',
                         'image/webp' => 'webp',
-                        default      => 'bin',
+                        default => 'bin',
                     };
 
-                    $file_name = Str::slug($request->title) . '-' . time() . '.' . $extension;
+                    $file_name = Str::slug($request->title).'-'.time().'.'.$extension;
                 }
-                $path = 'anime_banner/' . $file_name;
+                $path = 'anime_banner/'.$file_name;
                 $this->storeSingleImage($path, $imageContent);
                 $post->updateOrCreateImage($path, 'banner');
             }
         }
+
         return $post;
     }
 
@@ -859,9 +876,10 @@ class PostController extends Controller
     {
         try {
             Artisan::call('app:track-ranking');
+
             return redirect()->back()->with('success', 'Ranking tracking executed successfully.');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Error executing ranking tracking: ' . $th->getMessage());
+            return redirect()->back()->with('error', 'Error executing ranking tracking: '.$th->getMessage());
         }
     }
 
@@ -869,9 +887,10 @@ class PostController extends Controller
     {
         try {
             Artisan::call('app:track-ranking', ['--seasonal-only' => true]);
+
             return redirect()->back()->with('success', 'Seasonal ranking recalculated successfully.');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Error executing seasonal ranking: ' . $th->getMessage());
+            return redirect()->back()->with('error', 'Error executing seasonal ranking: '.$th->getMessage());
         }
     }
 }

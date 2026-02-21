@@ -1,81 +1,105 @@
 <?php
 
+use App\Http\Controllers\Api\ArtistController;
+use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\PlaylistController;
+use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\SongController;
+use App\Http\Controllers\Api\SongVariantController;
+use App\Http\Controllers\Api\StudioController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserRequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\PostController as apiPostController;
-use App\Http\Controllers\Api\SongVariantController as apiSongVariantController;
-use App\Http\Controllers\Api\CommentController as apiCommentController;
-use App\Http\Controllers\Api\UserController as apiUserController;
-use App\Http\Controllers\Api\ArtistController as apiArtistController;
-use App\Http\Controllers\Api\SongController as apiSongController;
-use App\Http\Controllers\Api\UserRequestController as apiUserRequestController;
-use App\Http\Controllers\Api\StudioController as apiStudioController;
-use App\Http\Controllers\Api\PlaylistController as apiPlaylistController;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
 // Posts
-Route::get('search/{q}', [apiPostController::class, 'search'])->name('api.posts.search');
-Route::get('animes', [apiPostController::class, 'animes'])->name('api.posts.animes');
+Route::controller(PostController::class)->group(function () {
+    Route::get('home', 'home')->name('api.home');
+    Route::get('search', 'globalSearch')->name('api.search');
+    Route::get('posts', 'index')->name('api.posts.index');
+    Route::get('posts/{post}', 'show')->name('api.posts.show');
+});
 
 // Songs
-Route::get('songs/seasonal', [apiSongController::class, 'seasonal'])->name('api.songs.seasonal');
-Route::get('songs/ranking', [apiSongController::class, 'ranking'])->name('api.songs.ranking');
-Route::get('songs/{song}/comments', [apiSongController::class, 'comments'])->name('api.songs.comments');
+Route::controller(SongController::class)->group(function () {
+    Route::get('songs', 'index')->name('api.songs.index');
+    Route::get('songs/seasonal', 'seasonal')->name('api.songs.seasonal');
+    Route::get('songs/ranking/global', 'globalRanking')->name('api.songs.ranking.global');
+    Route::get('songs/ranking/seasonal', 'seasonalRanking')->name('api.songs.ranking.seasonal');
+    Route::get('songs/{song}/comments', 'comments')->name('api.songs.comments');
+});
+
+// Comments
+Route::controller(CommentController::class)->group(function () {
+    Route::get('comments', 'index')->name('api.comments.index');
+    Route::get('comments/{comment}', 'show')->name('api.comments.show');
+});
 
 // Song Variants
-Route::get('variants/{variant}/get-videos', [apiSongVariantController::class, 'getVideos'])->name('api.variants.get-video');
+Route::controller(SongVariantController::class)->group(function () {
+    Route::get('variants', 'index')->name('api.variants.index');
+    Route::get('variants/{variant}/video', 'video')->name('api.variants.video');
+});
 
 // Artists
-Route::get('artists/{artist}/filter', [apiArtistController::class, 'songsFilter'])->name('api.artists.songs.filter');
+Route::get('artists', [ArtistController::class, 'index'])->name('api.artists.index');
+Route::get('artists/{artist}', [ArtistController::class, 'show'])->name('api.artists.show');
+Route::get('artists/{artist}/songs', [ArtistController::class, 'songs'])->name('api.artists.songs');
 
 // Users
-Route::get('users/{id}/list', [apiUserController::class, 'userList'])->name('api.users.list');
+Route::get('users/{user}', [UserController::class, 'show'])->name('api.users.show');
 
 // Studios
-Route::get('studios/filter', [apiStudioController::class, 'filter'])->name('api.studios.filter');
-Route::get('studios/{studio}/songs', [apiStudioController::class, 'songsFilter'])->name('api.studios.songs');
-Route::get('studios/{studio}/animes', [apiStudioController::class, 'postsFilter'])->name('api.studios.posts');
+Route::get('studios', [StudioController::class, 'index'])->name('api.studios.index');
+Route::get('studios/{studio}', [StudioController::class, 'show'])->name('api.studios.show');
+Route::get('studios/{studio}/animes', [StudioController::class, 'animes'])->name('api.studios.animes');
 
 // Auth Routes
 Route::middleware(['auth:sanctum'])->group(function () {
     // Playlists
-    Route::resource('playlists', apiPlaylistController::class)->names('api.playlists')->only('index', 'store');
-    Route::post('/playlists/{playlist}/toggle-song', [apiPlaylistController::class, 'toggleSong'])->name('api.playlists.toggle.song');
+    Route::controller(PlaylistController::class)->group(function () {
+        Route::get('playlists', 'index')->name('api.playlists.index');
+        Route::post('playlists', 'store')->name('api.playlists.store');
+        Route::post('playlists/{playlist}/toggle-song', 'toggleSong')->name('api.playlists.toggle.song');
+    });
 
     // Songs
-    Route::post('songs/{song}/like', [apiSongController::class, 'like'])->name('api.songs.like');
-    Route::post('songs/{song}/dislike', [apiSongController::class, 'dislike'])->name('api.songs.dislike');
-    Route::post('songs/{song}/favorite', [apiSongController::class, 'toggleFavorite'])->name('api.songs.toggle.favorite');
-    Route::post('songs/{song}/rate', [apiSongController::class, 'rate'])->name('api.songs.rate');
-    Route::post('songs/comments', [apiSongController::class, 'storeComment'])->name('api.songs.store.comment');
-    Route::post('songs/reports', [apiSongController::class, 'storeReport'])->name('api.songs.reports');
+    Route::controller(SongController::class)->group(function () {
+        Route::post('songs/{song}/like', 'like')->name('api.songs.like');
+        Route::post('songs/{song}/dislike', 'dislike')->name('api.songs.dislike');
+        Route::post('songs/{song}/favorite', 'toggleFavorite')->name('api.songs.toggle.favorite');
+        Route::post('songs/{song}/rate', 'rate')->name('api.songs.rate');
+        Route::post('songs/comments', 'storeComment')->name('api.songs.store.comment');
+    });
+
+    // Reports
+    Route::controller(ReportController::class)->group(function () {
+        Route::post('reports', 'store')->name('api.reports.store');
+    });
 
     // Comments
-    Route::post('comments/{id}/like', [apiCommentController::class, 'like'])->name('api.comments.like');
-    Route::post('comments/{id}/dislike', [apiCommentController::class, 'dislike'])->name('api.comments.dislike');
-    Route::post('comments/{parentComment}/reply', [apiCommentController::class, 'reply'])->name('api.comments.reply');
-    Route::resource('comments', apiCommentController::class, ['as' => 'api'])->only('store', 'update', 'destroy');
+    Route::controller(CommentController::class)->group(function () {
+        Route::post('comments/{comment}/like', 'like')->name('api.comments.like');
+        Route::post('comments/{comment}/dislike', 'dislike')->name('api.comments.dislike');
+        Route::post('comments/{comment}/reply', 'reply')->name('api.comments.reply');
+        Route::post('comments', 'store')->name('api.comments.store');
+        Route::patch('comments/{comment}', 'update')->name('api.comments.update');
+        Route::delete('comments/{comment}', 'destroy')->name('api.comments.destroy');
+    });
 
     // User Requests
-    Route::resource('requests', apiUserRequestController::class, ['as' => 'api'])->only('store');
+    Route::resource('requests', UserRequestController::class);
 
     // User
-    Route::post('users/avatar', [apiUserController::class, 'uploadAvatar'])->name('api.users.upload.avatar');
-    Route::post('users/banner', [apiUserController::class, 'uploadBanner'])->name('api.users.upload.banner');
-    Route::post('users/score-format', [apiUserController::class, 'setScoreFormat'])->name('api.users.score.format');
-    Route::post('users/favorites', [apiUserController::class, 'favorites'])->name('api.users.favorites');
+    Route::controller(UserController::class)->group(function () {
+        Route::post('users/avatar', 'uploadAvatar')->name('api.users.upload.avatar');
+        Route::post('users/banner', 'uploadBanner')->name('api.users.upload.banner');
+        Route::post('users/score-format', 'setScoreFormat')->name('api.users.score.format');
+        Route::post('users/favorites', 'favorites')->name('api.users.favorites');
+    });
 });
