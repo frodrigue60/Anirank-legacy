@@ -46,7 +46,7 @@ The application uses a **Modern Dark Theme** with a deep purple aesthetic.
 - `.glass-panel`: Frosted glass effect (`backdrop-filter: blur(12px)`) with transparent background.
 - `.hero-glow`: Purple shadow glow (`box-shadow`) for high-impact sections.
 - `.filled`: Utility class for Material Symbols to use the "FILL" variation.
-- `x-ui.image`: Reusable Blade component for high-performance image rendering. Handles lazy-loading (`loading="lazy"`), error fallbacks (`onerror`), and uses `Storage::url()` internally to ensure CDN/Cloud storage compatibility.
+- `x-ui.image`: Reusable Blade component for high-performance image rendering. Handles lazy-loading (`loading="lazy"`), error fallbacks (`onerror`), and uses `Storage::url()` internally to ensure CDN/Cloud storage compatibility. Automatically handles absolute path resolution for S3/MinIO.
 - `partials.meta`: Centralized SEO management. All views should use `@section('title')` and `@section('description')` instead of hardcoded meta tags.
 
 ---
@@ -212,7 +212,7 @@ Represents the **actual video file** for a SongVariant.
 **Key Methods:**
 
 - `isEmbed()`, `isLocal()` → Check video type.
-- `getLocalUrlAttribute()` → Returns the full public URL.
+- `getLocalUrlAttribute()` → Returns the storage-aware full public URL (correctly handles path resolution for both local and S3/MinIO disks).
 
 ---
 

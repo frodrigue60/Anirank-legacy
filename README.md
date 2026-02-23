@@ -19,7 +19,7 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🛠️ Standardized Admin Panel**: Robust CRUD control with unified search patterns and RESTful state management.
 - **🔔 Unified Notification System**: Real-time feedback via a custom subtle toast notification system, replacing intrusive popups.
 - **📝 Streamlined Request Workflow**: Simplified user request system with automatic categorization and manual staff-controlled status tracking.
-- **🖼️ Polymorphic Image System**: Centralized media management allowing multiple image types (thumbnails, banners, avatars) for any model with absolute decouple from legacy columns.
+- **🖼️ Polymorphic Image System**: Centralized media management allowing multiple image types (thumbnails, banners, avatars) for any model. Automatically handles absolute path resolution for S3/MinIO storage, ensuring seamless asset delivery across environments.
 - **🔍 SEO Centralization**: Single-source meta tag management using Blade partials, eliminating redundancy across views.
 - **⚡ Vite Optimization**: Streamlined asset configuration to minimize production bundle size and improve build performance.
 - **🏷️ Automated Genre System**: Multi-layered categorization with direct AniList synchronization and advanced filtering capabilities across all database views.

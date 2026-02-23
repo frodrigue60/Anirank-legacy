@@ -60,6 +60,6 @@ class Video extends Model
 
     public function getLocalUrlAttribute()
     {
-        return $this->isLocal() ? config('app.url') . Storage::url($this->video_src) : null;
+        return $this->isLocal() ? Storage::url($this->video_src) : null;
     }
 }
