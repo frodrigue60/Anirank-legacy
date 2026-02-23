@@ -120,7 +120,7 @@
                                                 wire:loading.attr="disabled"
                                                 class="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-red-400 transition-all">
                                                 <span
-                                                    class="material-symbols-outlined text-base {{ $song->isFavorited() ? 'filled text-red-400' : '' }}">favorite</span>
+                                                    class="material-symbols-outlined text-base {{ $song->is_favorited ? 'filled text-red-400' : '' }}">favorite</span>
                                             </button>
                                         </div>
                                     </div>
@@ -145,7 +145,7 @@
                                     <button wire:click="toggleFavorite({{ $song->id }})" wire:loading.attr="disabled"
                                         class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-red-400 transition-all">
                                         <span
-                                            class="material-symbols-outlined text-[20px] {{ $song->isFavorited() ? 'filled text-red-400' : '' }}">favorite</span>
+                                            class="material-symbols-outlined text-[20px] {{ $song->is_favorited ? 'filled text-red-400' : '' }}">favorite</span>
                                     </button>
                                 </div>
                             </div>

@@ -15,7 +15,7 @@ class PlaylistController extends Controller
         $songId = $request->query('song_id') ?? $request->input('song_id');
         $user = auth('sanctum')->user();
 
-        $query = Playlist::with(['user'])->withCount('songs');
+        $query = Playlist::with(['user', 'songs.post'])->withCount('songs');
 
         if ($request->has('mine') && $user) {
             $query->where('user_id', $user->id);
@@ -180,7 +180,7 @@ class PlaylistController extends Controller
 
     public function userPlaylists(Request $request, \App\Models\User $user)
     {
-        $query = $user->playlists()->withCount('songs');
+        $query = $user->playlists()->with(['songs.post'])->withCount('songs');
 
         // Solo mostrar privadas si es el propio usuario autenticado
         $currentUser = auth('sanctum')->user();

@@ -86,7 +86,7 @@ class PostController extends Controller
             ->whereHas('post', function ($q) use ($status) {
                 $q->where('status', $status);
             })
-            ->inRandomOrder()
+            ->latest()
             ->first();
 
         $appendUrls = function ($collection) {

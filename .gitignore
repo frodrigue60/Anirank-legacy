@@ -28,3 +28,5 @@ public/.ngrok.exe.old
 .playwright-mcp
 ./docker-compose.yml
 ./Dockerfile.dockerfile
+/anirank-db-6.sql
+/logs.txt

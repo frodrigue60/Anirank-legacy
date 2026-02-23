@@ -37,70 +37,42 @@
                             $cover = $firstSong->post->thumbnail_url;
                         }
                     @endphp
+
                     <div
-                        class="group relative bg-surface-dark/30 rounded-2xl border border-white/5 p-5 backdrop-blur-sm hover:bg-surface-dark/50 transition-all flex flex-col gap-4 overflow-hidden">
-
-                        {{-- Cover Image Background --}}
-                        <div
-                            class="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
-                            <x-ui.image src="{{ $cover }}" class="w-full h-full object-cover blur-sm scale-110" />
-                            <div class="absolute inset-0 bg-gradient-to-b from-surface-darker/80 to-surface-darker"></div>
+                        class="group relative bg-surface-dark/30 rounded-2xl border border-white/5 p-5 backdrop-blur-sm hover:bg-surface-dark/50 transition-all flex flex-col gap-4 overflow-hidden aspect-video">
+                        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                            data-alt="Cyberpunk city neon streets art" style="background-image: url('{{ $cover }}')">
                         </div>
-
-                        <div class="relative flex items-start justify-between gap-4">
-                            <div class="flex items-center gap-4 flex-1 min-w-0">
-                                <div
-                                    class="w-14 h-14 rounded-xl overflow-hidden border border-white/10 shrink-0 shadow-lg group-hover:border-primary/50 transition-colors">
-                                    <x-ui.image src="{{ $cover }}" class="w-full h-full object-cover" />
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <h3
-                                        class="text-xl font-bold text-white group-hover:text-primary transition-colors truncate mb-1">
-                                        {{ $playlist->name }}
-                                    </h3>
-                                    <div class="flex items-center gap-2">
-                                        <span
-                                            class="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
-                                            {{ $playlist->songs_count ?? 0 }} Songs
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+                        <div class="absolute top-0 right-0 p-2">
+                            <div class="flex items-center gap-2">
                                 <a href="{{ route('playlists.edit', $playlist->id) }}"
-                                    class="w-8 h-8 rounded-lg bg-white/5 hover:bg-green-500/20 hover:text-green-400 flex items-center justify-center transition-all text-white/40"
-                                    title="Edit Playlist">
-                                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    class="text-gray hover:text-primary bg-slate-300 rounded-md p-2">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
                                 </a>
-                                <form action="{{ route('playlists.destroy', $playlist->id) }}" method="POST"
-                                    class="inline">
+                                <form action="{{ route('playlists.destroy', $playlist->id) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
-                                        class="w-8 h-8 rounded-lg bg-white/5 hover:bg-red-500/20 hover:text-red-400 flex items-center justify-center transition-all text-white/40"
-                                        onclick="return confirm('Are you sure you want to delete this playlist?')"
-                                        title="Delete Playlist">
-                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                    <button type="submit" class="text-gray hover:text-red-600 bg-slate-300 rounded-md p-2">
+                                        <span class="material-symbols-outlined text-[20px]">delete</span>
                                     </button>
                                 </form>
                             </div>
                         </div>
-
-                        <p class="text-sm text-white/40 line-clamp-2 leading-relaxed h-10">
-                            {{ $playlist->description ?? 'No description provided.' }}
-                        </p>
-
-                        <div class="mt-2">
+                        <div class="absolute bottom-0 left-0 right-0 p-5 flex flex-col gap-2">
+                            <div class="flex items-center gap-2 mb-2">
+                                {{--  <span
+                                    class="px-2 py-0.5 rounded bg-primary/80 text-white text-[8px] font-bold uppercase">Trending</span>
+                                 --}}<span class="text-slate-400 text-[10px] flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-xs">music_note</span>
+                                    {{ $playlist->songs_count }} Songs
+                                </span>
+                            </div>
                             <a href="{{ route('playlists.show', $playlist->id) }}"
-                                class="w-full bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase py-3 rounded-xl transition-all flex items-center justify-center gap-2 group-hover:border-primary/30 border border-transparent">
-                                <span class="material-symbols-outlined text-[18px]">play_circle</span>
-                                View Playlist
-                            </a>
-                        </div>
-
-                        {{-- Hover decoration --}}
-                        <div
-                            class="absolute -inset-px rounded-2xl border border-primary/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                class="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors uppercase">
+                                {{ $playlist->name }}</a>
+                            <p class="text-slate-300 text-xs font-medium opacity-80">Curated by <span
+                                    class="text-primary font-semibold">{{ $playlist->user->name }}</span></p>
                         </div>
                     </div>
                 @empty
@@ -109,8 +81,7 @@
                         <p class="text-xl font-bold">No playlists yet</p>
                         <p class="text-sm font-medium mt-2">Create your first playlist and start collecting your favorite
                             themes!</p>
-                        <a href="{{ route('playlists.create') }}"
-                            class="mt-6 text-primary font-bold hover:underline">Create
+                        <a href="{{ route('playlists.create') }}" class="mt-6 text-primary font-bold hover:underline">Create
                             Playlist</a>
                     </div>
                 @endforelse
