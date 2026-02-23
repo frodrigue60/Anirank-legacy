@@ -32,7 +32,7 @@ The application uses a **Modern Dark Theme** with a deep purple aesthetic.
 - **Display**: `Spline Sans` (Headings, UI labels)
 - **Body**: `Noto Sans` (Descriptions, content)
 - **Icons**: Google Material Symbols (Outlined)
-    - ⚠️ **No hardcoded `font-size`**: The `.material-symbols-outlined` class in `fonts.css` must **NOT** set a fixed `font-size`. Icons inherit their size from the parent container or from Tailwind classes (`text-sm`, `text-lg`, `text-2xl`, etc.). Adding a fixed `font-size` will break icon sizing across the entire app.
+    - **No hardcoded `font-size`**: The `.material-symbols-outlined` class in `fonts.css` must **NOT** set a fixed `font-size`. Icons inherit their size from the parent container or from Tailwind classes (`text-sm`, `text-lg`, `text-2xl`, etc.). Adding a fixed `font-size` will break icon sizing across the entire app.
 
 ### Color Palette
 
@@ -46,6 +46,7 @@ The application uses a **Modern Dark Theme** with a deep purple aesthetic.
 - `.glass-panel`: Frosted glass effect (`backdrop-filter: blur(12px)`) with transparent background.
 - `.hero-glow`: Purple shadow glow (`box-shadow`) for high-impact sections.
 - `.filled`: Utility class for Material Symbols to use the "FILL" variation.
+- **Standardized Favorite Logic**: Unified interaction pattern using filled Material Symbols and consistent color feedback (`text-red-400`) across all list views (`ranking-table`, `seasonal-table`, `song-interactions`).
 - `x-ui.image`: Reusable Blade component for high-performance image rendering. Handles lazy-loading (`loading="lazy"`), error fallbacks (`onerror`), and uses `Storage::url()` internally to ensure CDN/Cloud storage compatibility. Automatically handles absolute path resolution for S3/MinIO.
 - `partials.meta`: Centralized SEO management. All views should use `@section('title')` and `@section('description')` instead of hardcoded meta tags.
 
@@ -72,6 +73,8 @@ To maintain a lean production bundle, `vite.config.mjs` only registers high-leve
 
 - **🔒 Livewire Request Guard**: Application-wide optimization pattern that blocks redundant requests and disables interactive elements during data loading for a robust UX.
 - **🚀 Optimized Dispatching**: Improved performance by migrating inter-component events (like modal triggers) to Alpine-based `@click` dispatches, reducing server roundtrips.
+- **⚡ Eager Loading Optimization**: Systematic use of `.with(['songs.post'])` in `PlaylistController` to eliminate N+1 query bottlenecks during list retrieval.
+- **🔥 Content Freshness**: Home featured song logic migrated from `inRandomOrder()` to `latest()` to prioritize new community additions over random rotation.
 - **💬 Livewire Request Modal**: Fully interactive and reactive user request system, replacing legacy modal patterns.
 - **Background Locking**: Filter containers use `wire:loading.class="opacity-50 pointer-events-none"` to prevent interaction during active requests.
 - **Input Disabling**: All search inputs and select dropdowns use `wire:loading.attr="disabled"` to prevent multiple simultaneous requests.
