@@ -15,11 +15,11 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173', 'http://localhost:8000', 'http://localhost:3000', 'https://anirank.work', 'https://anirank.work/api'],
+    'allowed_origins' => ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:8000', 'http://localhost:3000', 'https://anirank.work'],
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +29,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

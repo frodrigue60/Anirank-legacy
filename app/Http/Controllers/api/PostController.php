@@ -14,11 +14,11 @@ class PostController extends Controller
 {
     public function home()
     {
-        // $user = Auth::guard('sanctum')->user();
+        Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
         $status = true;
 
         // Weakly Ranking (3 OP + 3 ED)
-        $openings = Song::with(['post:id,title', 'artists:id,name'])
+        $openings = Song::with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'OP')
             ->whereHas('post', function ($q) use ($status) {
@@ -28,7 +28,7 @@ class PostController extends Controller
             ->take(3)
             ->get();
 
-        $endings = Song::with(['post:id,title', 'artists:id,name'])
+        $endings = Song::with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'ED')
             ->whereHas('post', function ($q) use ($status) {
@@ -41,7 +41,8 @@ class PostController extends Controller
         $weaklyRanking = $openings->concat($endings);
 
         // Recently Added Songs
-        $recently = Song::with(['post:id,title'])
+        $recently = Song::with(['post:id,title,slug', 'post.images'])
+            ->withAvg('ratings', 'rating')
             ->whereHas('post', function ($query) use ($status) {
                 $query->where('status', $status);
             })
@@ -50,7 +51,8 @@ class PostController extends Controller
             ->get();
 
         // Popular Songs (Likes)
-        $popular = Song::with(['post:id,title'])
+        $popular = Song::with(['post:id,title,slug', 'post.images'])
+            ->withAvg('ratings', 'rating')
             ->withCount('likes')
             ->whereHas('post', function ($query) use ($status) {
                 $query->where('status', $status);
@@ -60,7 +62,8 @@ class PostController extends Controller
             ->get();
 
         // Most Viewed Songs
-        $viewed = Song::with(['post:id,title'])
+        $viewed = Song::with(['post:id,title,slug', 'post.images'])
+            ->withAvg('ratings', 'rating')
             ->whereHas('post', function ($query) use ($status) {
                 $query->where('status', $status);
             })
@@ -69,33 +72,62 @@ class PostController extends Controller
             ->get();
 
         // Featured Artists
-        $featured_artists = Artist::select('id', 'name')->latest()->take(6)->get();
+        $featured_artists = Artist::select('id', 'name', 'slug')->with('images')->latest()->take(6)->get();
 
         // Featured Song (Random)
-        $featured_song = Song::with(['post:id,title', 'artists:id,name'])
+        $featured_song = Song::with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
+            ->withAvg('ratings', 'rating')
             ->whereHas('post', function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->inRandomOrder()
             ->first();
 
+        $appendUrls = function ($collection) {
+            foreach ($collection as $item) {
+                $item->append('average_rating');
+                if (isset($item->post)) {
+                    $item->post->append(['thumbnail_url', 'banner_url']);
+                }
+                if (isset($item->artists)) {
+                    $item->artists->each->append('avatar_url');
+                }
+            }
+
+            return $collection;
+        };
+
+        if ($featured_song) {
+            $featured_song->append('average_rating');
+            if ($featured_song->post) {
+                $featured_song->post->append(['thumbnail_url', 'banner_url']);
+            }
+            if ($featured_song->artists) {
+                $featured_song->artists->each->append('avatar_url');
+            }
+        }
+
+        $featured_artists->each->append('avatar_url');
+
         return response()->json([
             'featured_song' => $featured_song,
-            'weakly_ranking' => $weaklyRanking,
+            'weakly_ranking' => ['op' => $appendUrls($openings), 'ed' => $appendUrls($endings)],
             'featured_artists' => $featured_artists,
-            'recently_added' => $recently,
-            'most_popular' => $popular,
-            'most_viewed' => $viewed,
+            'recently_added' => $appendUrls($recently),
+            'most_popular' => $appendUrls($popular),
+            'most_viewed' => $appendUrls($viewed),
         ]);
     }
 
     public function index(Request $request)
     {
+        Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
         $season_id = $request->season_id;
         $year_id = $request->year_id;
         $name = $request->name;
-        $format_id = $request->format_id;
+        $type = $request->type;
         $genre_id = $request->genre_id;
+        $sort = $request->sort ?? 'latest';
 
         $status = true;
 
@@ -109,24 +141,70 @@ class PostController extends Controller
             ->when($name, function ($query, $name) {
                 $query->where('title', 'LIKE', '%'.$name.'%');
             })
-            ->when($format_id, function ($query, $format_id) {
-                $query->where('format_id', $format_id);
+            ->when($type, function ($query, $type) {
+                $query->whereHas('format', function ($q) use ($type) {
+                    if ($type === 'tv_show') {
+                        $q->where('slug', 'tv');
+                    } elseif ($type === 'tv_short') {
+                        $q->where('slug', 'tv-short');
+                    } else {
+                        $q->where('slug', $type);
+                    }
+                });
             })
             ->when($genre_id, function ($query, $genre_id) {
                 $query->whereHas('genres', function ($q) use ($genre_id) {
                     $q->where('genres.id', $genre_id);
                 });
             })
-            ->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name'])
+            ->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name', 'images'])
+            ->with(['songs' => function ($q) {
+                $q->withAvg('ratings', 'rating');
+            }])
             ->withCount('songs')
-            ->orderBy('title')
-            ->paginate($request->input('per_page', 15));
+            ->when($sort === 'latest', fn ($q) => $q->orderByDesc('created_at'))
+            ->when($sort === 'most_themes', fn ($q) => $q->orderByDesc('songs_count'))
+            ->when($sort === 'least_themes', fn ($q) => $q->orderBy('songs_count'))
+            ->when($sort === 'title', fn ($q) => $q->orderBy('title'))
+            ->paginate($request->input('per_page', 18));
+
+        $posts->getCollection()->each(function ($post) {
+            $post->append('thumbnail_url');
+            $post->average_rating = $post->songs->avg('ratings_avg_rating') ?: 0;
+            $post->makeHidden('songs');
+        });
 
         return response()->json($posts);
     }
 
     public function show(Post $post)
     {
+        Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
+        $post->load([
+            'year',
+            'season',
+            'studios',
+            'producers',
+            'format',
+            'genres',
+            'externalLinks',
+            'songs' => function ($q) {
+                $q->with(['artists', 'artists.images'])->withAvg('ratings', 'rating');
+            },
+        ]);
+
+        $post->append(['thumbnail_url', 'banner_url']);
+
+        $post->songs->each(function ($song) {
+            $song->append('average_rating');
+            if ($song->artists) {
+                $song->artists->each->append('avatar_url');
+            }
+        });
+
+        // Calcular rating promedio del anime basado en sus canciones
+        $post->average_rating = $post->songs->avg('ratings_avg_rating') ?: 0;
+
         return response()->json($post);
     }
 

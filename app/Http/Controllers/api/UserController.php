@@ -3,17 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use App\Models\SongVariant;
 use App\Models\Song;
+use App\Models\User;
+/* use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;*/
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -28,7 +27,7 @@ class UserController extends Controller
 
         try {
             $extension = $request->image->extension();
-            $file_name = $user->slug . '-' . time() . '.' . $extension;
+            $file_name = $user->slug.'-'.time().'.'.$extension;
             $path = 'profile';
 
             $storedPath = $request->file('image')->storeAs(
@@ -37,7 +36,7 @@ class UserController extends Controller
                 'public'
             );
 
-            if (!Storage::disk('public')->exists($storedPath)) {
+            if (! Storage::disk('public')->exists($storedPath)) {
                 throw new \Exception('El archivo no se pudo guardar en el almacenamiento');
             }
 
@@ -51,13 +50,13 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Avatar actualizado correctamente',
-                'avatar_url' => asset("storage/" . $storedPath),
+                'avatar_url' => asset('storage/'.$storedPath),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al subir la imagen',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -73,7 +72,7 @@ class UserController extends Controller
 
         try {
             $extension = $request->banner->extension();
-            $file_name = $user->slug . '-' . time() . '.' . $extension;
+            $file_name = $user->slug.'-'.time().'.'.$extension;
             $path = 'banner';
 
             $storedPath = $request->file('banner')->storeAs(
@@ -82,7 +81,7 @@ class UserController extends Controller
                 'public'
             );
 
-            if (!Storage::disk('public')->exists($storedPath)) {
+            if (! Storage::disk('public')->exists($storedPath)) {
                 throw new \Exception('El archivo no se pudo guardar en el almacenamiento');
             }
 
@@ -96,13 +95,13 @@ class UserController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Banner actualizado correctamente',
-                'banner_url' => asset("storage/" . $storedPath),
+                'banner_url' => asset('storage/'.$storedPath),
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error al subir la imagen',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -111,13 +110,13 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'score_format' => 'required|in:POINT_100,POINT_10_DECIMAL,POINT_10,POINT_5'
+                'score_format' => 'required|in:POINT_100,POINT_10_DECIMAL,POINT_10,POINT_5',
             ]);
 
             if ($validator->fails()) {
                 return response()->json([
                     'success' => false,
-                    'message' => $validator->getMessageBag()
+                    'message' => $validator->getMessageBag(),
                 ]);
             }
 
@@ -158,7 +157,7 @@ class UserController extends Controller
             ->whereHas('post', function ($query) use ($name, $season_id, $year_id, $status) {
                 $query->where('status', $status)
                     ->when($name, function ($query, $name) {
-                        $query->where('title', 'LIKE', '%' . $name . '%');
+                        $query->where('title', 'LIKE', '%'.$name.'%');
                     })
                     ->when($season_id, function ($query, $season_id) {
                         $query->where('season_id', $season_id->id);
@@ -184,9 +183,9 @@ class UserController extends Controller
     {
         $user = Auth::check() ? Auth::user() : null;
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
-                'message' => 'Please login or Re-login'
+                'message' => 'Please login or Re-login',
             ]);
         }
 
@@ -206,7 +205,7 @@ class UserController extends Controller
             ->whereHas('post', function ($query) use ($name, $season_id, $year_id, $status) {
                 $query->where('status', $status)
                     ->when($name, function ($query, $name) {
-                        $query->where('title', 'LIKE', '%' . $name . '%');
+                        $query->where('title', 'LIKE', '%'.$name.'%');
                     })
                     ->when($season_id, function ($query, $season_id) {
                         $query->where('season_id', $season_id->id);
@@ -286,26 +285,31 @@ class UserController extends Controller
                 $songVariants = $songVariants->sortBy(function ($song_variant) {
                     return $song_variant->song->post->title;
                 });
+
                 return $songVariants;
                 break;
 
             case 'averageRating':
                 $songVariants = $songVariants->sortByDesc('averageRating');
+
                 return $songVariants;
                 break;
 
             case 'view_count':
                 $songVariants = $songVariants->sortByDesc('views');
+
                 return $songVariants;
                 break;
 
             case 'likeCount':
                 $songVariants = $songVariants->sortByDesc('likeCount');
+
                 return $songVariants;
                 break;
 
             case 'recent':
                 $songVariants = $songVariants->sortByDesc('created_at');
+
                 return $songVariants;
                 break;
 
@@ -313,6 +317,7 @@ class UserController extends Controller
                 $songVariants = $songVariants->sortBy(function ($song_variant) {
                     return $song_variant->song->post->title;
                 });
+
                 return $songVariants;
                 break;
         }
@@ -379,14 +384,14 @@ class UserController extends Controller
         return $songs;
     }
 
-    public function paginate($songs, $perPage = 18, $page = null, $options = [])
+    /* public function paginate($songs, $perPage = 18, $page = null, $options = [])
     {
         $page = Paginator::resolveCurrentPage();
         $options = ['path' => Paginator::resolveCurrentPath()];
         $items = $songs instanceof Collection ? $songs : Collection::make($songs);
         $songs = new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
         return $songs;
-    }
+    } */
 
     public function sortSongs($sort, $songs)
     {
@@ -395,21 +400,26 @@ class UserController extends Controller
                 $songs = $songs->sortBy(function ($song) {
                     return $song->post->title;
                 });
+
                 return $songs;
                 break;
             case 'averageRating':
                 $songs = $songs->sortByDesc('averageRating');
+
                 return $songs;
             case 'view_count':
                 $songs = $songs->sortByDesc('view_count');
+
                 return $songs;
 
             case 'likeCount':
                 $songs = $songs->sortByDesc('likeCount');
+
                 return $songs;
                 break;
             case 'recent':
                 $songs = $songs->sortByDesc('created_at');
+
                 return $songs;
                 break;
 
@@ -417,6 +427,7 @@ class UserController extends Controller
                 $songs = $songs->sortBy(function ($song) {
                     return $song->post->title;
                 });
+
                 return $songs;
                 break;
         }
@@ -435,15 +446,15 @@ class UserController extends Controller
     {
         switch ($format) {
             case 'POINT_100':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_10_DECIMAL':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             case 'POINT_10':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_5':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             default:
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
         }
     }
 }

@@ -16,9 +16,57 @@ class StudioController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $studios = Studio::withCount('posts')->paginate(18);
+        $name = $request->name;
+        $sort = $request->sort ?? 'most_animes';
+
+        $query = Studio::query()->whereHas('posts', function ($q) {
+            $q->where('status', true);
+        })->withCount(['posts' => function ($q) {
+            $q->where('status', true);
+        }]);
+
+        // Load posts to get a banner image (taking the latest one)
+        $query->with(['posts' => function ($q) {
+            $q->where('status', true)->latest()->with('images');
+        }]);
+
+        if ($name) {
+            $query->where('name', 'like', '%'.$name.'%');
+        }
+
+        switch ($sort) {
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'least_animes':
+                $query->orderBy('posts_count', 'asc');
+                break;
+            case 'most_animes':
+            default:
+                $query->orderBy('posts_count', 'desc');
+                break;
+        }
+
+        $studios = $query->paginate(18);
+
+        foreach ($studios as $studio) {
+            $featured = $studio->posts->first();
+            if ($featured) {
+                $featured->append('banner_url');
+                $studio->featured_image = $featured->banner_url;
+                $studio->featured_title = $featured->title;
+            } else {
+                $studio->featured_image = null;
+                $studio->featured_title = null;
+            }
+            // Remove the collection to keep the response clean
+            unset($studio->posts);
+        }
 
         return response()->json([
             'studios' => $studios,
@@ -106,6 +154,11 @@ class StudioController extends Controller
             ->whereHas('studios', function ($query) use ($studio) {
                 $query->where('studios.id', $studio->id);
             })
+            ->with(['format:id,name', 'season:id,name', 'year:id,name', 'images'])
+            ->with(['songs' => function ($q) {
+                $q->withAvg('ratings', 'rating');
+            }])
+            ->withCount('songs')
             ->when($name, function ($query) use ($name) {
                 $query->where('title', 'like', '%'.$name.'%');
             })
@@ -121,13 +174,24 @@ class StudioController extends Controller
 
         // Aplicamos el ordenamiento antes de paginar
         if ($sort === 'title') {
-            $query->orderBy('title');
+            $query->orderBy('title', 'asc');
+        } elseif ($sort === 'name_desc') {
+            $query->orderBy('title', 'desc');
+        } elseif ($sort === 'most_themes') {
+            $query->orderBy('songs_count', 'desc');
+        } elseif ($sort === 'least_themes') {
+            $query->orderBy('songs_count', 'asc');
         } else {
-            // Aquí puedes añadir más casos según lo que necesites (ej. averageRating)
             $query->orderBy('created_at', 'desc');
         }
 
         $posts = $query->paginate(18);
+
+        $posts->getCollection()->each(function ($post) {
+            $post->append('thumbnail_url');
+            $post->average_rating = $post->songs->avg('ratings_avg_rating') ?: 0;
+            $post->makeHidden('songs');
+        });
 
         return response()->json([
             'posts' => $posts,

@@ -4,15 +4,16 @@ use App\Http\Controllers\Api\ArtistController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\InitController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\PlaylistController;
 use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\ProducerController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SongController;
 use App\Http\Controllers\Api\SongVariantController;
 use App\Http\Controllers\Api\StudioController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UserRequestController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Auth (Public)
@@ -24,12 +25,17 @@ Route::controller(AuthController::class)->prefix('auth')->group(function () {
 // Initialization (SPA Config)
 Route::get('init', [InitController::class, 'index'])->name('api.init');
 
+// Global Search
+Route::get('search', SearchController::class)->name('api.search');
+
 // Posts / Animes
 Route::controller(PostController::class)->group(function () {
     Route::get('home', 'home')->name('api.home');
-    Route::get('search', 'globalSearch')->name('api.search');
+    
+    // Public routes (Auth handled optionally in controllers/models)
     Route::get('animes', 'index')->name('api.animes.index');
-    Route::get('posts/{post}', 'show')->name('api.posts.show');
+    Route::get('animes/{post:slug}', 'show')->name('api.animes.show');
+    Route::get('animes/{post:slug}/songs/{song:slug}', [SongController::class, 'show'])->name('api.songs.show');
 });
 
 // Songs
@@ -55,16 +61,21 @@ Route::controller(SongVariantController::class)->group(function () {
 
 // Artists
 Route::get('artists', [ArtistController::class, 'index'])->name('api.artists.index');
-Route::get('artists/{artist}', [ArtistController::class, 'show'])->name('api.artists.show');
-Route::get('artists/{artist}/songs', [ArtistController::class, 'songs'])->name('api.artists.songs');
+Route::get('artists/{artist:slug}', [ArtistController::class, 'show'])->name('api.artists.show');
+Route::get('artists/{artist:slug}/songs', [ArtistController::class, 'songs'])->name('api.artists.songs');
 
 // Users
 Route::get('users/{user}', [UserController::class, 'show'])->name('api.users.show');
 
 // Studios
 Route::get('studios', [StudioController::class, 'index'])->name('api.studios.index');
-Route::get('studios/{studio}', [StudioController::class, 'show'])->name('api.studios.show');
-Route::get('studios/{studio}/animes', [StudioController::class, 'animes'])->name('api.studios.animes');
+Route::get('studios/{studio:slug}', [StudioController::class, 'show'])->name('api.studios.show');
+Route::get('studios/{studio:slug}/animes', [StudioController::class, 'animes'])->name('api.studios.animes');
+
+// Producers
+Route::get('producers', [ProducerController::class, 'index'])->name('api.producers.index');
+Route::get('producers/{producer:slug}', [ProducerController::class, 'show'])->name('api.producers.show');
+Route::get('producers/{producer:slug}/animes', [ProducerController::class, 'animes'])->name('api.producers.animes');
 
 // Auth Routes
 Route::middleware(['auth:sanctum'])->group(function () {

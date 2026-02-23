@@ -12,9 +12,26 @@ use Illuminate\Support\Facades\DB;
 
 class ArtistController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $artists = Artist::paginate(18);
+        $name = $request->name;
+        $sort = $request->sort;
+
+        $artists = Artist::when($name, function ($query) use ($name) {
+            $query->where('name', 'like', '%'.$name.'%');
+        })
+            ->withCount('songs')
+            ->when($sort === 'name_asc', fn ($q) => $q->orderBy('name'))
+            ->when($sort === 'name_desc', fn ($q) => $q->orderByDesc('name'))
+            ->when($sort === 'most_themes', fn ($q) => $q->orderByDesc('songs_count'))
+            ->when($sort === 'least_themes', fn ($q) => $q->orderBy('songs_count'))
+            ->when(!$sort, fn ($q) => $q->orderBy('name'))
+            ->with(['images'])
+            ->paginate(18);
+
+        $artists->getCollection()->each(function ($artist) {
+            $artist->append('avatar_url');
+        });
 
         return response()->json([
             'artists' => $artists,
@@ -33,45 +50,75 @@ class ArtistController extends Controller
         $user = Auth::check() ? Auth::user() : null;
         $status = true;
         $type = $request->type;
-        $sort = $request->sort;
+        $sort = $request->sort ?? 'recent';
         $name = $request->name;
         $year_id = $request->year_id;
         $season_id = $request->season_id;
 
         $query = Song::whereHas('artists', function ($query) use ($artist) {
             $query->where('artists.id', $artist->id);
-        })
-            ->when($year_id, function ($query) use ($year_id) {
-                $query->where('year_id', $year_id);
-            })
-            ->when($season_id, function ($query) use ($season_id) {
-                $query->where('season_id', $season_id);
-            })
-            ->whereHas('post', function ($query) use ($name, $status) {
-                $query->where('status', $status)
-                    ->when($name, function ($query) use ($name) {
-                        $query->where('title', 'like', '%'.$name.'%');
-                    });
-            })
-            ->when($type, function ($query) use ($type) {
-                $query->where('type', $type);
+        })->whereHas('post', function ($query) use ($status) {
+            $query->where('status', $status);
+        });
+
+        if ($year_id) {
+            $query->whereHas('post', function($q) use ($year_id) {
+                $q->where('year_id', $year_id);
             });
+        }
+        
+        if ($season_id) {
+            $query->whereHas('post', function($q) use ($season_id) {
+                $q->where('season_id', $season_id);
+            });
+        }
+
+        if ($name) {
+            $query->where(function($q) use ($name) {
+                $q->where('title', 'like', '%'.$name.'%')
+                  ->orWhereHas('post', function($sq) use ($name) {
+                      $sq->where('title', 'like', '%'.$name.'%');
+                  });
+            });
+        }
+
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        $query->with(['artists:id,name,slug', 'artists.images', 'post', 'post.images'])
+            ->withAvg('ratings', 'rating')
+            ->withCount('songVariants as view_count')
+            ->withCount('ratings as like_count'); // Approximating popular by rating counts
 
         // Ordenamos por base de datos antes de paginar
-        if ($sort === 'averageRating') {
-            $query->orderByDesc('averageRating');
-        } elseif ($sort === 'view_count') {
-            $query->orderByDesc('viewCount');
-        } elseif ($sort === 'recent') {
-            $query->orderByDesc('created_at');
+        if ($sort === 'rating') {
+            $query->orderBy('ratings_avg_rating', 'desc');
+        } elseif ($sort === 'rating_asc') {
+            $query->orderBy('ratings_avg_rating', 'asc');
+        } elseif ($sort === 'most_views') {
+            $query->orderBy('view_count', 'desc');
+        } elseif ($sort === 'most_popular') {
+            $query->orderBy('like_count', 'desc');
+        } elseif ($sort === 'alphabetical') {
+            $query->orderBy('title', 'asc');
         } else {
-            // Unir con posts para ordenar por título si es necesario, o usar orden por defecto
-            $query->orderByDesc('id');
+            // recent (default)
+            $query->orderBy('created_at', 'desc');
         }
 
         $songs = $query->paginate(18);
+        $songs = $this->setScoreSongs($songs, $user);
+
+        $songs->getCollection()->each(function ($song) {
+            if ($song->post) {
+                $song->post->append('thumbnail_url');
+                $song->post->append('banner_url');
+            }
+        });
 
         return response()->json([
+            'artist' => $artist,
             'songs' => $songs,
         ]);
     }

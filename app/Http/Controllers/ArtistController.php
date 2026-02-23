@@ -4,17 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Artist;
 use App\Models\Season;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Models\Song;
 use App\Models\Year;
-use stdClass;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
-use App\Models\SongVariant;
-
 
 class ArtistController extends Controller
 {
@@ -31,7 +21,6 @@ class ArtistController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Artist  $artist
      * @return \Illuminate\Http\Response
      */
     public function show(Artist $artist)
@@ -43,7 +32,7 @@ class ArtistController extends Controller
             ['name' => 'Opening', 'value' => 'OP'],
             ['name' => 'Ending', 'value' => 'ED'],
             ['name' => 'Insert', 'value' => 'INS'],
-            ['name' => 'Other', 'value' => 'OTH']
+            ['name' => 'Other', 'value' => 'OTH'],
         ];
 
         $sortMethods = [
@@ -51,7 +40,7 @@ class ArtistController extends Controller
             ['name' => 'Title', 'value' => 'title'],
             ['name' => 'Score', 'value' => 'averageRating'],
             ['name' => 'Views', 'value' => 'view_count'],
-            ['name' => 'Popular', 'value' => 'likeCount']
+            ['name' => 'Popular', 'value' => 'likeCount'],
         ];
 
         $artist->load('songs');

@@ -35,6 +35,8 @@ class AppServiceProvider extends ServiceProvider
         Paginator::defaultView('pagination::tailwind');
         Paginator::defaultSimpleView('pagination::simple-tailwind');
 
+
+
         Reaction::observe(ReactionObserver::class);
         User::observe(UserObserver::class);
 

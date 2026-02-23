@@ -4,18 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Post;
-use App\Models\SongVariant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Models\Rateable;
 use Illuminate\Support\Facades\Session;
-use App\Models\DailyMetric;
 
 class Song extends Model
 {
     use HasFactory;
     use Rateable;
+
+    protected $appends = [
+        'name',
+        'likes_count',
+        'dislikes_count',
+        'liked',
+        'disliked',
+        'is_favorited',
+        'average_rating',
+    ];
 
     protected $fillable = [
         'song_romaji',
@@ -27,10 +33,11 @@ class Song extends Model
         'post_id',
         'season_id',
         'year_id',
-        'views'
+        'views',
     ];
 
     public const TYPE_OPENING = 'OP';
+
     public const TYPE_ENDING = 'ED';
 
     protected static function boot()
@@ -86,9 +93,9 @@ class Song extends Model
 
     public function incrementViews()
     {
-        $key = 'song_' . $this->id;
+        $key = 'song_'.$this->id;
 
-        if (!Session::has($key)) {
+        if (! Session::has($key)) {
             DB::beginTransaction();
             try {
                 // Static global count
@@ -119,7 +126,7 @@ class Song extends Model
     public function getUrlFirstVariantAttribute()
     {
         // Cargar relaciones necesarias si no están ya cargadas
-        if (!$this->relationLoaded('post') || !$this->post->relationLoaded('songs')) {
+        if (! $this->relationLoaded('post') || ! $this->post->relationLoaded('songs')) {
             $this->load(['post', 'songVariants']);
         }
 
@@ -155,44 +162,50 @@ class Song extends Model
 
     public function getLikesCountAttribute()
     {
-        return $this->likes()->count();
+        return array_key_exists('likes_count', $this->attributes) 
+            ? $this->attributes['likes_count'] 
+            : $this->likes()->count();
     }
 
     public function getDislikesCountAttribute()
     {
-        return $this->dislikes()->count();
+        return array_key_exists('dislikes_count', $this->attributes) 
+            ? $this->attributes['dislikes_count'] 
+            : $this->dislikes()->count();
     }
 
     // Método para verificar si el usuario actual ha dado like
-    public function liked()
+    public function getLikedAttribute()
     {
-        if (Auth::check()) { // Verifica si el usuario está autenticado
+        if (auth('sanctum')->check()) { // Verifica si el usuario está autenticado vía API
             return $this->reactions()
-                ->where('user_id', Auth::id())
+                ->where('user_id', auth('sanctum')->id())
                 ->where('type', 1)
                 ->exists();
         }
+
         return false;
     }
 
     // Método para verificar si el usuario actual ha dado dislike
-    public function disliked()
+    public function getDislikedAttribute()
     {
-        if (Auth::check()) { // Verifica si el usuario está autenticado
+        if (auth('sanctum')->check()) { // Verifica si el usuario está autenticado vía API
             return $this->reactions()
-                ->where('user_id', Auth::id())
+                ->where('user_id', auth('sanctum')->id())
                 ->where('type', -1)
                 ->exists();
         }
+
         return false;
     }
 
     public function getViewsStringAttribute()
     {
         if ($this->views >= 1000000) {
-            $views = number_format(intval($this->views / 1000000), 0) . 'M';
+            $views = number_format(intval($this->views / 1000000), 0).'M';
         } elseif ($this->views >= 1000) {
-            $views = number_format(intval($this->views / 1000), 0) . 'K';
+            $views = number_format(intval($this->views / 1000), 0).'K';
         } else {
             $views = $this->views;
         }
@@ -239,28 +252,31 @@ class Song extends Model
     }
 
     // Método para verificar si el usuario actual ha marcado este post como favorito
-    public function isFavorited()
+    public function getIsFavoritedAttribute()
     {
-        if (Auth::check()) {
-            return $this->favorites()->where('user_id', Auth::id())->exists();
+        if (auth('sanctum')->check()) {
+            return $this->favorites()->where('user_id', auth('sanctum')->id())->exists();
         }
+
         return false;
     }
 
     public function toggleFavorite()
     {
-        if (!Auth::check()) {
+        if (! auth('sanctum')->check()) {
             return false;
         }
 
-        $userId = Auth::id();
+        $userId = auth('sanctum')->id();
         $favorite = $this->favorites()->where('user_id', $userId)->first();
 
         if ($favorite) {
             $favorite->delete();
+
             return false;
         } else {
             $this->favorites()->create(['user_id' => $userId]);
+
             return true;
         }
     }
@@ -320,16 +336,18 @@ class Song extends Model
     /**
      * Converts a raw score (0–100) to the given display format.
      */
-    private function convertScore(float|null $raw, string $format): int|float|null
+    private function convertScore(?float $raw, string $format): int|float|null
     {
-        if ($raw === null) return null;
+        if ($raw === null) {
+            return null;
+        }
 
         return match ($format) {
-            'POINT_100'        => (int) round($raw),
-            'POINT_10'         => (int) round($raw / 10),
+            'POINT_100' => (int) round($raw),
+            'POINT_10' => (int) round($raw / 10),
             'POINT_10_DECIMAL' => round($raw / 10, 1),
-            'POINT_5'          => round($raw / 20, 1),
-            default            => (int) round($raw),
+            'POINT_5' => round($raw / 20, 1),
+            default => (int) round($raw),
         };
     }
 
@@ -354,7 +372,9 @@ class Song extends Model
     public function formattedUserScore(string $format = 'POINT_100', ?int $userId = null): int|float|null
     {
         $userId ??= auth()->id();
-        if (!$userId) return null;
+        if (! $userId) {
+            return null;
+        }
 
         // Uses the ratings() relationship from the Rateable trait (polymorphic).
         $raw = $this->ratings()->where('user_id', $userId)->value('rating');

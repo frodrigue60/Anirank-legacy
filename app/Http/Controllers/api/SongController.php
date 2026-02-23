@@ -21,10 +21,44 @@ class SongController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $songs = Song::with('post', 'artists', 'likeCount')
+        Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
+        $name = $request->name;
+        $year_id = $request->year_id;
+        $season_id = $request->season_id;
+        $type = $request->type;
+        $sort = $request->sort;
+
+        $songs = Song::when($name, function ($query) use ($name) {
+            $query->where(function ($q) use ($name) {
+                $q->where('song_romaji', 'like', '%'.$name.'%')
+                    ->orWhere('song_en', 'like', '%'.$name.'%')
+                    ->orWhere('song_jp', 'like', '%'.$name.'%')
+                    ->orWhereHas('post', function ($postQuery) use ($name) {
+                        $postQuery->where('title', 'like', '%'.$name.'%');
+                    });
+            });
+        })
+            ->when($year_id, fn ($q) => $q->where('year_id', $year_id))
+            ->when($season_id, fn ($q) => $q->where('season_id', $season_id))
+            ->when($type, fn ($q) => $q->where('type', $type))
+            ->with(['post', 'post.images', 'artists', 'artists.images', 'year', 'season'])
+            ->withAvg('ratings', 'rating')
+            ->when($sort === 'title', fn ($q) => $q->orderBy('song_romaji'))
+            ->when($sort === 'rating', fn ($q) => $q->orderByDesc('ratings_avg_rating'))
+            ->when(! $sort || $sort === 'recent', fn ($q) => $q->orderByDesc('created_at'))
             ->paginate(18);
+
+        $songs->getCollection()->each(function ($song) {
+            if ($song->post) {
+                $song->post->append('thumbnail_url');
+                $song->post->append('banner_url');
+            }
+            if ($song->artists) {
+                $song->artists->each->append('avatar_url');
+            }
+        });
 
         return response()->json($songs);
     }
@@ -52,12 +86,53 @@ class SongController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param  \App\Models\Post  $post
+     * @param  \App\Models\Song  $song
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(\App\Models\Post $post, Song $song)
     {
-        //
+        Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
+        $song->load([
+            'artists',
+            'artists.images',
+            'year',
+            'season',
+            'post',
+            'post.images',
+            'songVariants.video',
+        ]);
+
+        $song->post->append(['thumbnail_url', 'banner_url']);
+        $song->artists->each->append('avatar_url');
+
+        // Transform videos to have correct URLs
+        $song->songVariants->each(function ($variant) {
+            if ($variant->video) {
+                $variant->video->append(['embed_url', 'local_url']);
+            }
+        });
+
+        // Interaction states are now automatically appended via the Song model
+        
+        // Get related songs from the same series (YouTube style)
+        $relatedSongs = Song::where('post_id', $post->id)
+            ->where('id', '!=', $song->id)
+            ->with(['artists', 'artists.images'])
+            ->withAvg('ratings', 'rating')
+            ->get();
+
+        $relatedSongs->each(function ($related) {
+            $related->artists->each->append('avatar_url');
+        });
+
+        $song->incrementViews();
+
+        return response()->json([
+            'success' => true,
+            'song' => $song,
+            'related' => $relatedSongs,
+        ]);
     }
 
     /**
@@ -102,15 +177,14 @@ class SongController extends Controller
             return response()->json([
                 'success' => true,
                 'song' => $song,
-                'likesCount' => $song->likesCount,
-                'dislikesCount' => $song->dislikesCount,
+                'likesCount' => $song->likes_count,
+                'dislikesCount' => $song->dislikes_count,
             ]);
         } catch (\Throwable $th) {
-            return response()->json(['success' => false, 'error' => $th]);
+            return response()->json(['success' => false, 'error' => $th->getMessage()]);
         }
     }
 
-    // Método para dislike
     public function dislike(Song $song)
     {
         try {
@@ -120,11 +194,11 @@ class SongController extends Controller
             return response()->json([
                 'success' => true,
                 'song' => $song,
-                'likesCount' => $song->likesCount,
-                'dislikesCount' => $song->dislikesCount,
+                'likesCount' => $song->likes_count,
+                'dislikesCount' => $song->dislikes_count,
             ]);
         } catch (\Throwable $th) {
-            return response()->json(['success' => false, 'error' => $th]);
+            return response()->json(['success' => false, 'error' => $th->getMessage()]);
         }
     }
 
@@ -244,7 +318,7 @@ class SongController extends Controller
         $sort = 'title';
         if ($currentSeason && $currentYear) {
 
-            $songs = Song::with(['post'])
+            $songs = Song::with(['post', 'post.images'])
                 ->where('type', $type)
                 ->when($currentSeason, function ($query, $currentSeason) {
                     $query->where('season_id', $currentSeason->id);
@@ -271,17 +345,27 @@ class SongController extends Controller
 
     public function globalRanking(Request $request)
     {
+        Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
         $user = Auth::guard('sanctum')->user();
         $status = true;
-        $type = $request->type ?? 'OP';
+        $type = in_array($request->type, ['OP', 'ED']) ? $request->type : null;
         $limit = 18;
 
-        $songs = Song::where('type', $type)
+        $songs = Song::when($type, fn ($q) => $q->where('type', $type))
             ->whereHas('post', fn ($q) => $q->where('status', $status))
-            ->with(['post'])
+            ->with(['post', 'post.images', 'artists', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->orderByDesc('ratings_avg_rating')
             ->paginate($limit);
+
+        $songs->getCollection()->each(function ($item) {
+            if (isset($item->post)) {
+                $item->post->append('thumbnail_url');
+            }
+            if (isset($item->artists)) {
+                $item->artists->each->append('avatar_url');
+            }
+        });
 
         // $songs = $this->setScoreSongs($songs->getCollection(), $user);
 
@@ -293,24 +377,34 @@ class SongController extends Controller
 
     public function seasonalRanking(Request $request)
     {
+        Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
         $user = Auth::guard('sanctum')->user();
         $limit = 18;
         $status = true;
-        $type = $request->type ?? 'OP';
+        $type = in_array($request->type, ['OP', 'ED']) ? $request->type : null;
 
         $currentSeason = Season::where('current', true)->first();
         $currentYear = Year::where('current', true)->first();
 
-        $songs = Song::where('type', $type)
+        $songs = Song::when($type, fn ($q) => $q->where('type', $type))
             ->whereHas('post', function ($query) use ($currentSeason, $currentYear, $status) {
                 $query->where('status', $status)
                     ->when($currentSeason, fn ($q) => $q->where('season_id', $currentSeason->id))
                     ->when($currentYear, fn ($q) => $q->where('year_id', $currentYear->id));
             })
-            ->with(['post'])
+            ->with(['post', 'post.images', 'artists', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->orderByDesc('ratings_avg_rating')
             ->paginate($limit);
+
+        $songs->getCollection()->each(function ($item) {
+            if (isset($item->post)) {
+                $item->post->append('thumbnail_url');
+            }
+            if (isset($item->artists)) {
+                $item->artists->each->append('avatar_url');
+            }
+        });
 
         // $songs = $this->setScoreSongs($songs->getCollection(), $user);
 
