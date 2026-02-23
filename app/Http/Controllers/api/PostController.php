@@ -18,7 +18,8 @@ class PostController extends Controller
         $status = true;
 
         // Weakly Ranking (3 OP + 3 ED)
-        $openings = Song::with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
+        $openings = Song::withUserInteractions()
+            ->with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'OP')
             ->whereHas('post', function ($q) use ($status) {
@@ -28,7 +29,8 @@ class PostController extends Controller
             ->take(3)
             ->get();
 
-        $endings = Song::with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
+        $endings = Song::withUserInteractions()
+            ->with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'ED')
             ->whereHas('post', function ($q) use ($status) {
@@ -41,7 +43,8 @@ class PostController extends Controller
         $weaklyRanking = $openings->concat($endings);
 
         // Recently Added Songs
-        $recently = Song::with(['post:id,title,slug', 'post.images'])
+        $recently = Song::withUserInteractions()
+            ->with(['post:id,title,slug', 'post.images'])
             ->withAvg('ratings', 'rating')
             ->whereHas('post', function ($query) use ($status) {
                 $query->where('status', $status);
@@ -51,7 +54,8 @@ class PostController extends Controller
             ->get();
 
         // Popular Songs (Likes)
-        $popular = Song::with(['post:id,title,slug', 'post.images'])
+        $popular = Song::withUserInteractions()
+            ->with(['post:id,title,slug', 'post.images'])
             ->withAvg('ratings', 'rating')
             ->withCount('likes')
             ->whereHas('post', function ($query) use ($status) {
@@ -62,7 +66,8 @@ class PostController extends Controller
             ->get();
 
         // Most Viewed Songs
-        $viewed = Song::with(['post:id,title,slug', 'post.images'])
+        $viewed = Song::withUserInteractions()
+            ->with(['post:id,title,slug', 'post.images'])
             ->withAvg('ratings', 'rating')
             ->whereHas('post', function ($query) use ($status) {
                 $query->where('status', $status);
@@ -75,7 +80,8 @@ class PostController extends Controller
         $featured_artists = Artist::select('id', 'name', 'slug')->with('images')->latest()->take(6)->get();
 
         // Featured Song (Random)
-        $featured_song = Song::with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
+        $featured_song = Song::withUserInteractions()
+            ->with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->whereHas('post', function ($q) use ($status) {
                 $q->where('status', $status);
@@ -159,7 +165,7 @@ class PostController extends Controller
             })
             ->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name', 'images'])
             ->with(['songs' => function ($q) {
-                $q->withAvg('ratings', 'rating');
+                $q->withUserInteractions()->withAvg('ratings', 'rating');
             }])
             ->withCount('songs')
             ->when($sort === 'latest', fn ($q) => $q->orderByDesc('created_at'))
@@ -189,7 +195,9 @@ class PostController extends Controller
             'genres',
             'externalLinks',
             'songs' => function ($q) {
-                $q->with(['artists', 'artists.images'])->withAvg('ratings', 'rating');
+                $q->withUserInteractions()
+                  ->with(['artists', 'artists.images'])
+                  ->withAvg('ratings', 'rating');
             },
         ]);
 

@@ -77,6 +77,13 @@ Route::get('producers', [ProducerController::class, 'index'])->name('api.produce
 Route::get('producers/{producer:slug}', [ProducerController::class, 'show'])->name('api.producers.show');
 Route::get('producers/{producer:slug}/animes', [ProducerController::class, 'animes'])->name('api.producers.animes');
 
+// Playlists (Public)
+Route::controller(PlaylistController::class)->group(function () {
+    Route::get('playlists', 'index')->name('api.playlists.index');
+    Route::get('playlists/{playlist}', 'show')->name('api.playlists.show');
+    Route::get('users/{user:slug}/playlists', 'userPlaylists')->name('api.users.playlists');
+});
+
 // Auth Routes
 Route::middleware(['auth:sanctum'])->group(function () {
     // Auth
@@ -85,10 +92,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('me', 'me')->name('api.auth.me');
     });
 
-    // Playlists
+    // Playlists (Private)
     Route::controller(PlaylistController::class)->group(function () {
-        Route::get('playlists', 'index')->name('api.playlists.index');
+        Route::get('playlists/mine', 'index')->name('api.playlists.mine');
         Route::post('playlists', 'store')->name('api.playlists.store');
+        Route::patch('playlists/{playlist}', 'update')->name('api.playlists.update');
+        Route::delete('playlists/{playlist}', 'destroy')->name('api.playlists.destroy');
         Route::post('playlists/{playlist}/toggle-song', 'toggleSong')->name('api.playlists.toggle.song');
     });
 
@@ -117,7 +126,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // User Requests
-    Route::resource('requests', UserRequestController::class);
+    Route::resource('user-requests', UserRequestController::class);
 
     // User
     Route::controller(UserController::class)->group(function () {

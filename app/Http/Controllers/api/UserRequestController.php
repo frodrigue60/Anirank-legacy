@@ -13,35 +13,33 @@ class UserRequestController extends Controller
     public function store(Request $request)
     {
         try {
-            $userRequest = new UserRequest();
-            $userRequest->title = $request->title;
-            $userRequest->content = $request->content;
-            $userRequest->user_id = Auth::user()->id;
-
             $validator = Validator::make($request->all(), [
                 'title'   => 'required|string|max:255',
                 'content' => 'required|string|max:255',
             ]);
 
             if ($validator->fails()) {
-                $messageBag = $validator->getMessageBag();
                 return response()->json([
                     'success' => false,
-                    'message' => $messageBag
-                ]);
+                    'message' => $validator->errors()->first()
+                ], 422);
             }
 
+            $userRequest = new UserRequest();
+            $userRequest->title = $request->title;
+            $userRequest->content = $request->content;
+            $userRequest->user_id = Auth::id();
             $userRequest->save();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Request send successfully!'
+                'message' => 'Request sent successfully!'
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => $th
-            ]);
+                'message' => 'Failed to submit request: ' . $th->getMessage()
+            ], 500);
         }
     }
 }

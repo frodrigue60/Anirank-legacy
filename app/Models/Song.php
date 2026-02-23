@@ -177,6 +177,13 @@ class Song extends Model
     // Método para verificar si el usuario actual ha dado like
     public function getLikedAttribute()
     {
+        if (array_key_exists('liked', $this->attributes)) {
+            return (bool) $this->attributes['liked'];
+        }
+        if (array_key_exists('reactions_exists', $this->attributes)) {
+            return (bool) $this->attributes['reactions_exists'];
+        }
+
         if (auth('sanctum')->check()) { // Verifica si el usuario está autenticado vía API
             return $this->reactions()
                 ->where('user_id', auth('sanctum')->id())
@@ -190,6 +197,10 @@ class Song extends Model
     // Método para verificar si el usuario actual ha dado dislike
     public function getDislikedAttribute()
     {
+        if (array_key_exists('disliked', $this->attributes)) {
+            return (bool) $this->attributes['disliked'];
+        }
+
         if (auth('sanctum')->check()) { // Verifica si el usuario está autenticado vía API
             return $this->reactions()
                 ->where('user_id', auth('sanctum')->id())
@@ -245,15 +256,35 @@ class Song extends Model
         return $this->morphMany(Favorite::class, 'favoritable');
     }
 
-    // retorna el la cantidad de veces que ha sido marcado como favorito
+    // retorna la cantidad de veces que ha sido marcado como favorito
     public function getFavoritesCountAttribute()
     {
         return $this->favorites()->count();
     }
 
+    public function scopeWithUserInteractions($query)
+    {
+        $guard = auth('sanctum')->check() ? 'sanctum' : null;
+        if (!$guard) return $query;
+
+        $userId = auth($guard)->id();
+        return $query->withExists([
+            'reactions as liked' => fn($q) => $q->where('user_id', $userId)->where('type', 1),
+            'reactions as disliked' => fn($q) => $q->where('user_id', $userId)->where('type', -1),
+            'favorites as is_favorited' => fn($q) => $q->where('user_id', $userId)
+        ]);
+    }
+
     // Método para verificar si el usuario actual ha marcado este post como favorito
     public function getIsFavoritedAttribute()
     {
+        if (array_key_exists('is_favorited', $this->attributes)) {
+            return (bool) $this->attributes['is_favorited'];
+        }
+        if (array_key_exists('favorites_exists', $this->attributes)) {
+            return (bool) $this->attributes['favorites_exists'];
+        }
+
         if (auth('sanctum')->check()) {
             return $this->favorites()->where('user_id', auth('sanctum')->id())->exists();
         }

@@ -19,6 +19,8 @@ return new class extends Migration
             $table->morphs('reactable'); // reactable_id y reactable_type
             $table->tinyInteger('type')->default(0); // 1 para like, -1 para dislike
             $table->timestamps();
+
+            $table->index(['user_id', 'reactable_type', 'reactable_id', 'type'], 'reactions_user_reactable_type_idx');
         });
     }
 

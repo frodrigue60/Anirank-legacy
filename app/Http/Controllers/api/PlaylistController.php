@@ -13,27 +13,30 @@ class PlaylistController extends Controller
     public function index(Request $request)
     {
         $songId = $request->query('song_id') ?? $request->input('song_id');
+        $user = auth('sanctum')->user();
 
-        if (!$songId) {
-            return response()->json(['error' => 'song_id is required'], 400);
+        $query = Playlist::with(['user'])->withCount('songs');
+
+        if ($request->has('mine') && $user) {
+            $query->where('user_id', $user->id);
+        } else {
+            $query->where('is_public', true);
         }
 
-        $user = Auth::user();
+        $playlists = $query->latest()->get();
 
-        $playlists = $user->playlists()
-            ->withCount('songs')
-            ->get();
+        if ($songId) {
+            $playlistsWithSong = DB::table('playlist_song')
+                ->where('song_id', $songId)
+                ->whereIn('playlist_id', $playlists->pluck('id'))
+                ->pluck('playlist_id')
+                ->toArray();
 
-        $playlistsWithSong = DB::table('playlist_song')
-            ->where('song_id', $songId)
-            ->whereIn('playlist_id', $playlists->pluck('id'))
-            ->pluck('playlist_id')
-            ->toArray();
-
-        $playlists = $playlists->map(function ($playlist) use ($playlistsWithSong) {
-            $playlist->is_in_playlist = in_array($playlist->id, $playlistsWithSong);
-            return $playlist;
-        });
+            $playlists = $playlists->map(function ($playlist) use ($playlistsWithSong) {
+                $playlist->is_in_playlist = in_array($playlist->id, $playlistsWithSong);
+                return $playlist;
+            });
+        }
 
         return response()->json([
             'playlists' => $playlists,
@@ -48,12 +51,14 @@ class PlaylistController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:255',
+            'is_public' => 'nullable|boolean',
         ]);
 
         $playlist = Playlist::create([
             'name' => $request->name,
             'description' => $request->description,
             'user_id' => Auth::id(),
+            'is_public' => $request->boolean('is_public', false),
         ]);
 
         return response()->json([
@@ -63,11 +68,58 @@ class PlaylistController extends Controller
         ], 201);
     }
 
+    public function update(Request $request, Playlist $playlist)
+    {
+        $this->authorize('update', $playlist);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:255',
+            'is_public' => 'nullable|boolean',
+        ]);
+
+        $playlist->update([
+            'name' => $request->name,
+            'description' => $request->description,
+            'is_public' => $request->boolean('is_public', $playlist->is_public),
+        ]);
+
+        return response()->json([
+            'playlist' => $playlist,
+            'message' => 'Playlist updated successfully',
+            'status' => 200
+        ], 200);
+    }
+
     public function show(Playlist $playlist)
     {
-        $this->authorize('view', $playlist);
+        $user = auth('sanctum')->user();
+        if (!$playlist->is_public) {
+            if (!$user || $user->id !== $playlist->user_id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+        }
 
-        $playlist->load('posts');
+        $playlist->load([
+            'songs' => function ($q) {
+                $q->withUserInteractions()
+                  ->with(['post', 'artists', 'songVariants.video']);
+            },
+        ]);
+
+        $playlist->songs->each(function ($song) {
+            if ($song->post) {
+                $song->post->append(['thumbnail_url', 'banner_url']);
+            }
+            if ($song->artists) {
+                $song->artists->each->append('avatar_url');
+            }
+            $song->songVariants->each(function ($variant) {
+                if ($variant->video) {
+                    $variant->video->append(['embed_url', 'local_url']);
+                }
+            });
+        });
 
         return response()->json([
             'playlist' => $playlist,
@@ -124,5 +176,23 @@ class PlaylistController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function userPlaylists(Request $request, \App\Models\User $user)
+    {
+        $query = $user->playlists()->withCount('songs');
+
+        // Solo mostrar privadas si es el propio usuario autenticado
+        $currentUser = auth('sanctum')->user();
+        if (!$currentUser || $currentUser->id !== $user->id) {
+            $query->where('is_public', true);
+        }
+
+        $playlists = $query->latest()->get();
+
+        return response()->json([
+            'playlists' => $playlists,
+            'message' => 'User playlists retrieved successfully',
+        ], 200);
     }
 }

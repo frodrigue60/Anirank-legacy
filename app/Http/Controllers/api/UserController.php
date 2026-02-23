@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Song;
 use App\Models\User;
-/* use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;*/
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +21,7 @@ class UserController extends Controller
         ]);
 
         $user = Auth::user();
-        $old_user_image = $user->image;
+        $disk = config('filesystems.default');
 
         try {
             $extension = $request->image->extension();
@@ -33,24 +31,15 @@ class UserController extends Controller
             $storedPath = $request->file('image')->storeAs(
                 $path,
                 $file_name,
-                'public'
+                $disk
             );
 
-            if (! Storage::disk('public')->exists($storedPath)) {
-                throw new \Exception('El archivo no se pudo guardar en el almacenamiento');
-            }
-
-            $user->image = $storedPath;
-            $user->save();
-
-            if (isset($old_user_image) && Storage::disk('public')->exists($old_user_image)) {
-                Storage::disk('public')->delete($old_user_image);
-            }
+            $user->updateOrCreateImage($storedPath, 'avatar', $disk);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Avatar actualizado correctamente',
-                'avatar_url' => asset('storage/'.$storedPath),
+                'avatar_url' => $user->avatar_url,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -68,7 +57,7 @@ class UserController extends Controller
         ]);
 
         $user = Auth::user();
-        $old_banner_image = $user->banner;
+        $disk = config('filesystems.default');
 
         try {
             $extension = $request->banner->extension();
@@ -78,24 +67,15 @@ class UserController extends Controller
             $storedPath = $request->file('banner')->storeAs(
                 $path,
                 $file_name,
-                'public'
+                $disk
             );
 
-            if (! Storage::disk('public')->exists($storedPath)) {
-                throw new \Exception('El archivo no se pudo guardar en el almacenamiento');
-            }
-
-            $user->banner = $storedPath;
-            $user->save();
-
-            if (isset($old_banner_image) && Storage::disk('public')->exists($old_banner_image)) {
-                Storage::disk('public')->delete($old_banner_image);
-            }
+            $user->updateOrCreateImage($storedPath, 'banner', $disk);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Banner actualizado correctamente',
-                'banner_url' => asset('storage/'.$storedPath),
+                'banner_url' => $user->banner_url,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -137,9 +117,17 @@ class UserController extends Controller
         }
     }
 
+    public function show(User $user)
+    {
+        return response()->json([
+            'success' => true,
+            'user' => $user->only(['id', 'name', 'slug', 'avatar_url', 'banner_url', 'score_format']),
+        ]);
+    }
+
     public function userList(Request $request, $id)
     {
-        $user = User::where('id', $id)->select('id', 'slug', 'score_format', 'image', 'banner', 'name')->first();
+        $user = User::where('id', $id)->select('id', 'slug', 'score_format', 'name')->first();
 
         $status = true;
         $perPage = 15;
@@ -150,7 +138,8 @@ class UserController extends Controller
         $sort = $request->sort;
         $name = $request->name;
 
-        $songs = Song::with(['post'])
+        $songs = Song::withUserInteractions()
+            ->with(['post'])
             ->when($type, function ($query, $type) {
                 $query->where('type', $type);
             })
@@ -167,14 +156,13 @@ class UserController extends Controller
                     });
             })
             ->favoritedBy($user->id)
-            ->get();
+            ->paginate($perPage);
 
-        $songs = $this->setScoreSongs($songs, $user);
-        $songs = $this->sortSongs($sort, $songs);
-        $songs = $this->paginate($songs, $perPage, $request->page);
+        //$songs = $this->setScoreSongs($songs, $user);
+        //$songs = $this->sortSongs($sort, $songs);
+        //$songs = $this->paginate($songs, $perPage, $request->page);
 
         return response()->json([
-            'html' => view('partials.songs.cards-v2', compact('songs'))->render(),
             'songs' => $songs,
         ]);
     }
@@ -198,7 +186,8 @@ class UserController extends Controller
         $sort = $request->sort;
         $name = $request->name;
 
-        $songs = Song::with(['post'])
+        $songs = Song::withUserInteractions()
+            ->with(['post'])
             ->when($type, function ($query, $type) {
                 $query->where('type', $type);
             })
@@ -215,112 +204,15 @@ class UserController extends Controller
                     });
             })
             ->favoritedBy($user->id)
-            ->get();
+            ->paginate($perPage);
 
-        $songs = $this->setScoreSongs($songs, $user);
-        $songs = $this->sortSongs($sort, $songs);
-        $songs = $this->paginate($songs, $perPage, $request->page);
+        //$songs = $this->setScoreSongs($songs, $user);
+        //$songs = $this->sortSongs($sort, $songs);
+        //$songs = $this->paginate($songs, $perPage, $request->page);
 
         return response()->json([
-            'html' => view('partials.songs.cards-v2', compact('songs'))->render(),
             'songs' => $songs,
         ]);
-    }
-
-    public function setScoreOnlyVariants($variants, $user = null)
-    {
-        $variants->each(function ($variant) use ($user) {
-            $variant->userScore = null;
-            $factor = 1;
-            $isDecimalFormat = false;
-            $denominator = 100;
-
-            if ($user) {
-                switch ($user->score_format) {
-                    case 'POINT_100':
-                        $factor = 1;
-                        $denominator = 100;
-                        break;
-                    case 'POINT_10_DECIMAL':
-                        $factor = 0.1;
-                        $denominator = 10;
-                        $isDecimalFormat = true;
-                        break;
-                    case 'POINT_10':
-                        $factor = 1 / 10;
-                        $denominator = 10;
-                        break;
-                    case 'POINT_5':
-                        $factor = 1 / 20;
-                        $denominator = 5;
-                        $isDecimalFormat = true;
-                        break;
-                }
-
-                if ($userRating = $this->getUserRating($variant->id, $user->id)) {
-                    $variant->userScore = $isDecimalFormat
-                        ? round($userRating->rating * $factor, 1)
-                        : (int) round($userRating->rating * $factor);
-                }
-            }
-
-            $variant->score = $isDecimalFormat
-                ? round($variant->averageRating * $factor, 1)
-                : (int) round($variant->averageRating * $factor);
-
-            $variant->scoreString = $this->formatScoreString(
-                $variant->score,
-                $user->score_format ?? 'POINT_100',
-                $denominator
-            );
-        });
-
-        return $variants;
-    }
-
-    public function sortVariants($sort, $songVariants)
-    {
-        switch ($sort) {
-            case 'title':
-                $songVariants = $songVariants->sortBy(function ($song_variant) {
-                    return $song_variant->song->post->title;
-                });
-
-                return $songVariants;
-                break;
-
-            case 'averageRating':
-                $songVariants = $songVariants->sortByDesc('averageRating');
-
-                return $songVariants;
-                break;
-
-            case 'view_count':
-                $songVariants = $songVariants->sortByDesc('views');
-
-                return $songVariants;
-                break;
-
-            case 'likeCount':
-                $songVariants = $songVariants->sortByDesc('likeCount');
-
-                return $songVariants;
-                break;
-
-            case 'recent':
-                $songVariants = $songVariants->sortByDesc('created_at');
-
-                return $songVariants;
-                break;
-
-            default:
-                $songVariants = $songVariants->sortBy(function ($song_variant) {
-                    return $song_variant->song->post->title;
-                });
-
-                return $songVariants;
-                break;
-        }
     }
 
     public function setScoreSongs($songs, $user = null)
@@ -383,15 +275,6 @@ class UserController extends Controller
 
         return $songs;
     }
-
-    /* public function paginate($songs, $perPage = 18, $page = null, $options = [])
-    {
-        $page = Paginator::resolveCurrentPage();
-        $options = ['path' => Paginator::resolveCurrentPath()];
-        $items = $songs instanceof Collection ? $songs : Collection::make($songs);
-        $songs = new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
-        return $songs;
-    } */
 
     public function sortSongs($sort, $songs)
     {

@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('user_requests', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
             $table->text('content');
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('attended_by')->nullable()->references('id')->on('users')->onDelete('cascade');

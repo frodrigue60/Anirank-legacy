@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Artist extends Model
 {
     use HasFactory, \App\Traits\HasImages;
+    protected $appends = ['avatar_url'];
 
     protected $fillable = [
         'name',

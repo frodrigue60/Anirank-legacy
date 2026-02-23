@@ -88,7 +88,7 @@ class ProducerController extends Controller
             })
             ->with(['format:id,name', 'season:id,name', 'year:id,name', 'images'])
             ->with(['songs' => function ($q) {
-                $q->withAvg('ratings', 'rating');
+                $q->withUserInteractions()->withAvg('ratings', 'rating');
             }])
             ->withCount('songs')
             ->when($name, function ($query) use ($name) {

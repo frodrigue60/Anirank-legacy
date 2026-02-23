@@ -43,6 +43,14 @@ class SongController extends Controller
             ->when($year_id, fn ($q) => $q->where('year_id', $year_id))
             ->when($season_id, fn ($q) => $q->where('season_id', $season_id))
             ->when($type, fn ($q) => $q->where('type', $type))
+            ->when(Auth::guard('sanctum')->check(), function ($q) {
+                $userId = Auth::guard('sanctum')->id();
+                $q->withExists([
+                    'reactions as liked' => fn($q) => $q->where('user_id', $userId)->where('type', 1),
+                    'reactions as disliked' => fn($q) => $q->where('user_id', $userId)->where('type', -1),
+                    'favorites as is_favorited' => fn($q) => $q->where('user_id', $userId)
+                ]);
+            })
             ->with(['post', 'post.images', 'artists', 'artists.images', 'year', 'season'])
             ->withAvg('ratings', 'rating')
             ->when($sort === 'title', fn ($q) => $q->orderBy('song_romaji'))
@@ -98,10 +106,18 @@ class SongController extends Controller
             'artists.images',
             'year',
             'season',
-            'post',
             'post.images',
             'songVariants.video',
         ]);
+
+        if (Auth::guard('sanctum')->check()) {
+            $userId = Auth::guard('sanctum')->id();
+            $song->loadExists([
+                'reactions as liked' => fn($q) => $q->where('user_id', $userId)->where('type', 1),
+                'reactions as disliked' => fn($q) => $q->where('user_id', $userId)->where('type', -1),
+                'favorites as is_favorited' => fn($q) => $q->where('user_id', $userId)
+            ]);
+        }
 
         $song->post->append(['thumbnail_url', 'banner_url']);
         $song->artists->each->append('avatar_url');
@@ -120,6 +136,14 @@ class SongController extends Controller
             ->where('id', '!=', $song->id)
             ->with(['artists', 'artists.images'])
             ->withAvg('ratings', 'rating')
+            ->when(Auth::guard('sanctum')->check(), function ($q) {
+                $userId = Auth::guard('sanctum')->id();
+                $q->withExists([
+                    'reactions as liked' => fn($q) => $q->where('user_id', $userId)->where('type', 1),
+                    'reactions as disliked' => fn($q) => $q->where('user_id', $userId)->where('type', -1),
+                    'favorites as is_favorited' => fn($q) => $q->where('user_id', $userId)
+                ]);
+            })
             ->get();
 
         $relatedSongs->each(function ($related) {
@@ -354,6 +378,7 @@ class SongController extends Controller
         $songs = Song::when($type, fn ($q) => $q->where('type', $type))
             ->whereHas('post', fn ($q) => $q->where('status', $status))
             ->with(['post', 'post.images', 'artists', 'artists.images'])
+            ->withUserInteractions()
             ->withAvg('ratings', 'rating')
             ->orderByDesc('ratings_avg_rating')
             ->paginate($limit);
@@ -393,6 +418,7 @@ class SongController extends Controller
                     ->when($currentYear, fn ($q) => $q->where('year_id', $currentYear->id));
             })
             ->with(['post', 'post.images', 'artists', 'artists.images'])
+            ->withUserInteractions()
             ->withAvg('ratings', 'rating')
             ->orderByDesc('ratings_avg_rating')
             ->paginate($limit);

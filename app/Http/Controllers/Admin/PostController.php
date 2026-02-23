@@ -224,10 +224,10 @@ class PostController extends Controller
 
             if ($post->update()) {
                 if ($old_thumbnail && $old_thumbnail !== $post->thumbnail) {
-                    Storage::disk('public')->delete($old_thumbnail);
+                    Storage::disk('s3')->delete($old_thumbnail);
                 }
                 if ($old_banner && $old_banner !== $post->banner) {
-                    Storage::disk('public')->delete($old_banner);
+                    Storage::disk('s3')->delete($old_banner);
                 }
 
                 return redirect(route('admin.posts.index'))->with('success', 'Post Updated Successfully');
@@ -487,11 +487,11 @@ class PostController extends Controller
             $post->delete();
         }
 
-        $thumbnail_files = Storage::disk('public')->files('thumbnails');
-        Storage::disk('public')->delete($thumbnail_files);
+        $thumbnail_files = Storage::disk('s3')->files('thumbnails');
+        Storage::disk('s3')->delete($thumbnail_files);
 
-        $banner_files = Storage::disk('public')->files('anime_banner');
-        Storage::disk('public')->delete($banner_files);
+        $banner_files = Storage::disk('s3')->files('anime_banner');
+        Storage::disk('s3')->delete($banner_files);
 
         $success = 'All posts deleted';
 
@@ -655,7 +655,7 @@ class PostController extends Controller
             $path = 'thumbnails/'.$file_name;
             $this->storeSingleImage($path, $imageContent);
 
-            $post->updateOrCreateImage($path, 'thumbnail');
+            $post->updateOrCreateImage($path, 'thumbnail', 's3');
         }
 
         return $post;
@@ -676,7 +676,7 @@ class PostController extends Controller
             $path = 'anime_banner/'.$file_name;
             $this->storeSingleImage($path, $imageContent);
 
-            $post->updateOrCreateImage($path, 'banner');
+            $post->updateOrCreateImage($path, 'banner', 's3');
         }
 
         return $post;
@@ -710,7 +710,7 @@ class PostController extends Controller
             }
             $path = 'thumbnails/'.$file_name;
             $this->storeSingleImage($path, $imageContent);
-            $post->updateOrCreateImage($path, 'thumbnail');
+            $post->updateOrCreateImage($path, 'thumbnail', 's3');
         } else {
             /* Thumbnail witn url store */
             if ($request->thumbnail_src != null) {
@@ -739,7 +739,7 @@ class PostController extends Controller
 
                 $path = 'thumbnails/'.$file_name;
                 $this->storeSingleImage($path, $imageContent);
-                $post->updateOrCreateImage($path, 'thumbnail');
+                $post->updateOrCreateImage($path, 'thumbnail', 's3');
             }
         }
 
@@ -768,7 +768,7 @@ class PostController extends Controller
             }
             $path = 'anime_banner/'.$file_name;
             $this->storeSingleImage($path, $imageContent);
-            $post->updateOrCreateImage($path, 'banner');
+            $post->updateOrCreateImage($path, 'banner', 's3');
         } else {
             /* Bannter with url store */
             if ($request->banner_src != null) {
@@ -795,7 +795,7 @@ class PostController extends Controller
                 }
                 $path = 'anime_banner/'.$file_name;
                 $this->storeSingleImage($path, $imageContent);
-                $post->updateOrCreateImage($path, 'banner');
+                $post->updateOrCreateImage($path, 'banner', 's3');
             }
         }
 
@@ -804,7 +804,7 @@ class PostController extends Controller
 
     public function storeSingleImage($path, $imageContent)
     {
-        Storage::disk('public')->put($path, $imageContent);
+        Storage::disk('s3')->put($path, $imageContent);
     }
 
     public function dashboard()

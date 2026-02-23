@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('song_id')->constrained()->cascadeOnDelete();
             $table->unsignedInteger('rank');
+            $table->integer('seasonal_rank')->nullable();
             $table->decimal('score', 8, 2)->nullable();
             $table->date('date');
             $table->timestamps();

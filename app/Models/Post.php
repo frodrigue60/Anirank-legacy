@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 class Post extends Model
 {
     use HasFactory, \App\Traits\HasImages;
+    protected $appends = ['thumbnail_url', 'banner_url'];
 
     protected $fillable = [
         'title',

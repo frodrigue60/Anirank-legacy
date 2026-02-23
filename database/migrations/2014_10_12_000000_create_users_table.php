@@ -20,9 +20,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('type', ['admin','editor','creator', 'user'])->default('user');
-            $table->string('image')->nullable();
-            $table->string('banner')->nullable();
+            $table->timestamp('last_login_at')->nullable();
             $table->enum('score_format', ['POINT_100', 'POINT_10_DECIMAL','POINT_10','POINT_5'])->default('POINT_10_DECIMAL');
 
             $table->rememberToken();

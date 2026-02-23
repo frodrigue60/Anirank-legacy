@@ -87,6 +87,7 @@ class ArtistController extends Controller
         }
 
         $query->with(['artists:id,name,slug', 'artists.images', 'post', 'post.images'])
+            ->withUserInteractions()
             ->withAvg('ratings', 'rating')
             ->withCount('songVariants as view_count')
             ->withCount('ratings as like_count'); // Approximating popular by rating counts

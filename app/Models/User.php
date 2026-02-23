@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, \App\Traits\HasImages;
+    protected $appends = ['avatar_url', 'banner_url'];
 
     /**
      * The attributes that are mass assignable.
@@ -29,6 +30,11 @@ class User extends Authenticatable
         'score_format',
         'slug'
     ];
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -141,7 +147,7 @@ class User extends Authenticatable
      */
     public function playlistsWithCount()
     {
-        return $this->playlists()->withCount('posts');
+        return $this->playlists()->withCount('songs');
     }
 
     /**
@@ -152,7 +158,7 @@ class User extends Authenticatable
         return Playlist::where('is_public', true)
             ->where('user_id', '!=', $this->id)
             ->with('user')
-            ->withCount('posts');
+            ->withCount('songs');
     }
 
     /**
@@ -174,9 +180,9 @@ class User extends Authenticatable
     /**
      * Obtener el número total de posts en todas las playlists del usuario
      */
-    public function getTotalPlaylistPostsAttribute()
+    public function getTotalPlaylistSongsAttribute()
     {
-        return $this->playlists()->withCount('posts')->get()->sum('posts_count');
+        return $this->playlists()->withCount('songs')->get()->sum('songs_count');
     }
 
     protected static function boot()

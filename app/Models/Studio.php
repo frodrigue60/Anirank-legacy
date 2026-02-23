@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Studio extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\HasImages;
+    protected $appends = ['avatar_url'];
 
     protected $fillable = [
         'name',

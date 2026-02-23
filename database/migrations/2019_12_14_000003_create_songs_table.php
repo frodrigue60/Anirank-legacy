@@ -26,6 +26,10 @@ return new class extends Migration
             $table->foreignId('year_id')->references('id')->on('years')->onDelete('cascade');
             $table->timestamps();
             $table->unsignedBigInteger('views')->default(0);
+
+            $table->index('type', 'songs_type_idx');
+            $table->index('views', 'songs_views_idx');
+            $table->index('slug', 'songs_slug_idx');
         });
     }
 

@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->morphs('favoritable'); // favoritable_id y favoritable_type
             $table->timestamps();
+
+            $table->index(['user_id', 'favoritable_type', 'favoritable_id'], 'favorites_user_favoritable_idx');
         });
     }
 
