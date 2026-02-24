@@ -89,20 +89,6 @@ class PostController extends Controller
             ->latest()
             ->first();
 
-        $appendUrls = function ($collection) {
-            foreach ($collection as $item) {
-                $item->append('average_rating');
-                if (isset($item->post)) {
-                    $item->post->append(['thumbnail_url', 'banner_url']);
-                }
-                if (isset($item->artists)) {
-                    $item->artists->each->append('avatar_url');
-                }
-            }
-
-            return $collection;
-        };
-
         if ($featured_song) {
             $featured_song->append('average_rating');
             if ($featured_song->post) {
@@ -114,6 +100,19 @@ class PostController extends Controller
         }
 
         $featured_artists->each->append('avatar_url');
+
+        $appendUrls = function ($collection) {
+            $collection->each(function ($item) {
+                $item->append('average_rating');
+                if ($item->post) {
+                    $item->post->append(['thumbnail_url', 'banner_url']);
+                }
+                if ($item->artists) {
+                    $item->artists->each->append('avatar_url');
+                }
+            });
+            return $collection;
+        };
 
         return response()->json([
             'featured_song' => $featured_song,
@@ -164,9 +163,11 @@ class PostController extends Controller
                 });
             })
             ->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name', 'images'])
-            ->with(['songs' => function ($q) {
-                $q->withUserInteractions()->withAvg('ratings', 'rating');
-            }])
+            ->addSelect(['average_rating' => \App\Models\Rating::selectRaw('avg(rating)')
+                ->join('songs', 'songs.id', '=', 'ratings.rateable_id')
+                ->where('ratings.rateable_type', \App\Models\Song::class)
+                ->whereColumn('songs.post_id', 'posts.id')
+            ])
             ->withCount('songs')
             ->when($sort === 'latest', fn ($q) => $q->orderByDesc('created_at'))
             ->when($sort === 'most_themes', fn ($q) => $q->orderByDesc('songs_count'))
@@ -176,8 +177,7 @@ class PostController extends Controller
 
         $posts->getCollection()->each(function ($post) {
             $post->append('thumbnail_url');
-            $post->average_rating = $post->songs->avg('ratings_avg_rating') ?: 0;
-            $post->makeHidden('songs');
+            $post->average_rating = (float) ($post->average_rating ?? 0);
         });
 
         return response()->json($posts);

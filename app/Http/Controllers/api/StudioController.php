@@ -155,9 +155,11 @@ class StudioController extends Controller
                 $query->where('studios.id', $studio->id);
             })
             ->with(['format:id,name', 'season:id,name', 'year:id,name', 'images'])
-            ->with(['songs' => function ($q) {
-                $q->withUserInteractions()->withAvg('ratings', 'rating');
-            }])
+            ->addSelect(['average_rating' => \App\Models\Rating::selectRaw('avg(rating)')
+                ->join('songs', 'songs.id', '=', 'ratings.rateable_id')
+                ->where('ratings.rateable_type', \App\Models\Song::class)
+                ->whereColumn('songs.post_id', 'posts.id')
+            ])
             ->withCount('songs')
             ->when($name, function ($query) use ($name) {
                 $query->where('title', 'like', '%'.$name.'%');
@@ -189,8 +191,7 @@ class StudioController extends Controller
 
         $posts->getCollection()->each(function ($post) {
             $post->append('thumbnail_url');
-            $post->average_rating = $post->songs->avg('ratings_avg_rating') ?: 0;
-            $post->makeHidden('songs');
+            $post->average_rating = (float) ($post->average_rating ?? 0);
         });
 
         return response()->json([

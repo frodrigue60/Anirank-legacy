@@ -52,6 +52,7 @@ class SongController extends Controller
                 ]);
             })
             ->with(['post', 'post.images', 'artists', 'artists.images', 'year', 'season'])
+            ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
             ->when($sort === 'title', fn ($q) => $q->orderBy('song_romaji'))
             ->when($sort === 'rating', fn ($q) => $q->orderByDesc('ratings_avg_rating'))
@@ -379,6 +380,7 @@ class SongController extends Controller
             ->whereHas('post', fn ($q) => $q->where('status', $status))
             ->with(['post', 'post.images', 'artists', 'artists.images'])
             ->withUserInteractions()
+            ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
             ->orderByDesc('ratings_avg_rating')
             ->paginate($limit);
@@ -419,6 +421,7 @@ class SongController extends Controller
             })
             ->with(['post', 'post.images', 'artists', 'artists.images'])
             ->withUserInteractions()
+            ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
             ->orderByDesc('ratings_avg_rating')
             ->paginate($limit);
