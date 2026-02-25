@@ -318,6 +318,25 @@ class SongController extends Controller
         }
     }
 
+    /**
+     * Get the latest theme number for a specific post and type.
+     */
+    public function getLatestNumber(Request $request)
+    {
+        $request->validate([
+            'post_id' => 'required|exists:posts,id',
+            'type' => 'required|string|in:OP,ED,INS,OTH',
+        ]);
+
+        $latestVersion = Song::where('post_id', $request->post_id)
+            ->where('type', $request->type)
+            ->max('theme_num');
+
+        $nextNumber = $latestVersion !== null ? $latestVersion + 1 : 1;
+
+        return response()->json(['next_number' => $nextNumber]);
+    }
+
     public function destroy(Song $song)
     {
         $song->artists()->detach();

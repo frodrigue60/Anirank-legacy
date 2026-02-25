@@ -17,12 +17,13 @@
         </div>
 
         {{-- Form Card --}}
-        <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8">
+        <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8"
+            x-data="songForm()">
             <form method="post" action="{{ route('admin.songs.store') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
 
                 {{--  POST  --}}
-                <div x-data="postAutocomplete()">
+                <div>
                     <label for="post_search"
                         class="block text-sm font-bold text-zinc-400 uppercase tracking-widest mb-2">Post / Anime</label>
                     <div class="relative">
@@ -86,7 +87,7 @@
 
                 @push('scripts')
                     <script>
-                        function postAutocomplete() {
+                        function songForm() {
                             return {
                                 search: '',
                                 results: [],
@@ -94,6 +95,33 @@
                                 selectedTitle: '{{ $currentPost ? addslashes($currentPost->title) : '' }}',
                                 loading: false,
                                 showResults: false,
+
+                                // Theme numbering
+                                type: '{{ old('type', 'OP') }}',
+                                themeNum: '{{ old('theme_num') }}',
+
+                                init() {
+                                    this.$watch('selectedId', (value) => {
+                                        if (value) this.fetchSuggestedNumber();
+                                    });
+                                    this.$watch('type', () => this.fetchSuggestedNumber());
+
+                                    // Initial load if post is pre-selected
+                                    if (this.selectedId && !this.themeNum) {
+                                        this.fetchSuggestedNumber();
+                                    }
+                                },
+
+                                fetchSuggestedNumber() {
+                                    if (!this.selectedId || !this.type) return;
+
+                                    fetch(`{{ route('admin.songs.latest_number') }}?post_id=${this.selectedId}&type=${this.type}`)
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            this.themeNum = data.next_number;
+                                        })
+                                        .catch(err => console.error('Error fetching latest number:', err));
+                                },
 
                                 fetchPosts() {
                                     if (this.search.length < 2) {
@@ -128,6 +156,7 @@
                                     this.selectedTitle = '';
                                     this.search = '';
                                     this.results = [];
+                                    this.themeNum = '';
                                     this.$nextTick(() => document.getElementById('post_search').focus());
                                 }
                             }
@@ -140,7 +169,7 @@
                     <div class="space-y-2">
                         <label for="theme_num" class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">OP/ED
                             Number</label>
-                        <input type="number" name="theme_num" id="theme_num" value="{{ old('theme_num') }}"
+                        <input type="number" name="theme_num" id="theme_num" x-model="themeNum"
                             class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12"
                             placeholder="e.g. 1">
                     </div>
@@ -149,10 +178,10 @@
                     <div class="space-y-2">
                         <label for="type" class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Theme
                             Type</label>
-                        <select name="type" id="type"
+                        <select name="type" id="type" x-model="type"
                             class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12">
                             @foreach ($types as $item)
-                                <option value="{{ $item['value'] }}" {{ old('type') == $item['value'] ? 'selected' : '' }}>
+                                <option value="{{ $item['value'] }}">
                                     {{ $item['name'] }}
                                 </option>
                             @endforeach

@@ -97,6 +97,7 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
     Route::get('/dashboard', [AdminPostController::class, 'dashboard'])->name('dashboard');
 
     // Songs & Variants
+    Route::get('songs/latest-number', [AdminSongController::class, 'getLatestNumber'])->name('songs.latest_number');
     Route::resource('songs', AdminSongController::class);
 
     Route::resource('variants', AdminSongVariantController::class);
