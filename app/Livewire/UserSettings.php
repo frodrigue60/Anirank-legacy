@@ -46,10 +46,11 @@ class UserSettings extends Component
             $file_name = $this->user->slug . '-' . time() . '.' . $extension;
             $path = 'profile/' . $file_name;
 
-            $storedPath = $this->image->storeAs('profile', $file_name, 'public');
+            $storedPath = $this->image->storeAs('profile', $file_name);
 
             if ($storedPath) {
                 $this->user->updateOrCreateImage($storedPath, 'avatar');
+                $this->user->load('images');
 
                 $this->dispatch('avatarUpdated', url: $this->user->avatar_url);
                 session()->flash('avatar_success', 'Avatar updated successfully!');
@@ -69,10 +70,11 @@ class UserSettings extends Component
             $file_name = $this->user->slug . '-' . time() . '.' . $extension;
             $path = 'banner/' . $file_name;
 
-            $storedPath = $this->banner->storeAs('banner', $file_name, 'public');
+            $storedPath = $this->banner->storeAs('banner', $file_name);
 
             if ($storedPath) {
                 $this->user->updateOrCreateImage($storedPath, 'banner');
+                $this->user->load('images');
 
                 $this->dispatch('bannerUpdated', url: $this->user->banner_url);
                 session()->flash('banner_success', 'Banner updated successfully!');

@@ -3,15 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Song;
 use App\Models\SongVariant;
 use App\Models\Video;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Services\Breadcrumb;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
-use App\Services\Breadcrumb;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 class VideoController extends Controller
@@ -35,7 +33,7 @@ class VideoController extends Controller
                 'url' => route('admin.variants.index', ['song_id' => $songVariant->song->id]),
             ],
             [
-                'name' => $songVariant->slug . ' - ' . 'video',
+                'name' => $songVariant->slug.' - '.'video',
                 'url' => '',
             ],
         ]);
@@ -47,7 +45,7 @@ class VideoController extends Controller
     {
         $variantId = $request->query('variant_id') ?? $request->query('variant');
 
-        if (!$variantId) {
+        if (! $variantId) {
             return redirect(route('admin.posts.index'))->with('error', 'Variant ID is required to add a video.');
         }
 
@@ -69,7 +67,7 @@ class VideoController extends Controller
                 'url' => route('admin.variants.index', ['song_id' => $song->id]),
             ],
             [
-                'name' => $songVariant->slug . ' - ' . 'video',
+                'name' => $songVariant->slug.' - '.'video',
                 'url' => '',
             ],
         ]);
@@ -79,86 +77,75 @@ class VideoController extends Controller
 
     public function store(Request $request)
     {
-        $songVariant = SongVariant::with('song.post')->find($request->song_variant_id);
+        $songVariant = SongVariant::with('song.post')->findOrFail($request->song_variant_id);
         $song = $songVariant->song;
-        $post = $songVariant->song->post;
-
-        $path = null;
-        $file_name = null;
+        $post = $song->post;
 
         try {
-            $video = new Video();
-            //$video->song_id = $song->id;
-
+            $video = new Video;
             $video->song_variant_id = $songVariant->id;
 
             if ($request->hasFile('video')) {
                 $validator = Validator::make($request->all(), [
-                    'video' => 'mimes:webm,mp4'
+                    'video' => 'mimes:webm,mp4',
                 ]);
 
                 if ($validator->fails()) {
-                    $errors = $validator->getMessageBag();
                     $request->flash();
-                    return Redirect::back()->with('error', $errors);
+
+                    return Redirect::back()->with('error', $validator->getMessageBag());
                 }
 
-                $path = null;
-                $file_name = null;
-
-                $yearFolder = Str::slug($song->year->name ?? 'unknown');
-                $seasonFolder = Str::slug($song->season->name ?? 'unknown');
+                $yearFolder = Str::slug($song->year?->name ?? 'unknown');
+                $seasonFolder = Str::slug($song->season?->name ?? 'unknown');
                 $path = "videos/{$yearFolder}/{$seasonFolder}/";
 
                 $mimeType = $request->video->getMimeType();
                 $extension = $this->getExtensionFromMimeType($mimeType);
 
-                $file_name = $post->slug . '-' . $song->slug . '-' . $songVariant->slug . '.' . $extension;
-                $video->video_src = $path . $file_name;
+                $file_name = ($post->slug ?? 'untitled').'-'.($song->slug ?? 'song').'-'.($songVariant->slug ?? 'default').'.'.$extension;
 
+                // Store file FIRST — only save DB record if storage succeeds
+                $request->video->storeAs($path, $file_name);
+
+                $video->video_src = $path.$file_name;
                 $video->type = 'file';
-
-                //dd($video);
+                $video->disk = config('filesystems.default');
             } else {
                 $validator = Validator::make($request->all(), [
-                    'embed' => 'required'
+                    'embed' => 'required',
                 ]);
 
                 if ($validator->fails()) {
-                    $errors = $validator->getMessageBag();
                     $request->flash();
-                    return Redirect::back()->with('error', $errors);
+
+                    return Redirect::back()->with('error', $validator->getMessageBag());
                 }
+
                 $video->embed_code = $request->embed;
                 $video->type = 'embed';
             }
 
             $video->save();
 
-            if ($video->type === "file") {
-                //Storage::disk('public')->put($path,$file_name.$request->video);
-                $request->video->storeAs($path, $file_name, 'public');
-            }
-
             return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Video saved successfully');
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('error', $e->getMessage());
         }
     }
 
-    public function show($id)
+    public function show(Video $video)
     {
         try {
-            $video = Video::findOrFail($id);
             dd($video);
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             dd($e);
         }
     }
-    public function edit($id)
+
+    public function edit(Video $video)
     {
         try {
-            $video = Video::findOrFail($id);
             $post = $video->songVariant->song->post;
             $song = $video->songVariant->song;
 
@@ -182,92 +169,84 @@ class VideoController extends Controller
             ]);
 
             return view('admin.videos.edit', compact('video', 'breadcrumb'));
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             dd($e);
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Video $video)
     {
         try {
-            $video = Video::with('songVariant.song.post')->findOrFail($id);
-            $song_variant = $video->songVariant;
-            $song = $video->songVariant->song;
-            $post = $video->songVariant->song->post;
+            $songVariant = $video->songVariant;
+            $song = $songVariant->song;
+            $post = $song->post;
 
-            $path = null;
-            $file_name = null;
-            //dd($request->all(),$video->song);
             if ($request->hasFile('video')) {
                 $validator = Validator::make($request->all(), [
-                    'video' => 'mimes:webm,mp4'
+                    'video' => 'mimes:webm,mp4',
                 ]);
 
                 if ($validator->fails()) {
-                    $errors = $validator->getMessageBag();
                     $request->flash();
-                    return Redirect::back()->with('error', $errors);
+
+                    return Redirect::back()->with('error', $validator->getMessageBag());
                 }
 
-                $yearFolder = Str::slug($song->year->name ?? 'unknown');
-                $seasonFolder = Str::slug($song->season->name ?? 'unknown');
+                $yearFolder = Str::slug($song->year?->name ?? 'unknown');
+                $seasonFolder = Str::slug($song->season?->name ?? 'unknown');
                 $path = "videos/{$yearFolder}/{$seasonFolder}/";
-
-                $old_file = $video->video_src;
 
                 $mimeType = $request->video->getMimeType();
                 $extension = $this->getExtensionFromMimeType($mimeType);
 
-                #
-                $file_name = $post->slug . '-' . $song->slug . '-' . $song_variant->slug . '.' . $extension;
-                $video->video_src = $path . $file_name;
+                $file_name = ($post->slug ?? 'untitled').'-'.($song->slug ?? 'song').'-'.($songVariant->slug ?? 'default').'.'.$extension;
 
-                //dd($video);
+                // Store new file FIRST
+                $request->video->storeAs($path, $file_name);
+
+                // Delete old file after new one is safely stored
+                $oldFile = $video->video_src;
+                $oldDisk = $video->disk;
+                if ($oldFile && Storage::disk($oldDisk)->exists($oldFile)) {
+                    Storage::disk($oldDisk)->delete($oldFile);
+                }
+
+                $video->video_src = $path.$file_name;
                 $video->type = 'file';
+                $video->disk = config('filesystems.default');
             } else {
                 $validator = Validator::make($request->all(), [
-                    'embed' => 'required'
+                    'embed' => 'required',
                 ]);
 
                 if ($validator->fails()) {
-                    $errors = $validator->getMessageBag();
                     $request->flash();
-                    return Redirect::back()->with('error', $errors);
+
+                    return Redirect::back()->with('error', $validator->getMessageBag());
                 }
+
                 $video->embed_code = $request->embed;
                 $video->video_src = null;
                 $video->type = 'embed';
             }
-            //dd($old_file);
+
             $video->update();
 
-            if ($video->type == 'file') {
-                if (isset($old_file) && Storage::disk('public')->exists($old_file)) {
-                    Storage::disk('public')->delete($old_file);
-                }
-
-                //Store new video file
-                //Storage::disk('public')->put('$path',$file_name.$request->video);
-                $request->video->storeAs($path, $file_name, 'public');
-            }
-
-
             return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Video updated successfully');
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('error', $e->getMessage());
         }
     }
 
-    public function destroy($id)
+    public function destroy(Video $video)
     {
-        $video = Video::findOrFail($id);
         $song_variant = $video->songVariant;
         $song = $song_variant->song;
         try {
             if ($video->delete()) {
                 return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Video deleted successfully');
             }
-        } catch (ModelNotFoundException $e) {
+        } catch (\Throwable $e) {
             return redirect(route('admin.variants.index', ['song_id' => $song->id]))
                 ->with('error', $e->getMessage());
         }

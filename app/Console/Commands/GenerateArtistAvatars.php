@@ -60,7 +60,7 @@ class GenerateArtistAvatars extends Command
                     $file_name = $artist->slug . '-avatar-' . time() . '.png';
                     $path = 'artists/' . $file_name;
 
-                    Storage::disk('public')->put($path, $response->body());
+                    Storage::disk()->put($path, $response->body());
                     $artist->updateOrCreateImage($path, 'thumbnail');
                 }
             } catch (\Exception $e) {

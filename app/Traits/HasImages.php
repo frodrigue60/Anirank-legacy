@@ -21,7 +21,7 @@ trait HasImages
     public function getThumbnailUrlAttribute()
     {
         $image = $this->images->where('type', 'thumbnail')->first();
-        return $image ? Storage::disk($image->disk)->url($image->path) : asset('img/placeholders/default-thumbnail.webp');
+        return $image ? Storage::url($image->path) : asset('img/placeholders/default-thumbnail.webp');
     }
 
     /**
@@ -30,7 +30,7 @@ trait HasImages
     public function getBannerUrlAttribute()
     {
         $image = $this->images->where('type', 'banner')->first();
-        return $image ? Storage::disk($image->disk)->url($image->path) : asset('img/placeholders/default-banner.webp');
+        return $image ? Storage::url($image->path) : asset('img/placeholders/default-banner.webp');
     }
 
     /**
@@ -40,7 +40,7 @@ trait HasImages
     {
         $image = $this->images->where('type', 'avatar')->first();
         if ($image) {
-            return Storage::disk($image->disk)->url($image->path);
+            return Storage::url($image->path);
         }
 
         $name = isset($this->name) ? urlencode($this->name) : 'User';
@@ -51,8 +51,9 @@ trait HasImages
     /**
      * Update or create a specific type of image.
      */
-    public function updateOrCreateImage(string $path, string $type, string $disk = 'public')
+    public function updateOrCreateImage(string $path, string $type, string $disk = null)
     {
+        $disk = $disk ?? config('filesystems.default');
         $oldImage = $this->images()->where('type', $type)->first();
 
         if ($oldImage) {

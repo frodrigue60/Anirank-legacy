@@ -42,7 +42,7 @@ class GlobalBottomPlayer extends Component
 
         // Build thumbnail URL from the post's thumbnail
         $thumbnailUrl = null;
-        if ($this->song->post->thumbnail && Storage::disk('public')->exists($this->song->post->thumbnail)) {
+        if ($this->song->post->thumbnail && Storage::disk()->exists($this->song->post->thumbnail)) {
             $thumbnailUrl = Storage::url($this->song->post->thumbnail);
         } elseif ($this->song->post->thumbnail_src) {
             $thumbnailUrl = $this->song->post->thumbnail_src;
@@ -51,7 +51,7 @@ class GlobalBottomPlayer extends Component
         if ($video) {
             $videoUrl = $video->video_src;
             if ($video->isLocal()) {
-                $videoUrl = Storage::url($video->video_src);
+                $videoUrl = Storage::disk($video->disk)->url($video->video_src);
             } else if ($video->isEmbed()) {
                 // video_src may contain raw <iframe> or <embed> HTML; extract the src URL
                 $raw = $video->video_src;

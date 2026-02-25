@@ -9,40 +9,26 @@ use Illuminate\Support\Str;
 
 class StudioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $breadcrumb = [
             ['name' => 'Studios', 'url' => route('admin.studios.index')],
         ];
         $studios = Studio::paginate(15);
+
         return view('admin.studios.index', compact('studios', 'breadcrumb'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $breadcrumb = [
             ['name' => 'Studios', 'url' => route('admin.studios.index')],
             ['name' => 'Create', 'url' => route('admin.studios.create')],
         ];
+
         return view('admin.studios.create', compact('breadcrumb'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -57,35 +43,20 @@ class StudioController extends Controller
         return redirect()->route('admin.studios.index')->with('success', 'Studio created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function edit(Studio $studio)
     {
         $breadcrumb = [
             ['name' => 'Studios', 'url' => route('admin.studios.index')],
-            ['name' => 'Edit', 'url' => route('admin.studios.edit', $id)],
+            ['name' => 'Edit', 'url' => route('admin.studios.edit', $studio->id)],
         ];
-        $studio = Studio::findOrFail($id);
+
         return view('admin.studios.edit', compact('studio', 'breadcrumb'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, Studio $studio)
     {
-        $studio = Studio::findOrFail($id);
-
         $request->validate([
-            'name' => 'required|unique:studios,name,' . $studio->id,
+            'name' => 'required|unique:studios,name,'.$studio->id,
         ]);
 
         $studio->update([
@@ -96,17 +67,12 @@ class StudioController extends Controller
         return redirect()->route('admin.studios.index')->with('success', 'Studio updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy(Studio $studio)
     {
-        $studio = Studio::findOrFail($id);
-        $studio->delete();
-
-        return redirect()->route('admin.studios.index')->with('success', 'Studio deleted successfully.');
+        if ($studio->delete()) {
+            return redirect()->route('admin.studios.index')->with('success', 'Studio deleted successfully.');
+        } else {
+            return redirect()->route('admin.studios.index')->with('error', 'Error deleting studio.');
+        }
     }
 }

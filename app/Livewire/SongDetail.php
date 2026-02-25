@@ -123,8 +123,8 @@ class SongDetail extends Component
         }
 
         // File type
-        if ($video->video_src && Storage::disk('public')->exists($video->video_src)) {
-            return Storage::url($video->video_src);
+        if ($video->video_src && Storage::disk($video->disk)->exists($video->video_src)) {
+            return Storage::disk($video->disk)->url($video->video_src);
         }
 
         return $video->video_src ?? '';

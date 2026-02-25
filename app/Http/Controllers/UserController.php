@@ -143,7 +143,7 @@ class UserController extends Controller
             $file_name = $user->slug . '-' . time() . '.' . $extension;
             $path = 'profile/' . $file_name;
 
-            $storedPath = $request->image->storeAs('profile', $file_name, 'public');
+            $storedPath = $request->image->storeAs('profile', $file_name);
 
             if ($storedPath) {
                 $user->updateOrCreateImage($storedPath, 'avatar');
@@ -170,7 +170,7 @@ class UserController extends Controller
             $file_name = $user->slug . '-' . time() . '.' . $extension;
             $path = 'banner/' . $file_name;
 
-            $storedPath = $request->banner->storeAs('banner', $file_name, 'public');
+            $storedPath = $request->banner->storeAs('banner', $file_name);
 
             if ($storedPath) {
                 $user->updateOrCreateImage($storedPath, 'banner');

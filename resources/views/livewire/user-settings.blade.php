@@ -14,16 +14,20 @@
                         class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Upload
                         new avatar</label>
 
-                    {{-- Avatar Preview --}}
-                    @if ($image)
-                        <div class="mb-4 relative w-20 h-20">
-                            <x-ui.image src="{{ $image->temporaryUrl() }}"
+                    {{-- Avatar Preview (single container: shows new if selected, else current) --}}
+                    <div class="mb-4 relative w-20 h-20">
+                        @if ($image)
+                            <img src="{{ $image->temporaryUrl() }}"
                                 class="w-full h-full object-cover rounded-full border-2 border-primary shadow-lg shadow-primary/20" />
-                            <div class="absolute -top-1 -right-1 bg-primary text-white rounded-full p-0.5">
-                                <span class="material-symbols-outlined text-xs">sync</span>
+                            <div
+                                class="absolute -bottom-1 -right-1 bg-primary text-white rounded-full px-1.5 py-0.5 text-[8px] uppercase font-black tracking-wider">
+                                New
                             </div>
-                        </div>
-                    @endif
+                        @else
+                            <img src="{{ $user->avatar_url }}"
+                                class="w-full h-full object-cover rounded-full border-2 border-white/10 shadow-lg" />
+                        @endif
+                    </div>
 
                     <div class="flex flex-col sm:flex-row gap-3">
                         <div class="flex-1 relative">
@@ -75,16 +79,19 @@
                         class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Upload
                         new banner</label>
 
-                    {{-- Banner Preview --}}
-                    @if ($banner)
-                        <div
-                            class="mb-4 relative w-full aspect-[4/1] rounded-lg overflow-hidden border-2 border-primary shadow-lg shadow-primary/20">
-                            <x-ui.image src="{{ $banner->temporaryUrl() }}" class="w-full h-full object-cover" />
-                            <div class="absolute top-2 right-2 bg-primary text-white rounded-full p-1 shadow-lg">
-                                <span class="material-symbols-outlined text-sm">sync</span>
+                    {{-- Banner Preview (single container: shows new if selected, else current) --}}
+                    <div
+                        class="mb-4 relative w-full aspect-4/1 rounded-lg overflow-hidden {{ $banner ? 'border-2 border-primary shadow-lg shadow-primary/20' : 'border border-white/10' }}">
+                        @if ($banner)
+                            <img src="{{ $banner->temporaryUrl() }}" class="w-full h-full object-cover" />
+                            <div
+                                class="absolute top-2 right-2 bg-primary text-white rounded-full px-2 py-0.5 text-[8px] uppercase font-black tracking-wider shadow-lg">
+                                New
                             </div>
-                        </div>
-                    @endif
+                        @else
+                            <x-ui.image src="{{ $user->banner_url }}" class="w-full h-full object-cover" />
+                        @endif
+                    </div>
 
                     <div class="flex flex-col sm:flex-row gap-3">
                         <div class="flex-1 relative">

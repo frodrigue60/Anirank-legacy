@@ -47,7 +47,7 @@ The application uses a **Modern Dark Theme** with a deep purple aesthetic.
 - `.hero-glow`: Purple shadow glow (`box-shadow`) for high-impact sections.
 - `.filled`: Utility class for Material Symbols to use the "FILL" variation.
 - **Standardized Favorite Logic**: Unified interaction pattern using filled Material Symbols and consistent color feedback (`text-red-400`) across all list views (`ranking-table`, `seasonal-table`, `song-interactions`).
-- `x-ui.image`: Reusable Blade component for high-performance image rendering. Handles lazy-loading (`loading="lazy"`), error fallbacks (`onerror`), and uses `Storage::url()` internally to ensure CDN/Cloud storage compatibility. Automatically handles absolute path resolution for S3/MinIO.
+- `x-ui.image`: Reusable Blade component for high-performance image rendering. Handles lazy-loading (`loading="lazy"`), error fallbacks (`onerror`), and uses `Storage::url()` internally. It is **disk-agnostic**, automatically resolving paths based on the `FILESYSTEM_DISK` configuration (local or S3/MinIO).
 - `partials.meta`: Centralized SEO management. All views should use `@section('title')` and `@section('description')` instead of hardcoded meta tags.
 
 ---
@@ -82,6 +82,45 @@ To maintain a lean production bundle, `vite.config.mjs` only registers high-leve
 - **Conditional Handlers**: Action buttons use conditional `wire:click` checks (e.g., `wire:click="$activeFilter !== 'all' ? setFilter('all') : null"`) to block redundant requests when clicking an already active state.
 - **Client-Side Dispatching**: For component-to-component communication (like opening modals), we use Alpine's `@click="$dispatch('event')"` instead of `wire:click="$dispatch('event')"`. This bypasses the unnecessary server roundtrip of the origin component, sending the request directly to the target listener.
 - **Server-Side Submission Guards**: Sensitive actions (like submitting reports) implement a protected `$isSubmitting` boolean state to prevent double-processing on the backend.
+
+---
+
+### Dynamic Storage System
+
+All file operations (images, videos, badges, avatars) are **fully dynamic** and controlled by a single `.env` variable:
+
+```env
+# Local storage (files in storage/app/public, served via symlink)
+FILESYSTEM_DISK=public
+
+# Cloud storage (S3/MinIO bucket)
+FILESYSTEM_DISK=s3
+```
+
+**Rules for all new code:**
+
+| Operation    | Correct Pattern                         | ❌ Never Do                                |
+| ------------ | --------------------------------------- | ------------------------------------------ |
+| Save file    | `Storage::disk()->put($path, $content)` | `Storage::disk('public')->put(...)`        |
+| Upload file  | `$file->storeAs('dir', $name)`          | `$file->storeAs('dir', $name, 'public')`   |
+| Check exists | `Storage::disk()->exists($path)`        | `Storage::disk('public')->exists(...)`     |
+| Delete file  | `Storage::disk()->delete($path)`        | `Storage::disk('s3')->delete(...)`         |
+| Get URL      | `Storage::url($path)`                   | Hardcoded `/storage/` paths                |
+| Record in DB | `updateOrCreateImage($path, 'type')`    | `updateOrCreateImage($path, 'type', 's3')` |
+
+> **Why:** `Storage::disk()` with no argument uses `config('filesystems.default')`, which reads `FILESYSTEM_DISK` from `.env`. This makes the entire app switch between local and cloud storage by changing one variable.
+
+**Local setup requires:**
+
+```bash
+php artisan storage:link
+```
+
+**After changing `FILESYSTEM_DISK`:**
+
+```bash
+php artisan config:clear && php artisan cache:clear
+```
 
 ---
 
@@ -215,7 +254,8 @@ Represents the **actual video file** for a SongVariant.
 **Key Methods:**
 
 - `isEmbed()`, `isLocal()` → Check video type.
-- `getLocalUrlAttribute()` → Returns the storage-aware full public URL (correctly handles path resolution for both local and S3/MinIO disks).
+- `getLocalUrlAttribute()` → Returns the dynamic, disk-aware full public URL for the video (correctly handles path resolution for both local and S3/MinIO disks).
+- **Deletion:** The `deleting` boot event uses `Storage::disk()->exists/delete` (dynamic, disk-agnostic).
 
 ---
 
@@ -251,7 +291,7 @@ Polymorphic storage for all media assets (Post covers/banners, Artist thumbnails
 | `type`           | string      | `thumbnail`, `banner`, or `avatar`.             |
 | `imageable_id`   | bigint      | Polymorphic ID.                                 |
 | `imageable_type` | string      | Polymorphic type (`Post`, `Artist`, or `User`). |
-| `disk`           | string      | Storage disk (default: `public`).               |
+| `disk`           | string      | Storage disk (auto-set from `FILESYSTEM_DISK`). |
 | `timestamps`     | datetime    | Created/updated at.                             |
 
 **Relationships:**

@@ -57,7 +57,7 @@ class BadgeController extends Controller
         if ($request->hasFile('icon')) {
             $extension = $request->file('icon')->extension();
             $file_name = \Illuminate\Support\Str::slug($badge->name) . '-' . time() . '.' . $extension;
-            $path = $request->file('icon')->storeAs('badges', $file_name, 'public');
+            $path = $request->file('icon')->storeAs('badges', $file_name);
             $badge->updateOrCreateImage($path, 'icon');
         }
 
@@ -93,7 +93,7 @@ class BadgeController extends Controller
         if ($request->hasFile('icon')) {
             $extension = $request->file('icon')->extension();
             $file_name = \Illuminate\Support\Str::slug($badge->name) . '-' . time() . '.' . $extension;
-            $path = $request->file('icon')->storeAs('badges', $file_name, 'public');
+            $path = $request->file('icon')->storeAs('badges', $file_name);
             $badge->updateOrCreateImage($path, 'icon');
         }
 

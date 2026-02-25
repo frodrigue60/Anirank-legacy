@@ -19,7 +19,7 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🛠️ Standardized Admin Panel**: Robust CRUD control with unified search patterns and RESTful state management.
 - **🔔 Unified Notification System**: Real-time feedback via a custom subtle toast notification system, replacing intrusive popups.
 - **📝 Streamlined Request Workflow**: Simplified user request system with automatic categorization and manual staff-controlled status tracking.
-- **🖼️ Polymorphic Image System**: Centralized media management allowing multiple image types (thumbnails, banners, avatars) for any model. Automatically handles absolute path resolution for S3/MinIO storage, ensuring seamless asset delivery across environments.
+- **🖼️ Dynamic Storage System**: Fully disk-agnostic file management for all media (images, videos, avatars, badges). Switch between local and S3/MinIO storage with a single `.env` variable (`FILESYSTEM_DISK`). Includes polymorphic `Image` model with automatic disk tracking and safe deletion guards.
 - **🔍 SEO Centralization**: Single-source meta tag management using Blade partials, eliminating redundancy across views.
 - **⚡ Vite Optimization**: Streamlined asset configuration to minimize production bundle size and improve build performance.
 - **🏷️ Automated Genre System**: Multi-layered categorization with direct AniList synchronization and advanced filtering capabilities across all database views.
@@ -84,7 +84,15 @@ The project follows a set of strict administrative architectural patterns:
     php artisan migrate --seed
     ```
 
-5. **Start Development Server**:
+5. **Storage Setup** (required for local media access):
+
+    ```bash
+    php artisan storage:link
+    ```
+
+    > This creates a symlink from `public/storage` to `storage/app/public`. Without it, images/videos won't load when using `FILESYSTEM_DISK=public`.
+
+6. **Start Development Server**:
     ```bash
     php artisan serve
     npm run dev

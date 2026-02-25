@@ -83,7 +83,7 @@ class RegisterController extends Controller
                 $file_name = $user->slug . '-avatar-' . time() . '.png';
                 $path = 'profile/' . $file_name;
 
-                Storage::disk('public')->put($path, $response->body());
+                Storage::disk()->put($path, $response->body());
                 $user->updateOrCreateImage($path, 'avatar');
             }
         } catch (\Exception $e) {

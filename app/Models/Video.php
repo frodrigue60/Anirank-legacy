@@ -14,7 +14,7 @@ class Video extends Model
         'embed_code',
         'video_src',
         'type',
-        /* 'song_id', */
+        'disk',
         'song_variant_id',
     ];
 
@@ -25,8 +25,8 @@ class Video extends Model
         parent::boot();
 
         static::deleting(function ($video) {
-            if ($video->video_src && Storage::exists('public/' . $video->video_src)) {
-                Storage::delete('public/' . $video->video_src);
+            if ($video->video_src && Storage::disk($video->disk)->exists($video->video_src)) {
+                Storage::disk($video->disk)->delete($video->video_src);
             }
         });
     }
@@ -60,6 +60,8 @@ class Video extends Model
 
     public function getLocalUrlAttribute()
     {
-        return $this->isLocal() ? Storage::url($this->video_src) : null;
+        if (!$this->isLocal()) return null;
+
+        return Storage::disk($this->disk)->url($this->video_src);
     }
 }

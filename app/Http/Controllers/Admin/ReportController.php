@@ -8,11 +8,6 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $breadcrumb = [
@@ -24,34 +19,17 @@ class ReportController extends Controller
         return view('admin.reports.index', compact('reports', 'breadcrumb'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(report $report)
+    public function show(Report $report)
     {
         $breadcrumb = [
             ['name' => 'Reports', 'url' => route('admin.reports.index')],
@@ -61,49 +39,33 @@ class ReportController extends Controller
         return view('admin.reports.show', compact('report', 'breadcrumb'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(report $report)
+    public function edit(Report $report)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, Report $report)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(report $report)
+    public function destroy(Report $report)
     {
-        $report->delete();
-        return redirect(route('admin.reports.index'))->with('warning', 'Report ' . $report->id . ' deleted');
+        if ($report->delete()) {
+            return redirect(route('admin.reports.index'))->with('success', 'Report '.$report->id.' deleted');
+        }
+
+        return redirect(route('admin.reports.index'))->with('error', 'Report '.$report->id.' has not been deleted!');
     }
 
-    public function toggle(report $report)
+    public function toggle(Report $report)
     {
         try {
             $report->toggle();
 
-            return redirect()->back()->with('success', 'Report #' . $report->id . ' status updated to ' . $report->status);
+            return redirect()->back()->with('success', 'Report #'.$report->id.' status updated to '.$report->status);
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Failed to update report: ' . $th->getMessage());
+            return redirect()->back()->with('error', 'Failed to update report: '.$th->getMessage());
         }
     }
 }

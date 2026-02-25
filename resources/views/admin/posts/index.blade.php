@@ -13,6 +13,15 @@
             </div>
 
             <div class="flex flex-wrap gap-3">
+                <form action="{{ route('admin.posts.sync.all') }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                        class="inline-flex items-center px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-zinc-800 hover:border-zinc-700 shadow-xl">
+                        <span class="material-symbols-outlined mr-2">sync</span>
+                        SYNC ALL
+                    </button>
+                </form>
+
                 <a href="{{ route('admin.posts.create') }}"
                     class="inline-flex items-center px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all border border-zinc-800 hover:border-zinc-700 shadow-xl">
                     <span class="material-symbols-outlined mr-2">add</span>

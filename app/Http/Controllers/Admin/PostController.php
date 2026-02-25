@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Artist;
 use App\Models\DailyMetric;
 use App\Models\ExternalLink;
 use App\Models\Format;
+use App\Models\Genre;
 use App\Models\Post;
 use App\Models\Producer;
 use App\Models\Season;
@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -28,13 +29,24 @@ use Intervention\Image\ImageManagerStatic as Image;
 
 class PostController extends Controller
 {
+    /**
+     * Reusable Guzzle client for AniList API calls.
+     */
+    private ?Client $httpClient = null;
+
+    private function httpClient(): Client
+    {
+        return $this->httpClient ??= new Client;
+    }
+
+    // ──────────────────────────────────────────────
+    //  CRUD
+    // ──────────────────────────────────────────────
+
     public function index(Request $request)
     {
         $breadcrumb = Breadcrumb::generate([
-            [
-                'name' => 'Posts',
-                'url' => route('admin.posts.index'),
-            ],
+            ['name' => 'Posts', 'url' => route('admin.posts.index')],
         ]);
 
         $query = Post::query();
@@ -43,6 +55,7 @@ class PostController extends Controller
             $query->where('title', 'like', "%{$request->q}%")
                 ->orWhere('description', 'like', "%{$request->q}%");
         }
+
         $posts = $query->latest()->paginate(20);
 
         return view('admin.posts.index', compact('posts', 'breadcrumb'));
@@ -50,206 +63,102 @@ class PostController extends Controller
 
     public function create()
     {
-        $artists = Artist::all();
         $seasons = Season::all();
         $years = Year::all();
-
-        $types = [
-            ['name' => 'Opening', 'value' => 'OP'],
-            ['name' => 'Ending', 'value' => 'ED'],
-            ['name' => 'Insert', 'value' => 'INS'],
-            ['name' => 'Other', 'value' => 'OTH'],
-        ];
-
-        $postStatus = [
-            ['name' => 'Stagged', 'value' => false],
-            ['name' => 'Published', 'value' => true],
-        ];
+        $types = self::songTypes();
+        $postStatus = self::postStatuses();
 
         $breadcrumb = Breadcrumb::generate([
-            [
-                'name' => 'Index',
-                'url' => route('admin.posts.index'),
-            ],
-            [
-                'name' => 'Create post',
-                'url' => '',
-            ],
+            ['name' => 'Index', 'url' => route('admin.posts.index')],
+            ['name' => 'Create post', 'url' => ''],
         ]);
 
-        return view('admin.posts.create', compact('years', 'seasons', 'types', 'artists', 'postStatus', 'breadcrumb'));
+        return view('admin.posts.create', compact('years', 'seasons', 'types', 'postStatus', 'breadcrumb'));
     }
 
     public function store(Request $request)
     {
-        // dd($request->all());
-        /* return redirect()->back()
-                         ->with('error', 'Hubo un error al procesar el formulario.')
-                         ->withInput(); */
-        $user = Auth::User()->type;
-        if ($user == 'admin' || $user == 'editor' || $user == 'creator') {
+        $post = new Post;
+        $post->title = $request->title;
+        $post->slug = Str::slug($request->title);
+        $post->description = $request->description;
+        $post->year_id = $request->year;
+        $post->season_id = $request->season;
+        $post->status = $this->resolvePostStatus($request);
 
-            $post = new Post;
-            $post->title = $request->title;
-            $post->slug = Str::slug($request->title);
-            $post->description = $request->description;
-            $post->year_id = $request->year;
-            $post->season_id = $request->season;
+        $this->storePostImages($post, $request);
 
-            switch (Auth::user()->type) {
-                case 'creator':
-                    $post->status = false;
-                    break;
-                case 'admin' || 'editor':
-                    if ($request->postStatus == null) {
-                        $post->status = false;
-                    } else {
-                        $post->status = $request->postStatus;
-                    }
-                    break;
-                default:
-                    $post->status = true;
-                    break;
-            }
-
-            $this->storePostImages($post, $request);
-
-            if ($post->save()) {
-                // $post->retag($request->tags);
-                $msg = 'Post created successfully';
-
-                return redirect(route('admin.songs.index', ['post_id' => $post->id]))->with('success', $msg);
-            } else {
-                $msg = 'Somethis was wrong!';
-
-                return redirect(route('admin.posts.index'))->with('error', $msg);
-            }
-        } else {
-            $error = 'User is not authorized!';
-
-            return redirect(route('admin.posts.index'))->with('error', $error);
+        if ($post->save()) {
+            return redirect(route('admin.songs.index', ['post_id' => $post->id]))
+                ->with('success', 'Post created successfully');
         }
+
+        return redirect(route('admin.posts.index'))->with('error', 'Something went wrong!');
     }
 
     public function show(Post $post)
     {
-        if (Auth::check() && Auth::user()->isStaff()) {
+        $score_format = Auth::user()->score_format;
 
-            $score_format = Auth::user()->score_format;
+        $breadcrumb = Breadcrumb::generate([
+            ['name' => 'Posts', 'url' => route('admin.posts.index')],
+            ['name' => $post->title, 'url' => route('admin.posts.show', $post->id)],
+        ]);
 
-            $breadcrumb = Breadcrumb::generate([
-                [
-                    'name' => 'Posts',
-                    'url' => route('admin.posts.index'),
-                ],
-                [
-                    'name' => $post->title,
-                    'url' => route('admin.posts.show', $post->id),
-                ],
-            ]);
+        $ops = $post->songs->where('type', 'OP');
+        $eds = $post->songs->where('type', 'ED');
 
-            $ops = $post->songs->filter(function ($song) {
-                return $song->type === 'OP';
-            });
-            $eds = $post->songs->filter(function ($song) {
-                return $song->type === 'ED';
-            });
-
-            // dd($ops, $eds);
-            return view('admin.posts.show', compact('post', 'score_format', 'ops', 'eds', 'breadcrumb'));
-        }
+        return view('admin.posts.show', compact('post', 'score_format', 'ops', 'eds', 'breadcrumb'));
     }
 
     public function edit(Post $post)
     {
-        $artists = Artist::all();
         $seasons = Season::all();
         $years = Year::all();
-
-        $types = [
-            ['name' => 'Opening', 'value' => 'OP'],
-            ['name' => 'Ending', 'value' => 'ED'],
-            ['name' => 'Insert', 'value' => 'INS'],
-            ['name' => 'Other', 'value' => 'OTH'],
-        ];
-
-        $postStatus = [
-            ['name' => 'Stagged', 'value' => false],
-            ['name' => 'Published', 'value' => true],
-        ];
+        $types = self::songTypes();
+        $postStatus = self::postStatuses();
 
         $breadcrumb = Breadcrumb::generate([
-            [
-                'name' => 'Posts',
-                'url' => route('admin.posts.index'),
-            ],
-            [
-                'name' => $post->title,
-                'url' => '',
-            ],
+            ['name' => 'Posts', 'url' => route('admin.posts.index')],
+            ['name' => $post->title, 'url' => ''],
         ]);
 
-        return view('admin.posts.edit', compact('post', 'types', 'artists', 'postStatus', 'breadcrumb', 'years', 'seasons'));
+        return view('admin.posts.edit', compact('post', 'types', 'postStatus', 'breadcrumb', 'years', 'seasons'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Post $post)
     {
-        // dd($request->all());
-        $user = Auth::User()->type;
-        if ($user == 'admin' || $user == 'editor' || $user == 'creator') {
-            $post = Post::find($id);
-            $old_thumbnail = $post->thumbnail;
-            $old_banner = $post->banner;
-            $post->title = $request->title;
-            $post->slug = Str::slug($request->title);
-            $post->description = $request->description;
+        $old_thumbnail = $post->thumbnail;
+        $old_banner = $post->banner;
 
-            switch (Auth::user()->type) {
-                case 'creator':
-                    $post->status = false;
-                    break;
-                case 'admin' || 'editor':
-                    if ($request->postStatus == null) {
-                        $post->status = false;
-                    } else {
-                        $post->status = $request->postStatus;
-                    }
-                    break;
-                default:
-                    $post->status = false;
-                    break;
+        $post->title = $request->title;
+        $post->slug = Str::slug($request->title);
+        $post->description = $request->description;
+        $post->status = $this->resolvePostStatus($request);
+
+        $this->storePostImages($post, $request);
+
+        if ($post->update()) {
+            if ($old_thumbnail && $old_thumbnail !== $post->thumbnail) {
+                Storage::disk()->delete($old_thumbnail);
+            }
+            if ($old_banner && $old_banner !== $post->banner) {
+                Storage::disk()->delete($old_banner);
             }
 
-            $this->storePostImages($post, $request);
-
-            if ($post->update()) {
-                if ($old_thumbnail && $old_thumbnail !== $post->thumbnail) {
-                    Storage::disk('s3')->delete($old_thumbnail);
-                }
-                if ($old_banner && $old_banner !== $post->banner) {
-                    Storage::disk('s3')->delete($old_banner);
-                }
-
-                return redirect(route('admin.posts.index'))->with('success', 'Post Updated Successfully');
-            } else {
-                return redirect(route('admin.posts.index'))->with('error', 'Something has wrong');
-            }
-        } else {
-            $error = 'User is not authorized!';
-
-            return redirect(route('admin.posts.index'))->with('error', $error);
+            return redirect(route('admin.posts.index'))->with('success', 'Post Updated Successfully');
         }
+
+        return redirect(route('admin.posts.index'))->with('error', 'Something went wrong');
     }
 
-    public function destroy($id)
+    public function destroy(Post $post)
     {
-        $post = Post::find($id);
-
         if ($post->delete()) {
             return Redirect::route('admin.posts.index')->with('success', 'Post Deleted successfully!');
-        } else {
-            return Redirect::route('admin.posts.index')->with('error', 'Post has been not deleted!');
         }
+
+        return Redirect::route('admin.posts.index')->with('error', 'Post has not been deleted!');
     }
 
     public function toggleStatus(Post $post)
@@ -263,93 +172,57 @@ class PostController extends Controller
         }
     }
 
+    // ──────────────────────────────────────────────
+    //  AniList Integration
+    // ──────────────────────────────────────────────
+
     public function searchInAnilist(Request $request)
     {
         $breadcrumb = [
-            [
-                'name' => 'Posts',
-                'url' => route('admin.posts.index'),
-            ],
-            [
-                'name' => 'Search Animes',
-                'url' => '',
-            ],
+            ['name' => 'Posts', 'url' => route('admin.posts.index')],
+            ['name' => 'Search Animes', 'url' => ''],
         ];
-        $q = $request->q;
-        $type = $request->type;
 
+        $q = $request->q;
         $variables = [
             'search' => $q,
-            'format_in' => $type,
+            'format_in' => $request->type,
         ];
 
-        $query = $this->buildGraphQLQuerySearch();
-
-        $client = new Client;
-        $response = $client->post('https://graphql.anilist.co', [
+        $response = $this->httpClient()->post('https://graphql.anilist.co', [
             'json' => [
-                'query' => $query,
+                'query' => $this->buildGraphQLQuerySearch(),
                 'variables' => $variables,
             ],
         ]);
 
-        $body = $response->getBody()->__toString();
-
-        $json = json_decode($body);
-        $data = $json->data->Page->media;
-        $posts = [];
-        foreach ($data as $item) {
-            array_push($posts, $item);
-        }
+        $json = json_decode($response->getBody()->__toString());
+        $posts = $json->data->Page->media;
 
         return view('admin.posts.select', compact('posts', 'breadcrumb', 'q'));
     }
 
     public function getById($anilist_id)
     {
-        $variables = [
-            'id' => $anilist_id,
-        ];
-
-        $client = new \GuzzleHttp\Client;
-        $response = $client->post('https://graphql.anilist.co', [
-            'json' => [
-                'query' => $this->buildGraphQLQueryId(),
-                'variables' => $variables,
-            ],
-        ]);
-        $body = $response->getBody()->__toString();
-        $json = json_decode($body);
+        $json = $this->fetchAnilistById($anilist_id);
 
         $data[] = $json->data->Media;
-        // dd($data);
         $this->generateMassive($data);
-        $success = 'Single post created successfully';
 
-        return redirect(route('admin.posts.index'))->with('success', $success);
+        return redirect(route('admin.posts.index'))->with('success', 'Single post created successfully');
     }
 
     public function syncAllFromAnilist()
     {
         $posts = Post::whereNotNull('anilist_id')->get();
-        $client = new Client;
 
         foreach ($posts as $post) {
             try {
-                $variables = ['id' => $post->anilist_id];
-                $response = $client->post('https://graphql.anilist.co', [
-                    'json' => [
-                        'query' => $this->buildGraphQLQueryId(),
-                        'variables' => $variables,
-                    ],
-                ]);
-                $body = $response->getBody()->__toString();
-                $json = json_decode($body);
-                $item = $json->data->Media;
-
-                $this->updatePostFromAnilistData($post, $item);
+                $json = $this->fetchAnilistById($post->anilist_id);
+                $this->updatePostFromAnilistData($post, $json->data->Media);
             } catch (\Throwable $th) {
-                // Skip or log error
+                Log::error("SyncAll failed for post {$post->id} ({$post->title}): ".$th->getMessage());
+
                 continue;
             }
         }
@@ -357,120 +230,10 @@ class PostController extends Controller
         return redirect(route('admin.posts.index'))->with('success', 'All posts synchronized with AniList');
     }
 
-    private function updatePostFromAnilistData($post, $item)
+    public function forceUpdate(Post $post)
     {
-        $post->description = $item->description;
-        $post->anilist_id = $item->id;
-
-        $externalLinks = $item->externalLinks;
-        $studios = $item->studios->nodes;
-        $idStudios = [];
-        $idProducers = [];
-        $idLinks = [];
-        $format_name = $item->format;
-
-        foreach ($studios as $key => $value) {
-            if ($value->isAnimationStudio) {
-                $studio = Studio::firstOrCreate(
-                    ['slug' => Str::slug($value->name)],
-                    ['name' => $value->name, 'slug' => Str::slug($value->name)]
-                );
-                array_push($idStudios, $studio->id);
-            } else {
-                $producer = Producer::firstOrCreate(
-                    ['slug' => Str::slug($value->name)],
-                    ['name' => $value->name, 'slug' => Str::slug($value->name)]
-                );
-                array_push($idProducers, $producer->id);
-            }
-        }
-
-        foreach ($externalLinks as $key => $value) {
-            $externalLink = ExternalLink::firstOrCreate(
-                ['url' => $value->url],
-                ['icon' => $value->icon, 'name' => $value->site, 'type' => $value->type, 'url' => $value->url]
-            );
-            array_push($idLinks, $externalLink->id);
-        }
-
-        $format = Format::firstOrCreate(
-            ['slug' => Str::slug($format_name)],
-            ['name' => $format_name, 'slug' => Str::slug($format_name)]
-        );
-
-        $post->format()->associate($format);
-
-        $this->saveAnimeBanner($item, $post);
-        $this->saveAnimeThumbnail($item, $post);
-
-        if (! empty($item->season) && ! empty($item->seasonYear)) {
-            $season = Season::firstOrCreate(['name' => $item->season]);
-            $post->season_id = $season->id;
-            $year = Year::firstOrCreate(['name' => $item->seasonYear]);
-            $post->year_id = $year->id;
-        } elseif (! $item->season and ! $item->seasonYear && isset($item->startDate->month)) {
-            $month_al = $item->startDate->month;
-            $year_al = $item->startDate->year;
-
-            $season = Season::firstOrCreate(['name' => $this->assignSeason($month_al)]);
-            $post->season_id = $season->id;
-
-            $year = Year::firstOrCreate(['name' => $year_al]);
-            $post->year_id = $year->id;
-        }
-
-        if ($post->save()) {
-            $post->studios()->sync($idStudios);
-            $post->producers()->sync($idProducers);
-            $post->externalLinks()->sync($idLinks);
-
-            // Sync Genres
-            if (! empty($item->genres)) {
-                $genreIds = [];
-                foreach ($item->genres as $genreName) {
-                    $genre = Genre::firstOrCreate(
-                        ['slug' => \Illuminate\Support\Str::slug($genreName)],
-                        ['name' => $genreName, 'slug' => \Illuminate\Support\Str::slug($genreName)]
-                    );
-                    $genreIds[] = $genre->id;
-                }
-                $post->genres()->sync($genreIds);
-            }
-        }
-    }
-
-    public function generateMassive($data)
-    {
-        foreach ($data as $item) {
-            $post_exist = Post::where('title', $item->title->romaji)->first();
-            if ($post_exist) {
-                continue;
-            }
-            $post = new Post;
-            $post->title = $item->title->romaji;
-            $post->slug = Str::slug($post->title);
-            $post->status = true;
-
-            $this->updatePostFromAnilistData($post, $item);
-        }
-    }
-
-    public function forceUpdate($id)
-    {
-        $post = Post::find($id);
-
         try {
-            $variables = ['id' => $post->anilist_id];
-            $client = new \GuzzleHttp\Client;
-            $response = $client->post('https://graphql.anilist.co', [
-                'json' => [
-                    'query' => $this->buildGraphQLQueryId(),
-                    'variables' => $variables,
-                ],
-            ]);
-            $body = $response->getBody()->__toString();
-            $json = json_decode($body);
-
+            $json = $this->fetchAnilistById($post->anilist_id);
             $this->updatePostFromAnilistData($post, $json->data->Media);
 
             return redirect(route('admin.posts.show', $post->id))->with('success', 'Post updated');
@@ -479,341 +242,54 @@ class PostController extends Controller
         }
     }
 
+    public function getSeasonalAnimes(Request $request)
+    {
+        $breadcrumb = [
+            ['name' => 'Posts', 'url' => route('admin.posts.index')],
+            ['name' => 'Seasonal', 'url' => ''],
+        ];
+
+        $variables = [
+            'year' => $request->year ?? now()->year,
+            'season' => $request->season ?? $this->assignSeason(now()->month),
+            'page' => $request->page ?? 1,
+            'perPage' => $request->perPage ?? 50,
+            'format_in' => $request->type ?? ['TV', 'TV_SHORT', 'ONA'],
+        ];
+
+        $response = $this->httpClient()->post('https://graphql.anilist.co', [
+            'json' => [
+                'query' => $this->buildGraphQLQuerySeasonal(),
+                'variables' => $variables,
+            ],
+        ]);
+
+        $json = json_decode($response->getBody()->__toString());
+        $posts = $json->data->Page->media;
+
+        return view('admin.posts.select', compact('posts', 'breadcrumb'));
+    }
+
     public function wipePosts()
     {
-        $posts = Post::all();
-
-        foreach ($posts as $post) {
+        Post::each(function ($post) {
             $post->delete();
-        }
+        }, 100);
 
-        $thumbnail_files = Storage::disk('s3')->files('thumbnails');
-        Storage::disk('s3')->delete($thumbnail_files);
+        Storage::disk()->delete(Storage::disk()->files('thumbnails'));
+        Storage::disk()->delete(Storage::disk()->files('anime_banner'));
 
-        $banner_files = Storage::disk('s3')->files('anime_banner');
-        Storage::disk('s3')->delete($banner_files);
-
-        $success = 'All posts deleted';
-
-        return redirect(route('admin.posts.index'))->with('success', $success);
+        return redirect(route('admin.posts.index'))->with('success', 'All posts deleted');
     }
 
-    public function buildGraphQLQuerySearch()
-    {
-        $query = '
-            query ($search: String, $format_in: [MediaFormat]) {
-                Page {
-                    media (search: $search, type: ANIME, format_in: $format_in) {
-                        id
-                        title {
-                            romaji
-                            english
-                            native
-                        }
-                        coverImage {
-                            extraLarge
-                        }
-                        bannerImage
-                    }
-                }
-            }
-        ';
-
-        return $query;
-    }
-
-    public function buildGraphQLQuerySeasonal()
-    {
-        $query = '
-            query ($year: Int, $season: MediaSeason, $page: Int, $perPage: Int, $format_in: [MediaFormat]) {
-                Page (page: $page, perPage: $perPage) {
-                    pageInfo {
-                        total
-                        perPage
-                        currentPage
-                        lastPage
-                        hasNextPage
-                    }
-                    media (
-                            seasonYear: $year,
-                            season: $season,
-                            type: ANIME,
-                            format_in: $format_in,
-                            isAdult:false
-                        ) {
-                        id
-                        title {
-                            romaji
-                            english
-                            native
-                        }
-                        description
-                        season
-                        seasonYear
-                        averageScore
-                        format
-                        genres
-                        studios {
-                            nodes {
-                                name
-                                isAnimationStudio
-                            }
-                        }
-                        coverImage {
-                            large
-                            extraLarge
-                        }
-                        bannerImage
-                        trailer{
-                            id
-                            site
-                            thumbnail
-                        }
-                        format
-                        externalLinks {
-                            icon
-                            type
-                            site
-                            url
-                        }
-                        startDate {
-                            month
-                            year
-                        }
-                        synonyms
-                            }
-                        }
-            }';
-
-        return $query;
-    }
-
-    public function buildGraphQLQueryId()
-    {
-        $query = '
-        query ($id: Int) { # Define which variables will be used in the query (id)
-            Media (id: $id, type: ANIME) { # Insert our variables into the query arguments (id) (type: ANIME is hard-coded in the query)
-                id
-                title {
-                    romaji
-                    english
-                    native
-                }
-                description
-                season
-                seasonYear
-                format
-                genres
-                averageScore
-                studios {
-                    nodes {
-                        name
-                        isAnimationStudio
-                    }
-                }
-                coverImage {
-                    large
-                    extraLarge
-                }
-                bannerImage
-                episodes
-                trailer{
-                    id
-                    site
-                    thumbnail
-                }
-                format
-                externalLinks {
-                    icon
-                    type
-                    site
-                    url
-                }
-                startDate {
-                    month
-                    year
-                }
-                synonyms
-            }
-        }
-        ';
-
-        return $query;
-    }
-
-    public function saveAnimeThumbnail($item, $post)
-    {
-        if ($item->coverImage->extraLarge != null) {
-            $client = new Client;
-            $response = $client->get($item->coverImage->extraLarge);
-            $imageContent = $response->getBody()->getContents();
-
-            if (extension_loaded('gd')) {
-                $imageContent = Image::make($imageContent)->encode('webp', 100);
-                $file_name = Str::slug($post->slug).'-'.time().'.webp';
-            }
-            $path = 'thumbnails/'.$file_name;
-            $this->storeSingleImage($path, $imageContent);
-
-            $post->updateOrCreateImage($path, 'thumbnail', 's3');
-        }
-
-        return $post;
-    }
-
-    public function saveAnimeBanner($item, $post)
-    {
-        if ($item->bannerImage != null) {
-
-            $client = new Client;
-            $response = $client->get($item->bannerImage);
-            $imageContent = $response->getBody()->getContents();
-
-            if (extension_loaded('gd')) {
-                $file_name = Str::slug($post->slug).'-'.time().'.webp';
-                $imageContent = Image::make($imageContent)->encode('webp', 100);
-            }
-            $path = 'anime_banner/'.$file_name;
-            $this->storeSingleImage($path, $imageContent);
-
-            $post->updateOrCreateImage($path, 'banner', 's3');
-        }
-
-        return $post;
-    }
-
-    public function storePostImages($post, $request)
-    {
-        /* Thumnail with file store */
-        if ($request->hasFile('file')) {
-
-            $validator = Validator::make($request->all(), [
-                'file' => 'mimes:png,jpg,jpeg,webp|max:2048',
-            ]);
-
-            if ($validator->fails()) {
-                $errors = $validator->getMessageBag();
-                $request->flash();
-
-                return Redirect::back()
-                    ->with('error', $errors);
-            }
-
-            $imageContent = $request->file;
-
-            if (extension_loaded('gd')) {
-                $file_name = Str::slug($request->title).'-'.time().'.'.'webp';
-                $imageContent = Image::make($request->file)->encode('webp', 100);
-            } else {
-                $file_extension = $request->file->extension();
-                $file_name = Str::slug($request->title).'-'.time().'.'.$file_extension;
-            }
-            $path = 'thumbnails/'.$file_name;
-            $this->storeSingleImage($path, $imageContent);
-            $post->updateOrCreateImage($path, 'thumbnail', 's3');
-        } else {
-            /* Thumbnail witn url store */
-            if ($request->thumbnail_src != null) {
-
-                $client = new Client;
-                $response = $client->get($request->thumbnail_src);
-                $imageContent = $response->getBody()->getContents();
-
-                if (extension_loaded('gd')) {
-                    $file_name = Str::slug($request->title).'-'.time().'.'.'webp';
-                    $imageContent = Image::make($imageContent)->encode('webp', 100);
-                } else {
-                    $headers = $response->getHeaders();
-                    $contentType = $headers['Content-Type'][0] ?? null;
-
-                    $extension = match ($contentType) {
-                        'image/jpeg' => 'jpg',
-                        'image/png' => 'png',
-                        'image/gif' => 'gif',
-                        'image/webp' => 'webp',
-                        default => 'bin',
-                    };
-
-                    $file_name = Str::slug($request->title).'-'.time().'.'.$extension;
-                }
-
-                $path = 'thumbnails/'.$file_name;
-                $this->storeSingleImage($path, $imageContent);
-                $post->updateOrCreateImage($path, 'thumbnail', 's3');
-            }
-        }
-
-        /* Banner with file store */
-        if ($request->hasFile('banner')) {
-            $validator = Validator::make($request->all(), [
-                'banner' => 'mimes:png,jpg,jpeg,webp|max:2048',
-            ]);
-
-            if ($validator->fails()) {
-                $errors = $validator->getMessageBag();
-                $request->flash();
-
-                return Redirect::back()
-                    ->with('error', $errors);
-            }
-
-            $imageContent = $request->banner;
-
-            if (extension_loaded('gd')) {
-                $file_name = Str::slug($request->title).'-'.time().'.'.'webp';
-                $imageContent = Image::make($request->banner)->encode('webp', 100);
-            } else {
-                $extension = $request->file->extension();
-                $file_name = Str::slug($request->title).'-'.time().'.'.$extension;
-            }
-            $path = 'anime_banner/'.$file_name;
-            $this->storeSingleImage($path, $imageContent);
-            $post->updateOrCreateImage($path, 'banner', 's3');
-        } else {
-            /* Bannter with url store */
-            if ($request->banner_src != null) {
-
-                $client = new Client;
-                $response = $client->get($request->banner_src);
-                $imageContent = $response->getBody()->getContents();
-
-                if (extension_loaded('gd')) {
-                    $file_name = Str::slug($request->title).'-'.time().'.'.'webp';
-                    $imageContent = Image::make($imageContent)->encode('webp', 100);
-                } else {
-                    $headers = $response->getHeaders();
-                    $contentType = $headers['Content-Type'][0] ?? null;
-                    $extension = match ($contentType) {
-                        'image/jpeg' => 'jpg',
-                        'image/png' => 'png',
-                        'image/gif' => 'gif',
-                        'image/webp' => 'webp',
-                        default => 'bin',
-                    };
-
-                    $file_name = Str::slug($request->title).'-'.time().'.'.$extension;
-                }
-                $path = 'anime_banner/'.$file_name;
-                $this->storeSingleImage($path, $imageContent);
-                $post->updateOrCreateImage($path, 'banner', 's3');
-            }
-        }
-
-        return $post;
-    }
-
-    public function storeSingleImage($path, $imageContent)
-    {
-        Storage::disk('s3')->put($path, $imageContent);
-    }
+    // ──────────────────────────────────────────────
+    //  Dashboard
+    // ──────────────────────────────────────────────
 
     public function dashboard()
     {
-        $last7Days = collect(range(6, 0))->map(function ($days) {
-            return now()->subDays($days)->toDateString();
-        });
+        $last7Days = collect(range(6, 0))->map(fn ($days) => now()->subDays($days)->toDateString());
 
-        // 1. User Growth (Last 30 days)
         $userGrowth = User::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
@@ -821,7 +297,6 @@ class PostController extends Controller
             ->get()
             ->pluck('count', 'date');
 
-        // 2. Trending Songs (Last 7 days views)
         $trendingSongs = Song::select('songs.*')
             ->join('daily_metrics', 'songs.id', '=', 'daily_metrics.song_id')
             ->where('daily_metrics.date', '>=', now()->subDays(7))
@@ -831,7 +306,6 @@ class PostController extends Controller
             ->limit(5)
             ->get();
 
-        // 3. Overall Statistics
         $stats = [
             'total_users' => User::count(),
             'active_users_24h' => User::where('last_login_at', '>=', now()->subDays(1))->count(),
@@ -840,7 +314,6 @@ class PostController extends Controller
             'total_views' => Song::sum('views'),
         ];
 
-        // 4. Views Chart Data (Last 7 days)
         $viewsData = DailyMetric::select('date', DB::raw('SUM(views_count) as total_views'))
             ->where('date', '>=', now()->subDays(7))
             ->groupBy('date')
@@ -848,29 +321,14 @@ class PostController extends Controller
             ->get()
             ->pluck('total_views', 'date');
 
-        $chartData = $last7Days->mapWithKeys(function ($date) use ($viewsData) {
-            return [$date => $viewsData->get($date, 0)];
-        });
+        $chartData = $last7Days->mapWithKeys(fn ($date) => [$date => $viewsData->get($date, 0)]);
 
         return view('admin.dashboard', compact('stats', 'chartData', 'trendingSongs', 'userGrowth'));
     }
 
-    private function assignSeason(int $month)
-    {
-        if ($month == 12 || $month == 1 || $month == 2) {
-            return 'WINTER';
-        } else {
-            if ($month == 3 || $month == 4 || $month == 5) {
-                return 'SPRING';
-            } else {
-                if ($month == 6 || $month == 7 || $month == 8) {
-                    return 'SUMMER';
-                } else {
-                    return 'FALL';
-                }
-            }
-        }
-    }
+    // ──────────────────────────────────────────────
+    //  Ranking
+    // ──────────────────────────────────────────────
 
     public function trackRanking()
     {
@@ -892,5 +350,370 @@ class PostController extends Controller
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Error executing seasonal ranking: '.$th->getMessage());
         }
+    }
+
+    // ══════════════════════════════════════════════
+    //  PRIVATE HELPERS
+    // ══════════════════════════════════════════════
+
+    /**
+     * Fetch anime data from AniList by ID.
+     */
+    private function fetchAnilistById(int $anilistId): object
+    {
+        $response = $this->httpClient()->post('https://graphql.anilist.co', [
+            'json' => [
+                'query' => $this->buildGraphQLQueryId(),
+                'variables' => ['id' => $anilistId],
+            ],
+        ]);
+
+        return json_decode($response->getBody()->__toString());
+    }
+
+    /**
+     * Update a Post from AniList API data (studios, producers, genres, images, season, year).
+     */
+    private function updatePostFromAnilistData(Post $post, object $item): void
+    {
+        $post->description = $item->description;
+        $post->anilist_id = $item->id;
+
+        // Studios & Producers
+        $idStudios = [];
+        $idProducers = [];
+        foreach ($item->studios->nodes as $node) {
+            if ($node->isAnimationStudio) {
+                $studio = Studio::firstOrCreate(
+                    ['slug' => Str::slug($node->name)],
+                    ['name' => $node->name, 'slug' => Str::slug($node->name)]
+                );
+                $idStudios[] = $studio->id;
+            } else {
+                $producer = Producer::firstOrCreate(
+                    ['slug' => Str::slug($node->name)],
+                    ['name' => $node->name, 'slug' => Str::slug($node->name)]
+                );
+                $idProducers[] = $producer->id;
+            }
+        }
+
+        // External Links
+        $idLinks = [];
+        foreach ($item->externalLinks as $link) {
+            $externalLink = ExternalLink::firstOrCreate(
+                ['url' => $link->url],
+                ['icon' => $link->icon, 'name' => $link->site, 'type' => $link->type, 'url' => $link->url]
+            );
+            $idLinks[] = $externalLink->id;
+        }
+
+        // Format
+        $format = Format::firstOrCreate(
+            ['slug' => Str::slug($item->format)],
+            ['name' => $item->format, 'slug' => Str::slug($item->format)]
+        );
+        $post->format()->associate($format);
+
+        // Season & Year
+        if (! empty($item->season) && ! empty($item->seasonYear)) {
+            $post->season_id = Season::firstOrCreate(['name' => $item->season])->id;
+            $post->year_id = Year::firstOrCreate(['name' => $item->seasonYear])->id;
+        } elseif (isset($item->startDate->month)) {
+            $post->season_id = Season::firstOrCreate(['name' => $this->assignSeason($item->startDate->month)])->id;
+            $post->year_id = Year::firstOrCreate(['name' => $item->startDate->year])->id;
+        }
+
+        // Save FIRST so $post->id exists for image relationships
+        if ($post->save()) {
+            $post->studios()->sync($idStudios);
+            $post->producers()->sync($idProducers);
+            $post->externalLinks()->sync($idLinks);
+
+            // Images (require saved post for imageable_id)
+            $this->downloadAndStoreAnilistImage($item->bannerImage, $post, 'anime_banner', 'banner');
+            $this->downloadAndStoreAnilistImage($item->coverImage->extraLarge ?? null, $post, 'thumbnails', 'thumbnail');
+
+            // Genres
+            if (! empty($item->genres)) {
+                $genreIds = [];
+                foreach ($item->genres as $genreName) {
+                    $genre = Genre::firstOrCreate(
+                        ['slug' => Str::slug($genreName)],
+                        ['name' => $genreName, 'slug' => Str::slug($genreName)]
+                    );
+                    $genreIds[] = $genre->id;
+                }
+                $post->genres()->sync($genreIds);
+            }
+        }
+    }
+
+    /**
+     * Bulk import anime from AniList data array.
+     */
+    private function generateMassive(array $data): void
+    {
+        foreach ($data as $item) {
+            if (Post::where('title', $item->title->romaji)->exists()) {
+                continue;
+            }
+
+            $post = new Post;
+            $post->title = $item->title->romaji;
+            $post->slug = Str::slug($post->title);
+            $post->status = true;
+
+            $this->updatePostFromAnilistData($post, $item);
+        }
+    }
+
+    /**
+     * Download an image from a URL and store it locally.
+     * Unified handler for both thumbnails and banners from AniList.
+     */
+    private function downloadAndStoreAnilistImage(?string $imageUrl, Post $post, string $directory, string $type): void
+    {
+        if (! $imageUrl) {
+            return;
+        }
+
+        $response = $this->httpClient()->get($imageUrl);
+        $imageContent = $response->getBody()->getContents();
+
+        if (extension_loaded('gd')) {
+            $imageContent = Image::make($imageContent)->encode('webp', 100);
+            $file_name = Str::slug($post->slug).'-'.time().'.webp';
+        } else {
+            $contentType = $response->getHeaders()['Content-Type'][0] ?? 'image/jpeg';
+            $extension = $this->mimeToExtension($contentType);
+            $file_name = Str::slug($post->slug).'-'.time().'.'.$extension;
+        }
+
+        $path = $directory.'/'.$file_name;
+        Storage::disk()->put($path, $imageContent);
+        $post->updateOrCreateImage($path, $type);
+    }
+
+    /**
+     * Handle image uploads (file or URL) for thumbnails and banners.
+     */
+    private function storePostImages(Post $post, Request $request): void
+    {
+        // Thumbnail
+        $this->processImageUpload($post, $request, 'file', 'thumbnail_src', 'thumbnails', 'thumbnail');
+
+        // Banner
+        $this->processImageUpload($post, $request, 'banner', 'banner_src', 'anime_banner', 'banner');
+    }
+
+    /**
+     * Process a single image upload — from file or URL.
+     */
+    private function processImageUpload(Post $post, Request $request, string $fileField, string $urlField, string $directory, string $imageType): void
+    {
+        if ($request->hasFile($fileField)) {
+            // Validate
+            $validator = Validator::make($request->all(), [
+                $fileField => 'mimes:png,jpg,jpeg,webp|max:2048',
+            ]);
+
+            if ($validator->fails()) {
+                $request->flash();
+                abort(redirect()->back()->with('error', $validator->getMessageBag()));
+            }
+
+            $uploadedFile = $request->file($fileField);
+
+            if (extension_loaded('gd')) {
+                $file_name = Str::slug($request->title).'-'.time().'.webp';
+                $imageContent = Image::make($uploadedFile)->encode('webp', 100);
+            } else {
+                $extension = $uploadedFile->extension();
+                $file_name = Str::slug($request->title).'-'.time().'.'.$extension;
+                $imageContent = file_get_contents($uploadedFile->getRealPath());
+            }
+
+            $path = $directory.'/'.$file_name;
+            Storage::disk()->put($path, $imageContent);
+            $post->updateOrCreateImage($path, $imageType);
+
+        } elseif ($request->filled($urlField)) {
+            $response = $this->httpClient()->get($request->input($urlField));
+            $imageContent = $response->getBody()->getContents();
+
+            if (extension_loaded('gd')) {
+                $file_name = Str::slug($request->title).'-'.time().'.webp';
+                $imageContent = Image::make($imageContent)->encode('webp', 100);
+            } else {
+                $contentType = $response->getHeaders()['Content-Type'][0] ?? 'image/jpeg';
+                $extension = $this->mimeToExtension($contentType);
+                $file_name = Str::slug($request->title).'-'.time().'.'.$extension;
+            }
+
+            $path = $directory.'/'.$file_name;
+            Storage::disk()->put($path, $imageContent);
+            $post->updateOrCreateImage($path, $imageType);
+        }
+    }
+
+    /**
+     * Determine the post status based on the user's role.
+     */
+    private function resolvePostStatus(Request $request): bool
+    {
+        $user = Auth::user();
+
+        if ($user->hasRole('creator')) {
+            return false;
+        }
+
+        if ($user->hasRole('admin') || $user->hasRole('editor')) {
+            return (bool) $request->postStatus;
+        }
+
+        return false;
+    }
+
+    /**
+     * Map a MIME type to a file extension.
+     */
+    private function mimeToExtension(string $contentType): string
+    {
+        return match ($contentType) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+            default => 'bin',
+        };
+    }
+
+    /**
+     * Assign a season name based on the month.
+     */
+    private function assignSeason(int $month): string
+    {
+        return match (true) {
+            in_array($month, [12, 1, 2]) => 'WINTER',
+            in_array($month, [3, 4, 5]) => 'SPRING',
+            in_array($month, [6, 7, 8]) => 'SUMMER',
+            default => 'FALL',
+        };
+    }
+
+    /**
+     * Static data for song types dropdown.
+     */
+    private static function songTypes(): array
+    {
+        return [
+            ['name' => 'Opening', 'value' => 'OP'],
+            ['name' => 'Ending', 'value' => 'ED'],
+            ['name' => 'Insert', 'value' => 'INS'],
+            ['name' => 'Other', 'value' => 'OTH'],
+        ];
+    }
+
+    /**
+     * Static data for post status dropdown.
+     */
+    private static function postStatuses(): array
+    {
+        return [
+            ['name' => 'Staged', 'value' => false],
+            ['name' => 'Published', 'value' => true],
+        ];
+    }
+
+    // ──────────────────────────────────────────────
+    //  GraphQL Queries
+    // ──────────────────────────────────────────────
+
+    private function buildGraphQLQuerySearch(): string
+    {
+        return '
+            query ($search: String, $format_in: [MediaFormat]) {
+                Page {
+                    media (search: $search, type: ANIME, format_in: $format_in) {
+                        id
+                        title {
+                            romaji
+                            english
+                            native
+                        }
+                        coverImage {
+                            extraLarge
+                        }
+                        bannerImage
+                    }
+                }
+            }
+        ';
+    }
+
+    private function buildGraphQLQuerySeasonal(): string
+    {
+        return '
+            query ($year: Int, $season: MediaSeason, $page: Int, $perPage: Int, $format_in: [MediaFormat]) {
+                Page (page: $page, perPage: $perPage) {
+                    pageInfo {
+                        total
+                        perPage
+                        currentPage
+                        lastPage
+                        hasNextPage
+                    }
+                    media (
+                        seasonYear: $year,
+                        season: $season,
+                        type: ANIME,
+                        format_in: $format_in,
+                        isAdult: false
+                    ) {
+                        id
+                        title { romaji english native }
+                        description
+                        season
+                        seasonYear
+                        averageScore
+                        format
+                        genres
+                        studios { nodes { name isAnimationStudio } }
+                        coverImage { large extraLarge }
+                        bannerImage
+                        trailer { id site thumbnail }
+                        externalLinks { icon type site url }
+                        startDate { month year }
+                        synonyms
+                    }
+                }
+            }';
+    }
+
+    private function buildGraphQLQueryId(): string
+    {
+        return '
+            query ($id: Int) {
+                Media (id: $id, type: ANIME) {
+                    id
+                    title { romaji english native }
+                    description
+                    season
+                    seasonYear
+                    format
+                    genres
+                    averageScore
+                    studios { nodes { name isAnimationStudio } }
+                    coverImage { large extraLarge }
+                    bannerImage
+                    episodes
+                    trailer { id site thumbnail }
+                    externalLinks { icon type site url }
+                    startDate { month year }
+                    synonyms
+                }
+            }
+        ';
     }
 }
