@@ -29,6 +29,17 @@ use Intervention\Image\ImageManagerStatic as Image;
 
 class PostController extends Controller
 {
+    public function autocomplete(Request $request)
+    {
+        $q = $request->q;
+        $posts = Post::where('title', 'like', "%{$q}%")
+            ->latest()
+            ->limit(10)
+            ->get(['id', 'title']);
+
+        return response()->json($posts);
+    }
+
     /**
      * Reusable Guzzle client for AniList API calls.
      */

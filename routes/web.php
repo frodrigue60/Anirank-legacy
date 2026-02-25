@@ -115,6 +115,7 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
 
     // Posts
     Route::controller(AdminPostController::class)->prefix('posts')->as('posts.')->group(function () {
+        Route::get('/autocomplete', 'autocomplete')->name('autocomplete');
         Route::patch('/{post}/toggle-status', 'toggleStatus')->name('toggle.status');
         Route::post('/search-animes', 'searchInAnilist')->name('search.animes');
         Route::get('/by-id/{id}', 'getById')->name('by.id');

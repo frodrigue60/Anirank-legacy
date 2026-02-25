@@ -105,33 +105,37 @@ class SongController extends Controller
         $seasons = Season::all();
         $years = Year::all();
 
-        $posts = Post::orderBy('title')->get(['id', 'title']);
-
-        return view('admin.songs.create', compact('breadcrumb', 'posts', 'types', 'seasons', 'years', 'selectedPostId', 'currentPost'));
+        return view('admin.songs.create', compact('breadcrumb', 'types', 'seasons', 'years', 'selectedPostId', 'currentPost'));
     }
 
     public function store(Request $request)
     {
-        $name_romaji = null;
-        $name_jp = null;
         $song = new Song;
-
-        if ($request->song_romaji != null && $request->song_romaji != '') {
-            [$name_romaji, $name_jp] = $this->parseName($request->song_romaji);
+        if ($request->filled('song_romaji')) {
+            [$name_romaji, $name_jp_parsed] = $this->parseName($request->song_romaji);
 
             $song->song_romaji = $name_romaji;
-            $song->song_jp = $name_jp;
+            if ($name_jp_parsed) {
+                $song->song_jp = $name_jp_parsed;
+            }
         }
 
-        if ($request->song_en != null && $request->song_en != '') {
-            [$name_en, $name_jp] = $this->parseName($request->song_en);
+        if ($request->filled('song_en')) {
+            [$name_en, $name_jp_parsed] = $this->parseName($request->song_en);
 
             $song->song_en = $name_en;
-            $song->song_jp = $name_jp;
+            if ($name_jp_parsed) {
+                $song->song_jp = $name_jp_parsed;
+            }
         }
-        // $song->song_romaji = Str::of($request->song_romaji)->trim();
-        // $song->song_jp = Str::of($request->song_jp)->trim();
-        // $song->song_en = Str::of($request->song_en)->trim();
+
+        if ($request->filled('song_jp')) {
+            $song->song_jp = trim($request->song_jp) ?: null;
+        }
+
+        $song->song_romaji = $song->song_romaji ?: null;
+        $song->song_en = $song->song_en ?: null;
+        $song->song_jp = $song->song_jp ?: null;
 
         $song->post_id = $request->post_id;
         $song->season_id = $request->season_id;
@@ -153,12 +157,11 @@ class SongController extends Controller
             if ($name != '' && $name != null) {
                 $artist = Artist::firstOrCreate(
                     [
-                        'name' => $name,
                         'slug' => Str::slug($name),
                     ],
                     [
                         'name' => $name,
-                        'name_jp' => $name_jp ? $name_jp : null,
+                        'name_jp' => $name_jp ?: null,
                     ]
                 );
                 $artistsIds[] = $artist->id;
@@ -199,7 +202,7 @@ class SongController extends Controller
             $name_jp = null;
         }
 
-        return [$name, $name_jp];
+        return [$name ?: null, $name_jp ?: null];
     }
 
     public function show(Song $song)
@@ -247,7 +250,6 @@ class SongController extends Controller
             ],
         ]);
         /* $artists = Artist::all(); */
-        $posts = Post::all('id', 'title');
         $seasons = Season::all();
         $years = Year::all();
         $types = [
@@ -257,16 +259,16 @@ class SongController extends Controller
             ['name' => 'Other', 'value' => 'OTH'],
         ];
 
-        return view('admin.songs.edit', compact('song', /* 'artists', */ 'types', 'seasons', 'years', 'breadcrumb', 'posts'));
+        return view('admin.songs.edit', compact('song', /* 'artists', */ 'types', 'seasons', 'years', 'breadcrumb'));
     }
 
     public function update(Request $request, $songId)
     {
         $song = Song::with('post')->findOrFail($songId);
 
-        $song->song_romaji = Str::of($request->song_romaji)->trim();
-        $song->song_jp = Str::of($request->song_jp)->trim();
-        $song->song_en = Str::of($request->song_en)->trim();
+        $song->song_romaji = trim($request->song_romaji) ?: null;
+        $song->song_jp = trim($request->song_jp) ?: null;
+        $song->song_en = trim($request->song_en) ?: null;
         $song->post_id = $song->post->id;
         $song->season_id = $request->season_id;
         $song->year_id = $request->year_id;
@@ -276,17 +278,21 @@ class SongController extends Controller
 
         $artistsIds = [];
 
-        foreach ($artistsNames as $name) {
-            $name = preg_replace('/\s+/', ' ', $name);
-            $artist = Artist::firstOrCreate(
-                [
-                    'slug' => Str::slug($name),
-                ],
-                [
-                    'name' => $name,
-                ]
-            );
-            $artistsIds[] = $artist->id;
+        foreach ($artistsNames as $rawName) {
+            [$name, $name_jp] = $this->parseName($rawName);
+
+            if ($name) {
+                $artist = Artist::firstOrCreate(
+                    [
+                        'slug' => Str::slug($name),
+                    ],
+                    [
+                        'name' => $name,
+                        'name_jp' => $name_jp ?: null,
+                    ]
+                );
+                $artistsIds[] = $artist->id;
+            }
         }
 
         $latestVersion = Song::where('post_id', $song->post_id)

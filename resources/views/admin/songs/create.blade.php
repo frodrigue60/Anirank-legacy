@@ -22,20 +22,118 @@
                 @csrf
 
                 {{--  POST  --}}
-                <div>
-                    <label for="post_id"
-                        class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Post</label>
-                    <select name="post_id" id="post_id"
-                        class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12">
-                        <option value="">Select an anime...</option>
-                        @foreach ($posts as $post)
-                            <option value="{{ $post->id }}"
-                                {{ (old('post_id') ?? $selectedPostId) == $post->id ? 'selected' : '' }}>
-                                {{ $post->title }}
-                            </option>
-                        @endforeach
-                    </select>
+                <div x-data="postAutocomplete()">
+                    <label for="post_search"
+                        class="block text-sm font-bold text-zinc-400 uppercase tracking-widest mb-2">Post / Anime</label>
+                    <div class="relative">
+                        <input type="hidden" name="post_id" :value="selectedId" id="post_id">
+
+                        {{-- Search Input / Selected View --}}
+                        <div class="relative group">
+                            <input type="text" id="post_search" x-model="search" x-on:input.debounce.300ms="fetchPosts()"
+                                x-on:focus="showResults = true" :placeholder="selectedTitle ? '' : 'Search anime...'"
+                                :readonly="selectedId !== null"
+                                :class="selectedId ? 'bg-blue-600/20 border-blue-500/50 text-blue-100 font-bold pr-12' :
+                                    'bg-zinc-950/50 border-zinc-800 text-white'"
+                                class="block w-full border rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12 outline-none">
+
+                            {{-- Selected State Icon & Clear Button --}}
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                <template x-if="selectedId">
+                                    <button type="button" @click="clearSelection()"
+                                        class="text-zinc-500 hover:text-white transition-colors">
+                                        <span class="material-symbols-outlined text-xl">close</span>
+                                    </button>
+                                </template>
+                                <template x-if="!selectedId">
+                                    <span
+                                        class="material-symbols-outlined text-zinc-600 group-focus-within:text-blue-500 transition-colors">search</span>
+                                </template>
+                            </div>
+
+                            {{-- Selected Title Overlay (Better UX than just value) --}}
+                            <template x-if="selectedId">
+                                <div class="absolute inset-0 flex items-center px-4 pointer-events-none">
+                                    <span x-text="selectedTitle"
+                                        class="text-sm font-bold truncate pr-16 bg-transparent"></span>
+                                </div>
+                            </template>
+                        </div>
+
+                        {{-- Results Dropdown --}}
+                        <div x-show="showResults && results.length > 0" x-cloak @click.away="showResults = false"
+                            class="absolute z-50 w-full mt-2 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
+                            <div class="max-h-60 overflow-y-auto">
+                                <template x-for="post in results" :key="post.id">
+                                    <button type="button" @click="selectPost(post)"
+                                        class="w-full text-left px-4 py-3 hover:bg-blue-600/20 hover:text-blue-400 transition-all flex items-center gap-3 border-b border-zinc-800/50 last:border-0">
+                                        <span class="material-symbols-outlined text-zinc-500">movie</span>
+                                        <div class="flex flex-col">
+                                            <span x-text="post.title" class="text-sm font-medium"></span>
+                                        </div>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        {{-- Loading State --}}
+                        <div x-show="loading" class="absolute right-12 top-1/2 -translate-y-1/2">
+                            <div class="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full">
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                @push('scripts')
+                    <script>
+                        function postAutocomplete() {
+                            return {
+                                search: '',
+                                results: [],
+                                selectedId: {{ old('post_id') ?? $selectedPostId ? old('post_id') ?? $selectedPostId : 'null' }},
+                                selectedTitle: '{{ $currentPost ? addslashes($currentPost->title) : '' }}',
+                                loading: false,
+                                showResults: false,
+
+                                fetchPosts() {
+                                    if (this.search.length < 2) {
+                                        this.results = [];
+                                        return;
+                                    }
+
+                                    this.loading = true;
+                                    fetch(`{{ route('admin.posts.autocomplete') }}?q=${encodeURIComponent(this.search)}`)
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            this.results = data;
+                                            this.loading = false;
+                                            this.showResults = true;
+                                        })
+                                        .catch(err => {
+                                            console.error('Error fetching posts:', err);
+                                            this.loading = false;
+                                        });
+                                },
+
+                                selectPost(post) {
+                                    this.selectedId = post.id;
+                                    this.selectedTitle = post.title;
+                                    this.search = ''; // Clear search text
+                                    this.results = [];
+                                    this.showResults = false;
+                                },
+
+                                clearSelection() {
+                                    this.selectedId = null;
+                                    this.selectedTitle = '';
+                                    this.search = '';
+                                    this.results = [];
+                                    this.$nextTick(() => document.getElementById('post_search').focus());
+                                }
+                            }
+                        }
+                    </script>
+                @endpush
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {{-- OP/ED Number --}}

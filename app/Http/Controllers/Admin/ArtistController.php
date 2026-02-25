@@ -85,9 +85,7 @@ class ArtistController extends Controller
         $artist = new Artist;
         $artist->name = $name;
         // dd($request->all());
-        if ($request->name_jp) {
-            $artist->name_jp = trim(preg_replace('/\s+/', ' ', $request->name_jp));
-        }
+        $artist->name_jp = $request->filled('name_jp') ? trim(preg_replace('/\s+/', ' ', $request->name_jp)) : null;
 
         $artist->slug = $this->generateUniqueSlug($request->name);
 
@@ -162,10 +160,7 @@ class ArtistController extends Controller
 
         $artist->slug = $this->generateUniqueSlug($request->name);
 
-        if ($request->name_jp) {
-            $name_jp = trim(preg_replace('/\s+/', ' ', $request->name_jp));
-            $artist->name_jp = $name_jp;
-        }
+        $artist->name_jp = $request->filled('name_jp') ? trim(preg_replace('/\s+/', ' ', $request->name_jp)) : null;
 
         if ($artist->save()) {
             return redirect(route('admin.artists.index'))->with('success', 'Data has been updated successfully');
