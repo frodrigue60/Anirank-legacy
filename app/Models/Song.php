@@ -30,7 +30,7 @@ class Song extends Model
         'theme_num',
         'type',
         'slug',
-        'post_id',
+        'anime_id',
         'season_id',
         'year_id',
         'views',
@@ -61,9 +61,9 @@ class Song extends Model
         return $this->belongsTo(Season::class);
     }
 
-    public function post()
+    public function anime()
     {
-        return $this->belongsTo(Post::class);
+        return $this->belongsTo(Anime::class);
     }
 
     public function artists()
@@ -126,16 +126,16 @@ class Song extends Model
     public function getUrlFirstVariantAttribute()
     {
         // Cargar relaciones necesarias si no están ya cargadas
-        if (! $this->relationLoaded('post') || ! $this->post->relationLoaded('songs')) {
-            $this->load(['post', 'songVariants']);
+        if (! $this->relationLoaded('anime') || ! $this->anime->relationLoaded('songs')) {
+            $this->load(['anime', 'songVariants']);
         }
 
-        $smallestVariant = $this->post->songs->flatMap(function ($song) {
+        $smallestVariant = $this->anime->songs->flatMap(function ($song) {
             return $song->songVariants;
         })->sortBy('version_number')->first();
 
         return route('songs.show.nested', [
-            'post' => $this->post->slug,
+            'anime' => $this->anime->slug,
             'song' => $this->slug,
         ]);
     }
@@ -224,7 +224,7 @@ class Song extends Model
         return $views;
     }
 
-    // Método para obtener los posts que un usuario ha marcado como favorito
+    // Método para obtener los songs que un usuario ha marcado como favorito
     public function scopeFavoritedBy($query, $userId)
     {
         return $query->whereHas('favorites', function ($q) use ($userId) {
@@ -275,7 +275,7 @@ class Song extends Model
         ]);
     }
 
-    // Método para verificar si el usuario actual ha marcado este post como favorito
+    // Método para verificar si el usuario actual ha marcado este anime como favorito
     public function getIsFavoritedAttribute()
     {
         if (array_key_exists('is_favorited', $this->attributes)) {

@@ -16,8 +16,8 @@ class ExternalLink extends Model
         'type'
     ];
 
-    public function post()
+    public function anime()
     {
-        return $this->belongsToMany(Post::class);
+        return $this->belongsToMany(Anime::class);
     }
 }

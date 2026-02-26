@@ -3,7 +3,6 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use Livewire\Attributes\On;
 use App\Models\Song;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +36,6 @@ class RankingTable extends Component
         $this->hasMorePages = true;
     }
 
-    #[On('loadMore')]
     public function loadMore()
     {
         if (!$this->hasMorePages || !$this->readyToLoad) return;
@@ -65,9 +63,9 @@ class RankingTable extends Component
         $perPage = $this->perPage * $this->page;
 
         $query = Song::query()
-            ->with(['post:id,title,slug', 'artists:id,name,slug'])
+            ->with(['anime:id,title,slug', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
-            ->whereHas('post', function ($query) use ($status) {
+            ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             });
 

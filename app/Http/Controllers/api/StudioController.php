@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Song;
 use App\Models\Studio;
 use Illuminate\Http\Request;
@@ -21,14 +21,14 @@ class StudioController extends Controller
         $name = $request->name;
         $sort = $request->sort ?? 'most_animes';
 
-        $query = Studio::query()->whereHas('posts', function ($q) {
+        $query = Studio::query()->whereHas('animes', function ($q) {
             $q->where('status', true);
-        })->withCount(['posts' => function ($q) {
+        })->withCount(['animes' => function ($q) {
             $q->where('status', true);
         }]);
 
-        // Load posts to get a banner image (taking the latest one)
-        $query->with(['posts' => function ($q) {
+        // Load animes to get a banner image (taking the latest one)
+        $query->with(['animes' => function ($q) {
             $q->where('status', true)->latest()->with('images');
         }]);
 
@@ -44,18 +44,18 @@ class StudioController extends Controller
                 $query->orderBy('name', 'desc');
                 break;
             case 'least_animes':
-                $query->orderBy('posts_count', 'asc');
+                $query->orderBy('animes_count', 'asc');
                 break;
             case 'most_animes':
             default:
-                $query->orderBy('posts_count', 'desc');
+                $query->orderBy('animes_count', 'desc');
                 break;
         }
 
         $studios = $query->paginate(18);
 
         foreach ($studios as $studio) {
-            $featured = $studio->posts->first();
+            $featured = $studio->animes->first();
             if ($featured) {
                 $featured->append('banner_url');
                 $studio->featured_image = $featured->banner_url;
@@ -65,7 +65,7 @@ class StudioController extends Controller
                 $studio->featured_title = null;
             }
             // Remove the collection to keep the response clean
-            unset($studio->posts);
+            unset($studio->animes);
         }
 
         return response()->json([
@@ -101,7 +101,7 @@ class StudioController extends Controller
      */
     public function show(Studio $studio)
     {
-        // $studio->load('posts');
+        // $studio->load('animes');
 
         return response()->json([
             'studio' => $studio,
@@ -150,7 +150,7 @@ class StudioController extends Controller
         $season_id = $request->season_id;
         $sort = $request->sort ?? 'title';
 
-        $query = Post::where('status', $status)
+        $query = Anime::where('status', $status)
             ->whereHas('studios', function ($query) use ($studio) {
                 $query->where('studios.id', $studio->id);
             })
@@ -158,7 +158,7 @@ class StudioController extends Controller
             ->addSelect(['average_rating' => \App\Models\Rating::selectRaw('avg(rating)')
                 ->join('songs', 'songs.id', '=', 'ratings.rateable_id')
                 ->where('ratings.rateable_type', \App\Models\Song::class)
-                ->whereColumn('songs.post_id', 'posts.id')
+                ->whereColumn('songs.anime_id', 'animes.id')
             ])
             ->withCount('songs')
             ->when($name, function ($query) use ($name) {
@@ -187,15 +187,15 @@ class StudioController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $posts = $query->paginate(18);
+        $animes = $query->paginate(18);
 
-        $posts->getCollection()->each(function ($post) {
-            $post->append('thumbnail_url');
-            $post->average_rating = (float) ($post->average_rating ?? 0);
+        $animes->getCollection()->each(function ($anime) {
+            $anime->append('thumbnail_url');
+            $anime->average_rating = (float) ($anime->average_rating ?? 0);
         });
 
         return response()->json([
-            'posts' => $posts,
+            'animes' => $animes,
             'studio' => $studio,
         ]);
     }
@@ -225,23 +225,23 @@ class StudioController extends Controller
         }
     }
 
-    public function sortPosts($sort, $posts)
+    public function sortAnimes($sort, $animes)
     {
         switch ($sort) {
             case 'title':
 
-                $posts = $posts->sortBy(function ($post) {
-                    return $post->title;
+                $animes = $animes->sortBy(function ($anime) {
+                    return $anime->title;
                 });
 
-                return $posts;
+                return $animes;
                 break;
             case 'averageRating':
-                $posts = $posts->sortByDesc('averageRating');
+                $animes = $animes->sortByDesc('averageRating');
 
-                return $posts;
+                return $animes;
             case 'view_count':
-                $posts = $posts->sortByDesc('view_count');
+                $animes = $animes->sortByDesc('view_count');
 
                 return $songs;
 
@@ -258,7 +258,7 @@ class StudioController extends Controller
 
             default:
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
 
                 return $songs;

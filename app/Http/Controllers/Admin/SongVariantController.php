@@ -12,7 +12,7 @@ class SongVariantController extends Controller
 {
     public function index(Request $request)
     {
-        $query = SongVariant::query()->with('song', 'song.post', 'video');
+        $query = SongVariant::query()->with('song', 'song.anime', 'video');
 
         $currentSong = null;
         $breadcrumbItems = [
@@ -21,13 +21,13 @@ class SongVariantController extends Controller
 
         if ($request->filled('song_id')) {
             $query->where('song_id', $request->song_id);
-            $currentSong = Song::with('post')->find($request->song_id);
+            $currentSong = Song::with('anime')->find($request->song_id);
 
             if ($currentSong) {
                 $breadcrumbItems = [
-                    ['name' => 'Posts', 'url' => route('admin.posts.index')],
-                    ['name' => $currentSong->post->title, 'url' => route('admin.posts.show', $currentSong->post->id)],
-                    ['name' => $currentSong->slug, 'url' => route('admin.songs.index', ['post_id' => $currentSong->post->id])],
+                    ['name' => 'Animes', 'url' => route('admin.animes.index')],
+                    ['name' => $currentSong->anime->title, 'url' => route('admin.animes.show', $currentSong->anime->id)],
+                    ['name' => $currentSong->slug, 'url' => route('admin.songs.index', ['anime_id' => $currentSong->anime->id])],
                     ['name' => 'Variants', 'url' => route('admin.variants.index', ['song_id' => $currentSong->id])],
                 ];
             }
@@ -78,16 +78,16 @@ class SongVariantController extends Controller
     public function edit(SongVariant $songVariant)
     {
         $song = $songVariant->song;
-        $post = $song->post;
+        $anime = $song->anime;
 
         $breadcrumb = Breadcrumb::generate([
             [
-                'name' => 'Index',
-                'url' => route('admin.posts.index'),
+                'name' => 'Animes',
+                'url' => route('admin.animes.index'),
             ],
             [
-                'name' => $post->title,
-                'url' => route('admin.songs.index', ['post_id' => $post->id]),
+                'name' => $anime->title,
+                'url' => route('admin.songs.index', ['anime_id' => $anime->id]),
             ],
             [
                 'name' => $song->slug,

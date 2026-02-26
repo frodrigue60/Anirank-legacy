@@ -5,8 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Url;
-use Livewire\Attributes\On;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Season;
 use App\Models\Year;
 use App\Models\Format;
@@ -35,7 +34,6 @@ class AnimesTable extends Component
     public $viewMode = 'grid_small';
     
     public $perPage = 15;
-    public $page = 1;
     public $hasMorePages = false;
     public $readyToLoad = false;
 
@@ -52,26 +50,31 @@ class AnimesTable extends Component
     public function updatedName()
     {
         $this->resetPage();
+        $this->perPage = 15;
     }
     
     public function updatedYearId()
     {
         $this->resetPage();
+        $this->perPage = 15;
     }
     
     public function updatedSeasonId()
     {
         $this->resetPage();
+        $this->perPage = 15;
     }
     
     public function updatedFormatId()
     {
         $this->resetPage();
+        $this->perPage = 15;
     }
 
     public function updatedGenreId()
     {
         $this->resetPage();
+        $this->perPage = 15;
     }
 
     public function setViewMode($mode)
@@ -79,7 +82,6 @@ class AnimesTable extends Component
         $this->viewMode = $mode;
     }
 
-    #[On('loadMore')]
     public function loadMore()
     {
         if ($this->hasMorePages && $this->readyToLoad) {
@@ -91,7 +93,7 @@ class AnimesTable extends Component
     {
         if (!$this->readyToLoad) {
             return view('livewire.animes-table', [
-                'posts' => collect(),
+                'animes' => collect(),
                 'years' => collect(),
                 'seasons' => collect(),
                 'formats' => collect(),
@@ -99,7 +101,7 @@ class AnimesTable extends Component
             ]);
         }
 
-        $query = Post::where('status', true);
+        $query = Anime::where('status', true);
 
         if ($this->name) {
             $query->where('title', 'LIKE', '%' . $this->name . '%');
@@ -122,11 +124,12 @@ class AnimesTable extends Component
         $results = $query->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name'])
             ->withCount('songs')
             ->orderBy('title')
+            ->orderBy('id', 'asc')
             ->take($this->perPage + 1)
             ->get();
 
         $this->hasMorePages = $results->count() > $this->perPage;
-        $posts = $results->take($this->perPage);
+        $animes = $results->take($this->perPage);
 
         $years = Year::orderBy('name', 'desc')->get(['id', 'name']);
         $seasons = Season::all(['id', 'name']);
@@ -134,7 +137,7 @@ class AnimesTable extends Component
         $all_genres = Genre::orderBy('name')->get(['id', 'name']);
 
         return view('livewire.animes-table', [
-            'posts' => $posts,
+            'animes' => $animes,
             'years' => $years,
             'seasons' => $seasons,
             'formats' => $formats,

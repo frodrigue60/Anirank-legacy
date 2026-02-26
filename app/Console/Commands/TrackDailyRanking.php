@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Song;
 use App\Models\RankingHistory;
+use App\Models\Song;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class TrackDailyRanking extends Command
@@ -38,10 +38,10 @@ class TrackDailyRanking extends Command
         $rankings = [];
 
         // 1. Calculate Global Rankings (skip if --seasonal-only)
-        if (!$seasonalOnly) {
+        if (! $seasonalOnly) {
             $allSongs = Song::query()
                 ->withAvg('ratings', 'rating')
-                ->whereHas('post', function ($query) {
+                ->whereHas('anime', function ($query) {
                     $query->where('status', true);
                 })
                 ->orderByDesc('ratings_avg_rating')
@@ -59,7 +59,7 @@ class TrackDailyRanking extends Command
             // Pre-populate rankings map with existing global data so we can attach seasonal
             $allSongs = Song::query()
                 ->withAvg('ratings', 'rating')
-                ->whereHas('post', fn($q) => $q->where('status', true))
+                ->whereHas('anime', fn ($q) => $q->where('status', true))
                 ->get();
 
             foreach ($allSongs as $song) {
@@ -72,8 +72,8 @@ class TrackDailyRanking extends Command
         // 2. Calculate Seasonal Rankings
         // Get unique season/year pairs from active songs
         $seasonalPairs = DB::table('songs')
-            ->join('posts', 'songs.post_id', '=', 'posts.id')
-            ->where('posts.status', true)
+            ->join('animes', 'songs.anime_id', '=', 'animes.id')
+            ->where('animes.status', true)
             ->whereNotNull('songs.season_id')
             ->whereNotNull('songs.year_id')
             ->select('songs.season_id', 'songs.year_id')
@@ -87,7 +87,7 @@ class TrackDailyRanking extends Command
                 ->withAvg('ratings', 'rating')
                 ->where('season_id', $pair->season_id)
                 ->where('year_id', $pair->year_id)
-                ->whereHas('post', function ($query) {
+                ->whereHas('anime', function ($query) {
                     $query->where('status', true);
                 })
                 ->orderByDesc('ratings_avg_rating')
@@ -112,7 +112,7 @@ class TrackDailyRanking extends Command
             RankingHistory::updateOrCreate(
                 [
                     'song_id' => $songId,
-                    'date' => $date
+                    'date' => $date,
                 ],
                 $updateData
             );
@@ -122,7 +122,7 @@ class TrackDailyRanking extends Command
 
         $bar->finish();
         $this->newLine();
-        $this->info('Ranking history updated successfully for ' . $date);
+        $this->info('Ranking history updated successfully for '.$date);
 
         return Command::SUCCESS;
     }

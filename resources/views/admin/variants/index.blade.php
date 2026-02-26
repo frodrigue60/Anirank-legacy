@@ -77,7 +77,7 @@
                                                     <span class="text-sm text-zinc-300">{{ $variant->song->name }}</span>
                                                     @if ($variant->song->post)
                                                         <span
-                                                            class="text-[10px] text-zinc-500 uppercase font-bold">{{ $variant->song->post->title }}</span>
+                                                            class="text-[10px] text-zinc-500 uppercase font-bold">{{ $variant->song->anime->title }}</span>
                                                     @endif
                                                 </div>
                                             @else

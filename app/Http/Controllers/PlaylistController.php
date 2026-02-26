@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Playlist;
-use App\Models\Post;
+use App\Models\Anime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -15,7 +15,7 @@ class PlaylistController extends Controller
         $playlists = Auth::user()->playlists()
             ->withCount('songs')
             ->with(['songs' => function ($query) {
-                $query->with('post')->limit(1);
+                $query->with('anime')->limit(1);
             }])
             ->get();
         return view('public.playlists.index', compact('playlists'));
@@ -46,7 +46,7 @@ class PlaylistController extends Controller
 
     public function show(Playlist $playlist)
     {
-        $playlist->load(['songs.post', 'songs.songVariants.video', 'songs.artists']);
+        $playlist->load(['songs.anime', 'songs.songVariants.video', 'songs.artists']);
 
         $queue = $playlist->songs->map(function ($song) {
             // 1. Tomar la primera variante
@@ -63,9 +63,9 @@ class PlaylistController extends Controller
                 return null;
             }
 
-            // 3. Determinar el thumbnail (preferencia al post)
-            $thumbnailUrl = $song->post ? $song->post->thumbnail_url : asset('resources/images/song_cover.png');
-            if (!$song->post && $song->thumbnail) {
+            // 3. Determinar el thumbnail (preferencia al anime)
+            $thumbnailUrl = $song->anime ? $song->anime->thumbnail_url : asset('resources/images/song_cover.png');
+            if (!$song->anime && $song->thumbnail) {
                 $thumbnailUrl = $song->thumbnail;
             }
 
@@ -82,7 +82,7 @@ class PlaylistController extends Controller
                 'song_id'         => $song->id,
                 'song_title'      => $song->name,
                 'artist_names'    => $song->artists->pluck('name')->join(', '),
-                'anime_name'      => $song->post->title ?? 'Unknown Anime',
+                'anime_name'      => $song->anime->title ?? 'Unknown Anime',
                 'song_type'       => trim($formattedType),
                 'average_rating'  => number_format($song->averageRating, 1) ?? 'N/A',
                 'variant_id'      => $firstVariant->id,

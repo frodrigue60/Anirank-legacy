@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Song;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Year;
 use App\Models\Season;
 use Illuminate\Http\Request;
@@ -55,21 +55,21 @@ class SongController extends Controller
      */
     public function show(Song $song)
     {
-        $song->load(['songVariants.video', 'post']);
-        $post = $song->post;
+        $song->load(['songVariants.video', 'anime']);
+        $anime = $song->anime;
         $user = Auth::user();
 
-        if (!$post->status) {
+        if (!$anime->status) {
             if ($user && $user->isAdmin()) {
-                // Admin can view private posts
+                // Admin can view private animes
             } else {
-                return redirect('/')->with('danger', $user ? 'User not autorized!' : 'Post status: Private');
+                return redirect('/')->with('danger', $user ? 'User not autorized!' : 'Anime status: Private');
             }
         }
 
         $song->incrementViews();
 
-        return view('public.songs.show', compact('song', 'post'));
+        return view('public.songs.show', compact('song', 'anime'));
     }
 
     /**
@@ -121,15 +121,15 @@ class SongController extends Controller
         return view('public.ranking');
     }
 
-    public function showAnimeSong(Post $post, Song $song)
+    public function showAnimeSong(Anime $anime, Song $song)
     {
         $user = Auth::user();
 
-        if (!$post->status) {
+        if (!$anime->status) {
             if ($user && $user->isAdmin()) {
-                // Admin can view private posts
+                // Admin can view private animes
             } else {
-                return redirect('/')->with('danger', $user ? 'User not autorized!' : 'Post status: Private');
+                return redirect('/')->with('danger', $user ? 'User not autorized!' : 'Anime status: Private');
             }
         }
 
@@ -137,7 +137,7 @@ class SongController extends Controller
 
         $song->incrementViews();
 
-        return view('public.songs.show', compact('song', 'post'));
+        return view('public.songs.show', compact('song', 'anime'));
     }
 
     public function filterTypesSortChar()

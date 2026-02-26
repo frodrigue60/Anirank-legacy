@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\On;
 use App\Models\Song;
 use App\Models\Season;
 use App\Models\Year;
@@ -48,7 +47,6 @@ class SeasonalTable extends Component
         $this->hasMorePages = true;
     }
 
-    #[On('loadMore')]
     public function loadMore()
     {
         if (!$this->hasMorePages || !$this->readyToLoad) return;
@@ -76,9 +74,9 @@ class SeasonalTable extends Component
         $perPage = $this->perPage * $this->page;
 
         $query = Song::query()
-            ->with(['post:id,title,slug', 'artists:id,name,slug'])
+            ->with(['anime:id,title,slug', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
-            ->whereHas('post', function ($query) use ($status) {
+            ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status)
                     ->where('season_id', $this->seasonId)
                     ->where('year_id', $this->yearId);

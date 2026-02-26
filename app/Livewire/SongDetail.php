@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\Attributes\Validate;
 use App\Models\Song;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Comment;
 use App\Models\Reaction;
 use App\Models\Favorite;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 class SongDetail extends Component
 {
     public $song;
-    public $post;
+    public $anime;
     public $currentVariant;
     public $comments;
     public $relatedSongs;
@@ -44,10 +44,10 @@ class SongDetail extends Component
     public $showRatingModal = false;
     public $ratingValue = 0;
 
-    public function mount(Song $song, Post $post)
+    public function mount(Song $song, Anime $anime)
     {
         $this->song = $song;
-        $this->post = $post;
+        $this->anime = $anime;
 
         $this->loadVariant();
         $this->loadComments();
@@ -91,7 +91,7 @@ class SongDetail extends Component
 
     public function loadRelated()
     {
-        $this->relatedSongs = $this->post->songs()
+        $this->relatedSongs = $this->anime->songs()
             ->where('id', '!=', $this->song->id)
             ->with(['artists'])
             ->get();

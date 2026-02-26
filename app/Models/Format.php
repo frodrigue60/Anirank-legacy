@@ -14,8 +14,8 @@ class Format extends Model
         'slug'
     ];
 
-    public function posts()
+    public function animes()
     {
-        return $this->hasMany(Post::class);
+        return $this->hasMany(Anime::class);
     }
 }

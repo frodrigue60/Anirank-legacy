@@ -139,7 +139,7 @@ class CommentController extends Controller
     {
         $user = Auth::user();
 
-        // Buscar si ya existe una reacción del usuario para este post
+        // Buscar si ya existe una reacción del usuario para este anime
         $reaction = Reaction::where('user_id', $user->id)
             ->where('reactable_id', $comment->id)
             ->where('reactable_type', Comment::class)

@@ -4,14 +4,14 @@
         $forward_text =
             ($variant->song->slug ? $variant->song->slug : $variant->song->type) . 'v' . $variant->version_number;
 
-        $post = $variant->song->post;
-        $title = $post->title;
+        $anime = $variant->song->post;
+        $title = $anime->title;
         $thumbnail_url = '';
 
-        if (Storage::disk('public')->exists($post->thumbnail)) {
-            $thumbnail_url = Storage::url($post->thumbnail);
+        if (Storage::disk('public')->exists($anime->thumbnail)) {
+            $thumbnail_url = Storage::url($anime->thumbnail);
         } else {
-            $thumbnail_url = $post->thumbnail_src;
+            $thumbnail_url = $anime->thumbnail_src;
         }
 
     @endphp

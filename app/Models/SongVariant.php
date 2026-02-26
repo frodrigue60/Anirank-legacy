@@ -43,7 +43,7 @@ class SongVariant extends Model
     public function getUrlAttribute()
     {
         return route('variants.show', [
-            'anime_slug' => $this->song->post->slug,
+            'anime_slug' => $this->song->anime->slug,
             'song_slug' => $this->song->slug,
             'variant_slug' => $this->slug,
         ]);

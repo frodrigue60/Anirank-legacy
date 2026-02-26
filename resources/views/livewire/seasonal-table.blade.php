@@ -50,7 +50,7 @@
         <div class="flex flex-col min-h-[500px]">
             @if ($readyToLoad)
                 @foreach ($songs as $index => $song)
-                    @isset($song->post)
+                    @isset($song->anime)
                         @php
                             $rankNumber = $index + 1;
                             $formattedRank = str_pad($rankNumber, 2, '0', STR_PAD_LEFT);
@@ -83,7 +83,7 @@
                             <div class="flex items-center gap-4 sm:gap-6">
                                 <div
                                     class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden shrink-0 shadow-lg shadow-black/40 border border-white/10">
-                                    <x-ui.image :src="$song->post->thumbnail_url" :alt="$song->post->title"
+                                    <x-ui.image :src="$song->anime->thumbnail_url" :alt="$song->anime->title"
                                         class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                         fallback="default-anime.webp" />
                                 </div>
@@ -92,8 +92,8 @@
                                         class="text-base sm:text-lg font-bold text-white truncate block leading-tight mb-1 hover:text-primary transition-colors">{{ $song->name }}
                                     </a>
                                     <div class="flex flex-col items-start gap-0.5 sm:gap-1 text-xs sm:text-sm">
-                                        <a href="{{ route('posts.show', $song->post) }}"
-                                            class="text-primary font-bold truncate hover:underline">{{ $song->post->title }}</a>
+                                        <a href="{{ route('animes.show', $song->anime) }}"
+                                            class="text-primary font-bold truncate hover:underline">{{ $song->anime->title }}</a>
 
                                         <span class="text-white/60 truncate">
                                             @forelse ($song->artists as $artist)
@@ -155,7 +155,7 @@
 
         {{-- Infinite Scroll Trigger --}}
         @if ($hasMorePages && $readyToLoad)
-            <div wire:intersect="loadMore" wire:key="intersect-seasonal"
+            <div x-intersect.once="$wire.loadMore()" wire:key="intersect-seasonal-{{ $page }}"
                 class="p-8 border-t border-white/5 bg-surface-darker/30 flex flex-col items-center gap-4">
                 <div class="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                 <span class="text-xs font-bold text-white/20 uppercase tracking-widest">Loading more themes...</span>

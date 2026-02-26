@@ -97,7 +97,7 @@
             @endif
 
             @if ($hasMorePages && $readyToLoad)
-                <div wire:intersect="loadMore" wire:key="intersect-artists"
+                <div x-intersect.once="$wire.loadMore()" wire:key="intersect-artists-{{ $perPage }}"
                     class="py-12 flex flex-col items-center gap-4">
                     <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                 </div>

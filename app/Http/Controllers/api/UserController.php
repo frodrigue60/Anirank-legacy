@@ -139,11 +139,11 @@ class UserController extends Controller
         $name = $request->name;
 
         $songs = Song::withUserInteractions()
-            ->with(['post'])
+            ->with(['anime'])
             ->when($type, function ($query, $type) {
                 $query->where('type', $type);
             })
-            ->whereHas('post', function ($query) use ($name, $season_id, $year_id, $status) {
+            ->whereHas('anime', function ($query) use ($name, $season_id, $year_id, $status) {
                 $query->where('status', $status)
                     ->when($name, function ($query, $name) {
                         $query->where('title', 'LIKE', '%'.$name.'%');
@@ -187,11 +187,11 @@ class UserController extends Controller
         $name = $request->name;
 
         $songs = Song::withUserInteractions()
-            ->with(['post'])
+            ->with(['anime'])
             ->when($type, function ($query, $type) {
                 $query->where('type', $type);
             })
-            ->whereHas('post', function ($query) use ($name, $season_id, $year_id, $status) {
+            ->whereHas('anime', function ($query) use ($name, $season_id, $year_id, $status) {
                 $query->where('status', $status)
                     ->when($name, function ($query, $name) {
                         $query->where('title', 'LIKE', '%'.$name.'%');
@@ -281,7 +281,7 @@ class UserController extends Controller
         switch ($sort) {
             case 'title':
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
 
                 return $songs;
@@ -308,7 +308,7 @@ class UserController extends Controller
 
             default:
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
 
                 return $songs;

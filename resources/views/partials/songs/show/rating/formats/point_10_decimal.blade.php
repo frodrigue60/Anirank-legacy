@@ -33,7 +33,7 @@
         <div class="text-left">
             <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-1">Rate this theme</p>
             <h3 class="text-2xl font-bold leading-tight">{{ $song->name }}</h3>
-            <p class="text-sm text-white/50">{{ $song->post->title }} • {{ $song->type }} {{ $song->theme_num }}</p>
+            <p class="text-sm text-white/50">{{ $song->anime->title }} • {{ $song->type }} {{ $song->theme_num }}</p>
         </div>
     </div> --}}
 

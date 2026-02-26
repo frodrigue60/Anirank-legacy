@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\SongVariant;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class SongVariantController extends Controller
 {
     public function index()
     {
-        $variants = SongVariant::with('video', 'song.post')->paginate(18);
+        $variants = SongVariant::with('video', 'song.anime')->paginate(18);
 
         return response()->json([
             'variants' => $variants,
@@ -73,7 +74,7 @@ class SongVariantController extends Controller
         switch ($sort) {
             case 'title':
                 $songVariants = $songVariants->sortBy(function ($song_variant) {
-                    return $song_variant->song->post->title;
+                    return $song_variant->song->anime->title;
                 });
 
                 return $songVariants;
@@ -105,7 +106,7 @@ class SongVariantController extends Controller
 
             default:
                 $songVariants = $songVariants->sortBy(function ($song_variant) {
-                    return $song_variant->song->post->title;
+                    return $song_variant->song->anime->title;
                 });
 
                 return $songVariants;

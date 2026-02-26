@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
-class Post extends Model
+class Anime extends Model
 {
     use HasFactory, \App\Traits\HasImages;
     protected $appends = ['thumbnail_url', 'banner_url'];
@@ -27,8 +27,8 @@ class Post extends Model
     {
         parent::boot();
 
-        static::deleting(function ($post) {
-            foreach ($post->images as $image) {
+        static::deleting(function ($anime) {
+            foreach ($anime->images as $image) {
                 if (Storage::disk($image->disk)->exists($image->path)) {
                     Storage::disk($image->disk)->delete($image->path);
                 }

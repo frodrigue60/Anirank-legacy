@@ -86,7 +86,7 @@ class UserController extends Controller
         switch ($sort) {
             case 'title':
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
                 return $songs;
                 break;
@@ -108,7 +108,7 @@ class UserController extends Controller
 
             default:
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
                 return $songs;
                 break;

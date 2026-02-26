@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\{
-    PostController,
+    AnimeController,
     ArtistController,
     UserController,
     ReportController,
@@ -20,7 +20,7 @@ use App\Http\Controllers\{
 };
 
 use App\Http\Controllers\Admin\{
-    PostController as AdminPostController,
+    AnimeController as AdminAnimeController,
     ArtistController as AdminArtistController,
     UserController as AdminUserController,
     ReportController as AdminReportController,
@@ -43,18 +43,18 @@ use App\Http\Controllers\Admin\{
 |--------------------------------------------------------------------------
 */
 
-Route::controller(PostController::class)->group(function () {
+Route::controller(AnimeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
 
-    Route::get('/animes', 'animes')->name('posts.animes');
-    Route::get('/anime/{post:slug}', 'show')->name('posts.show');
+    Route::get('/animes', 'animes')->name('animes.index');
+    Route::get('/anime/{anime:slug}', 'show')->name('animes.show');
 });
 
 Route::controller(SongController::class)->group(function () {
     Route::get('/songs', 'index')->name('songs.index');
     Route::get('/songs/seasonal', 'seasonal')->name('songs.seasonal');
     Route::get('/songs/ranking', 'ranking')->name('songs.ranking');
-    Route::get('/song/{post:slug}/{song:slug}', 'showAnimeSong')->name('songs.show.nested')->scopeBindings();
+    Route::get('/song/{anime:slug}/{song:slug}', 'showAnimeSong')->name('songs.show.nested')->scopeBindings();
 });
 
 Route::controller(UserController::class)->group(function () {
@@ -80,7 +80,7 @@ Route::controller(ProducerController::class)->group(function () {
 
 // Resources
 // Only write methods — index/show are handled by the manual slug routes above
-Route::resource('posts', PostController::class)->only(['store', 'update', 'destroy']);
+Route::resource('animes', AnimeController::class)->only(['store', 'update', 'destroy']);
 Route::resource('songs', SongController::class)->only(['store', 'update', 'destroy']);
 Route::resource('variants', SongVariantController::class);
 Route::resource('requests', UserRequestController::class);
@@ -94,7 +94,7 @@ Route::resource('playlists', PlaylistController::class);
 */
 
 Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->group(function () {
-    Route::get('/dashboard', [AdminPostController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [AdminAnimeController::class, 'dashboard'])->name('dashboard');
 
     // Songs & Variants
     Route::get('songs/latest-number', [AdminSongController::class, 'getLatestNumber'])->name('songs.latest_number');
@@ -114,20 +114,20 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
     Route::patch('/reports/{report}/toggle', [AdminReportController::class, 'toggle'])->name('reports.toggle');
     Route::resource('reports', AdminReportController::class);
 
-    // Posts
-    Route::controller(AdminPostController::class)->prefix('posts')->as('posts.')->group(function () {
+    // Animes
+    Route::controller(AdminAnimeController::class)->prefix('animes')->as('animes.')->group(function () {
         Route::get('/autocomplete', 'autocomplete')->name('autocomplete');
-        Route::patch('/{post}/toggle-status', 'toggleStatus')->name('toggle.status');
+        Route::patch('/{anime}/toggle-status', 'toggleStatus')->name('toggle.status');
         Route::post('/search-animes', 'searchInAnilist')->name('search.animes');
         Route::get('/by-id/{id}', 'getById')->name('by.id');
         Route::post('/seasonal-animes', 'getSeasonalAnimes')->name('seasonal.animes');
-        Route::get('/{post}/force-update', 'forceUpdate')->name('force.update');
+        Route::get('/{anime}/force-update', 'forceUpdate')->name('force.update');
         Route::post('/sync-all', 'syncAllFromAnilist')->name('sync.all');
-        Route::delete('/wipe', 'wipePosts')->name('wipe');
+        Route::delete('/wipe', 'wipeAnimes')->name('wipe');
         Route::post('/track-ranking', 'trackRanking')->name('track.ranking');
         Route::post('/track-seasonal-ranking', 'trackSeasonalRanking')->name('track.seasonal.ranking');
     });
-    Route::resource('posts', AdminPostController::class);
+    Route::resource('animes', AdminAnimeController::class);
 
     //Artists
     Route::resource('artists', AdminArtistController::class);

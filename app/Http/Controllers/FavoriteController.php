@@ -94,7 +94,7 @@ class FavoriteController extends Controller
 
         $user = Auth::user();
 
-        // Verificar si el post ya está en favoritos
+        // Verificar si el tema ya está en favoritos
         $favorite = Favorite::where('user_id', $user->id)
             ->where('favoritable_id', $songVariant->id)
             ->where('favoritable_type', SongVariant::class)

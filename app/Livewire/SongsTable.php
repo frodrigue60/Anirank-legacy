@@ -85,10 +85,10 @@ class SongsTable extends Component
         }
 
         $query = Song::query()
-            ->with(['post:id,title,slug', 'artists:id,name,slug'])
+            ->with(['anime:id,title,slug', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->withCount('likes')
-            ->whereHas('post', function ($q) {
+            ->whereHas('anime', function ($q) {
                 $q->where('status', true);
                 if ($this->name) {
                     $q->where('title', 'LIKE', '%' . $this->name . '%');
@@ -107,8 +107,8 @@ class SongsTable extends Component
 
         switch ($this->sort) {
             case 'title':
-                $query->join('posts', 'songs.post_id', '=', 'posts.id')
-                    ->orderBy('posts.title')
+                $query->join('animes', 'songs.anime_id', '=', 'animes.id')
+                    ->orderBy('animes.title')
                     ->select('songs.*');
                 break;
             case 'averageRating':

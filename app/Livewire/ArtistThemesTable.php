@@ -97,12 +97,12 @@ class ArtistThemesTable extends Component
         }
 
         $query = Song::query()
-            ->with(['post:id,title,slug', 'artists:id,name,slug'])
+            ->with(['anime:id,title,slug', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->whereHas('artists', function ($q) {
                 $q->where('artists.id', $this->artist->id);
             })
-            ->whereHas('post', function ($q) {
+            ->whereHas('anime', function ($q) {
                 if (!Auth::check() || !Auth::user()->isStaff()) {
                     $q->where('status', true);
                 }
@@ -126,8 +126,8 @@ class ArtistThemesTable extends Component
 
         switch ($this->sort) {
             case 'title':
-                $query->join('posts', 'songs.post_id', '=', 'posts.id')
-                    ->orderBy('posts.title');
+                $query->join('animes', 'songs.anime_id', '=', 'animes.id')
+                    ->orderBy('animes.title');
                 break;
             case 'averageRating':
                 $query->orderByDesc('ratings_avg_rating');

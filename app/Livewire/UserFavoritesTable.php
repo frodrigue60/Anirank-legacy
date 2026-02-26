@@ -97,13 +97,13 @@ class UserFavoritesTable extends Component
         }
 
         $query = Song::query()
-            ->with(['post:id,title,slug', 'artists:id,name,slug'])
+            ->with(['anime:id,title,slug', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->favoritedBy($this->userId)
             ->when($this->type, function ($query) {
                 $query->where('type', $this->type);
             })
-            ->whereHas('post', function ($query) {
+            ->whereHas('anime', function ($query) {
                 $query->where('status', true)
                     ->when($this->name, function ($query) {
                         $query->where('title', 'LIKE', '%' . $this->name . '%');
@@ -118,8 +118,8 @@ class UserFavoritesTable extends Component
 
         switch ($this->sort) {
             case 'title':
-                $query->join('posts', 'songs.post_id', '=', 'posts.id')
-                    ->orderBy('posts.title', 'asc')
+                $query->join('animes', 'songs.anime_id', '=', 'animes.id')
+                    ->orderBy('animes.title', 'asc')
                     ->select('songs.*');
                 break;
             case 'averageRating':

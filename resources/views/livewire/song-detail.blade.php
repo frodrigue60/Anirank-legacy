@@ -62,8 +62,9 @@
                     @endif
                 </div>
                 <div class="flex flex-col">
-                    <a href="{{ route('posts.show', $post) }}" class="text-white/60 hover:text-white transition-colors">
-                        {{ $song->post->title }}
+                    <a href="{{ route('animes.show', $anime) }}"
+                        class="text-white/60 hover:text-white transition-colors">
+                        {{ $song->anime->title }}
                     </a>
                     <h1 class="text-2xl md:text-4xl font-black text-white leading-tight mb-2">
                         {{ $song->name }}
@@ -138,21 +139,21 @@
             {{-- Quick Actions --}}
             <div class="flex items-center gap-3" wire:loading.class="opacity-50 pointer-events-none transition-opacity">
                 <button wire:click="toggleLike" wire:loading.attr="disabled"
-                    class="group flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-white/10 transition-all {{ $song->liked() ? 'bg-primary/20 border-primary/50 text-primary shadow-lg shadow-primary/10' : 'bg-surface-dark hover:bg-surface-darker text-white/60 hover:text-white' }}">
+                    class="group flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-white/10 transition-all {{ $song->liked ? 'bg-primary/20 border-primary/50 text-primary shadow-lg shadow-primary/10' : 'bg-surface-dark hover:bg-surface-darker text-white/60 hover:text-white' }}">
                     <span
-                        class="material-symbols-outlined {{ $song->liked() ? 'filled' : '' }} text-[20px]">thumb_up</span>
+                        class="material-symbols-outlined {{ $song->liked ? 'filled' : '' }} text-[20px]">thumb_up</span>
                 </button>
 
                 <button wire:click="toggleDislike" wire:loading.attr="disabled"
-                    class="group flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-white/10 transition-all {{ $song->disliked() ? 'bg-primary/20 border-primary/50 text-primary shadow-lg shadow-primary/10' : 'bg-surface-dark hover:bg-surface-darker text-white/60 hover:text-white' }}">
+                    class="group flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-white/10 transition-all {{ $song->disliked ? 'bg-primary/20 border-primary/50 text-primary shadow-lg shadow-primary/10' : 'bg-surface-dark hover:bg-surface-darker text-white/60 hover:text-white' }}">
                     <span
-                        class="material-symbols-outlined {{ $song->disliked() ? 'filled' : '' }} text-[20px]">thumb_down</span>
+                        class="material-symbols-outlined {{ $song->disliked ? 'filled' : '' }} text-[20px]">thumb_down</span>
                 </button>
 
                 <button wire:click="toggleFavorite" wire:loading.attr="disabled"
-                    class="group px-4 py-2.5 flex items-center justify-center rounded-2xl border border-white/10 transition-all {{ $song->isFavorited() ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-lg shadow-red-500/10' : 'bg-surface-dark hover:bg-surface-darker text-white/60 hover:text-red-400' }}">
+                    class="group px-4 py-2.5 flex items-center justify-center rounded-2xl border border-white/10 transition-all {{ $song->is_favorited ? 'bg-red-500/20 border-red-500/50 text-red-500 shadow-lg shadow-red-500/10' : 'bg-surface-dark hover:bg-surface-darker text-white/60 hover:text-red-400' }}">
                     <span
-                        class="material-symbols-outlined {{ $song->isFavorited() ? 'filled' : '' }} text-[22px]">favorite</span>
+                        class="material-symbols-outlined {{ $song->is_favorited ? 'filled' : '' }} text-[22px]">favorite</span>
                 </button>
 
                 <button wire:click="openPlaylistModal" wire:loading.attr="disabled" title="Add to Playlist"
@@ -228,13 +229,13 @@
 
             {{-- Right Column: Related --}}
             <div class="lg:col-span-5 space-y-6">
-                <h3 class="text-xl font-bold text-white mb-4">More from {{ $post->title }}</h3>
+                <h3 class="text-xl font-bold text-white mb-4">More from {{ $anime->title }}</h3>
                 <div class="grid grid-cols-1 gap-4">
                     @foreach ($relatedSongs as $related)
                         <a href="{{ $related->url }}"
                             class="flex gap-4 p-3 rounded-2xl bg-surface-dark hover:bg-surface-darker border border-white/5 hover:border-primary/30 transition-all group">
                             <div class="w-24 aspect-video rounded-lg overflow-hidden relative shrink-0">
-                                <x-ui.image src="{{ $related->post->thumbnail_url }}"
+                                <x-ui.image src="{{ $related->anime->thumbnail_url }}"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     alt="{{ $related->name }}" />
                                 <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors">

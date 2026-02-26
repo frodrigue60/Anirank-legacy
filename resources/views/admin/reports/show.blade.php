@@ -74,12 +74,12 @@
                             class="group block p-3 bg-zinc-950/30 rounded-2xl border border-zinc-800 hover:border-blue-500/50 transition-all">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-10 bg-zinc-800 rounded border border-zinc-700 flex-shrink-0">
-                                    <img src="{{ $report->song->post->image }}" alt=""
+                                    <img src="{{ $report->song->anime->image }}" alt=""
                                         class="w-full h-full object-cover rounded">
                                 </div>
                                 <div class="flex flex-col overflow-hidden">
                                     <span
-                                        class="text-xs font-bold text-white truncate group-hover:text-blue-400 transition-colors">{{ $report->song->post->title }}</span>
+                                        class="text-xs font-bold text-white truncate group-hover:text-blue-400 transition-colors">{{ $report->song->anime->title }}</span>
                                     <span class="text-[10px] text-zinc-500 truncate">{{ $report->song->name }}</span>
                                 </div>
                             </div>

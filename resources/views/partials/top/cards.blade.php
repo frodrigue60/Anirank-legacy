@@ -5,9 +5,9 @@
     @isset($song->post)
         @php
             $img_url = null;
-            if ($song->post->banner != null) {
-                if (Storage::disk('public')->exists($song->post->banner)) {
-                    $img_url = Storage::url($song->post->banner);
+            if ($song->anime->banner != null) {
+                if (Storage::disk('public')->exists($song->anime->banner)) {
+                    $img_url = Storage::url($song->anime->banner);
                 }
             } else {
                 $img_url =
@@ -16,7 +16,7 @@
 
         @endphp
         <div class="card-2 mb-2">
-            <img class="card-2-bg" src="{{ $img_url }}" alt="{{ $song->post->title }}">
+            <img class="card-2-bg" src="{{ $img_url }}" alt="{{ $song->anime->title }}">
             <div class="gradient-1">
                 {{-- <div class="m-2 fs-5">
                     <span><i class="fa-solid fa-award"></i></span>
@@ -42,7 +42,7 @@
                                 <span>N/A</span>
                             @endif
                         </span>
-                        <a class="no-deco  text-truncate" href="{{ $song->post->url }}">{{ $song->post->title }}</a>
+                        <a class="no-deco  text-truncate" href="{{ $song->anime->url }}">{{ $song->anime->title }}</a>
                     @endisset
                 </div>
                 <div class="d-flex align-items-end">

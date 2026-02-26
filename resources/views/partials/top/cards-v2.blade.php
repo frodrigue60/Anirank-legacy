@@ -2,9 +2,9 @@
     @isset($song->post)
         @php
             $img_url = null;
-            if ($song->post->thumbnail != null) {
-                if (Storage::disk('public')->exists($song->post->thumbnail)) {
-                    $img_url = Storage::url($song->post->thumbnail);
+            if ($song->anime->thumbnail != null) {
+                if (Storage::disk('public')->exists($song->anime->thumbnail)) {
+                    $img_url = Storage::url($song->anime->thumbnail);
                 }
             } else {
                 $img_url =
@@ -36,7 +36,7 @@
                 <div class="min-w-0">
                     <h3 class="text-lg font-bold text-white truncate leading-tight mb-1">{{ $song->name }}</h3>
                     <div class="flex items-center gap-2 text-sm">
-                        <span class="text-primary font-bold truncate">{{ $song->post->title }}</span>
+                        <span class="text-primary font-bold truncate">{{ $song->anime->title }}</span>
                         <span class="w-1 h-1 rounded-full bg-white/20 shrink-0"></span>
                         <span class="text-white/60 truncate">
                             @if (isset($song->artists) && count($song->artists) != 0)

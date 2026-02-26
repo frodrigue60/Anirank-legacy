@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('admin.songs.create', request('post_id') ? ['post_id' => request('post_id')] : []) }}"
+                <a href="{{ route('admin.songs.create', request('anime_id') ? ['anime_id' => request('anime_id')] : []) }}"
                     class="px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-widest">
                     <span class="material-symbols-outlined mr-2 text-base">add</span>
                     Add New Song
@@ -41,8 +41,8 @@
             {{-- Search Card --}}
             <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-6">
                 <form action="{{ route('admin.songs.index') }}" method="GET" class="relative group">
-                    @if (request('post_id'))
-                        <input type="hidden" name="post_id" value="{{ request('post_id') }}">
+                    @if (request('anime_id'))
+                        <input type="hidden" name="anime_id" value="{{ request('anime_id') }}">
                     @endif
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <span
@@ -90,9 +90,9 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         @if ($song->post)
-                                            <a href="{{ route('admin.posts.show', $song->post->id) }}"
+                                            <a href="{{ route('admin.animes.show', $song->anime->id) }}"
                                                 class="text-sm text-zinc-300 hover:text-white transition-colors line-clamp-1">
-                                                {{ $song->post->title }}
+                                                {{ $song->anime->title }}
                                             </a>
                                         @else
                                             <span class="text-xs text-zinc-600 italic">Unlinked</span>

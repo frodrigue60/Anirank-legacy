@@ -53,21 +53,21 @@ class StudiosTable extends Component
         }
 
         $studiosQuery = Studio::query()
-            ->withCount(['posts' => function ($query) {
+            ->withCount(['animes' => function ($query) {
                 if (!Auth::check() || !Auth::user()->isStaff()) {
                     $query->where('status', true);
                 }
             }])
-            ->whereHas('posts', function ($query) {
+            ->whereHas('animes', function ($query) {
                 if (!Auth::check() || !Auth::user()->isStaff()) {
                     $query->where('status', true);
                 }
             })
-            ->with(['posts' => function ($query) {
+            ->with(['animes' => function ($query) {
                 if (!Auth::check() || !Auth::user()->isStaff()) {
                     $query->where('status', true);
                 }
-                $query->select(['posts.id']);
+                $query->select(['animes.id']);
             }])
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%');
@@ -79,10 +79,10 @@ class StudiosTable extends Component
                 $query->orderBy('name', 'desc');
             })
             ->when($this->sort === 'most_series', function ($query) {
-                $query->orderBy('posts_count', 'desc');
+                $query->orderBy('animes_count', 'desc');
             })
             ->when($this->sort === 'least_series', function ($query) {
-                $query->orderBy('posts_count', 'asc');
+                $query->orderBy('animes_count', 'asc');
             });
 
         $results = $studiosQuery->take($this->perPage + 1)->get();

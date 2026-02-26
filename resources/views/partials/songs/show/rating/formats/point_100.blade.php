@@ -29,7 +29,7 @@
             <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-1">Now Rating</p>
             <h3 class="text-xl font-bold leading-tight">{{ $song->name }}</h3>
             <p class="text-sm text-white/60">
-                {{ $song->post->title }} • {{ $song->type }} {{ $song->theme_num }}
+                {{ $song->anime->title }} • {{ $song->type }} {{ $song->theme_num }}
             </p>
         </div>
     </div> --}}

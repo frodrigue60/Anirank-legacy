@@ -125,47 +125,47 @@
             @if ($viewMode === 'grid_small')
                 <div
                     class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-                    @foreach ($posts as $post)
-                        <div wire:key="anime-grid-{{ $post->id }}" class="group relative">
+                    @foreach ($animes as $anime)
+                        <div wire:key="anime-grid-{{ $anime->id }}" class="group relative">
                             <div class="aspect-2/3 rounded-lg overflow-hidden bg-surface-darker shadow-lg relative">
                                 {{-- Cover Image --}}
-                                <x-ui.image :src="$post->thumbnail_url" :alt="$post->title" loading="lazy"
+                                <x-ui.image :src="$anime->thumbnail_url" :alt="$anime->title" loading="lazy"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     fallback="default-anime.webp" />
 
                                 {{-- <div class="absolute top-3 right-3 flex items-end gap-1.5 z-20">
                                     <span
                                         class="px-2 py-1 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
-                                        {{ $post->format->name }}
+                                        {{ $anime->format->name }}
                                     </span>
                                     <span
                                         class="px-2 py-1 rounded bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-white shadow-xl">
-                                        Songs: {{ $post->songs_count }}
+                                        Songs: {{ $anime->songs_count }}
                                     </span>
                                 </div> --}}
                                 {{-- Hover Overlay --}}
                                 <div
                                     class="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-                                    <a href="{{ route('posts.show', $post) }}" class="absolute inset-0 z-10"></a>
+                                    <a href="{{ route('animes.show', $anime) }}" class="absolute inset-0 z-10"></a>
                                 </div>
                             </div>
                             <h3
                                 class="mt-2 text-sm font-bold text-white leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                                <a href="{{ route('posts.show', $post) }}">{{ $post->title }}</a>
+                                <a href="{{ route('animes.show', $anime) }}">{{ $anime->title }}</a>
                             </h3>
                         </div>
                     @endforeach
                 </div>
             @elseif($viewMode === 'grid_large')
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                    @foreach ($posts as $post)
-                        <div wire:key="anime-large-{{ $post->id }}"
+                    @foreach ($animes as $anime)
+                        <div wire:key="anime-large-{{ $anime->id }}"
                             class="flex bg-surface-dark rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group relative border border-white/5">
 
                             {{-- COVER (Left) --}}
                             <div class="w-[120px] md:w-[180px] shrink-0 relative aspect-2/3">
-                                <a href="{{ route('posts.show', $post) }}" class="block w-full h-full">
-                                    <x-ui.image :src="$post->thumbnail_url" :alt="$post->title" loading="lazy"
+                                <a href="{{ route('animes.show', $anime) }}" class="block w-full h-full">
+                                    <x-ui.image :src="$anime->thumbnail_url" :alt="$anime->title" loading="lazy"
                                         class="w-full h-full object-cover" fallback="default-anime.webp" />
                                 </a>
 
@@ -174,11 +174,11 @@
                                     class="absolute inset-0 bg-linear-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2 pointer-events-none">
                                     <h3
                                         class="text-sm font-bold text-white leading-tight line-clamp-2 mb-0.5 text-shadow-sm">
-                                        {{ $post->title }}
+                                        {{ $anime->title }}
                                     </h3>
-                                    @if ($post->studios->isNotEmpty())
+                                    @if ($anime->studios->isNotEmpty())
                                         <div class="text-[12px] font-bold text-primary truncate">
-                                            @foreach ($post->studios as $studio)
+                                            @foreach ($anime->studios as $studio)
                                                 <span>{{ $studio->name }}</span>{{ !$loop->last ? ', ' : '' }}
                                             @endforeach
                                         </div>
@@ -192,28 +192,28 @@
                                 <div
                                     class="flex items-center justify-start text-[11px] font-bold text-white/50 mb-2 uppercase tracking-wide gap-2">
                                     <div class="flex items-center gap-2">
-                                        @if ($post->season && $post->year)
-                                            <span>{{ $post->season->name }} {{ $post->year->name }}</span>
+                                        @if ($anime->season && $anime->year)
+                                            <span>{{ $anime->season->name }} {{ $anime->year->name }}</span>
                                         @else
                                             <span>Start Date N/A</span>
                                         @endif
 
-                                        @if ($post->format)
+                                        @if ($anime->format)
                                             <span>&bull;</span>
-                                            <span> {{ $post->format->name }}</span>
+                                            <span> {{ $anime->format->name }}</span>
                                         @endif
 
-                                        @if ($post->songs_count > 0)
+                                        @if ($anime->songs_count > 0)
                                             <span>&bull;</span>
-                                            <span> {{ $post->songs_count }} Songs</span>
+                                            <span> {{ $anime->songs_count }} Songs</span>
                                         @endif
                                     </div>
                                 </div>
 
                                 {{-- Genres --}}
-                                @if ($post->genres->isNotEmpty())
+                                @if ($anime->genres->isNotEmpty())
                                     <div class="flex flex-wrap gap-1 mb-3">
-                                        @foreach ($post->genres as $genre)
+                                        @foreach ($anime->genres as $genre)
                                             <span
                                                 class="text-[10px] bg-white/5 border border-white/10 rounded px-1 font-thin uppercase tracking-widest text-white/60">
                                                 {{ $genre->name }}
@@ -224,7 +224,7 @@
 
                                 {{-- Body: Description --}}
                                 <div class="text-xs text-white/60 overflow-hidden line-clamp-6 leading-relaxed mb-auto">
-                                    {!! strip_tags($post->description) !!}
+                                    {!! strip_tags($anime->description) !!}
                                 </div>
                             </div>
                         </div>
@@ -232,12 +232,12 @@
                 </div>
             @elseif($viewMode === 'list')
                 <div class="flex flex-col gap-2">
-                    @foreach ($posts as $post)
-                        <div wire:key="anime-list-{{ $post->id }}"
+                    @foreach ($animes as $anime)
+                        <div wire:key="anime-list-{{ $anime->id }}"
                             class="flex items-center gap-4 bg-surface-dark/30 border border-white/5 p-3 rounded-lg hover:bg-white/5 transition-colors group">
                             {{-- Cover --}}
                             <div class="w-16 h-16 rounded overflow-hidden shrink-0">
-                                <x-ui.image :src="$post->thumbnail_url" :alt="$post->title" loading="lazy"
+                                <x-ui.image :src="$anime->thumbnail_url" :alt="$anime->title" loading="lazy"
                                     class="w-full h-full object-cover" fallback="default-anime.webp" />
                             </div>
 
@@ -245,23 +245,23 @@
                             <div class="min-w-0 flex flex-col gap-2">
                                 <h3
                                     class="text-sm font-bold text-white leading-tight truncate px-1 group-hover:text-primary transition-colors">
-                                    <a href="{{ route('posts.show', $post) }}">{{ $post->title }}</a>
+                                    <a href="{{ route('animes.show', $anime) }}">{{ $anime->title }}</a>
                                 </h3>
                                 <div class="flex items-center gap-3 text-xs text-white/40 mt-0.5 px-1">
-                                    @if ($post->format)
-                                        <span>{{ $post->format->name }}</span>
+                                    @if ($anime->format)
+                                        <span>{{ $anime->format->name }}</span>
                                     @endif
-                                    @if ($post->season && $post->year)
+                                    @if ($anime->season && $anime->year)
                                         <span>&bull;</span>
-                                        <span>{{ $post->season->name }} {{ $post->year->name }}</span>
+                                        <span>{{ $anime->season->name }} {{ $anime->year->name }}</span>
                                     @endif
-                                    @if ($post->songs_count > 0)
+                                    @if ($anime->songs_count > 0)
                                         <span>&bull;</span>
-                                        <span>{{ $post->songs_count }} Songs</span>
+                                        <span>{{ $anime->songs_count }} Songs</span>
                                     @endif
                                 </div>
                                 <div class="flex items-center gap-1.5">
-                                    @foreach ($post->genres as $genre)
+                                    @foreach ($anime->genres as $genre)
                                         <span
                                             class="text-[10px] bg-white/5 border border-white/10 rounded px-1 font-thin uppercase tracking-widest text-white/60">
                                             {{ $genre->name }}
@@ -273,7 +273,7 @@
 
                             {{-- Action --}}
                             <div class="ml-auto">
-                                <a href="{{ route('posts.show', $post) }}"
+                                <a href="{{ route('animes.show', $anime) }}"
                                     class="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-white/40 hover:bg-primary hover:text-white transition-all">
                                     <span class="material-symbols-outlined text-lg">chevron_right</span>
                                 </a>
@@ -284,7 +284,7 @@
             @endif
 
             {{-- Empty State --}}
-            @if ($posts->isEmpty())
+            @if ($animes->isEmpty())
                 <div class="py-20 flex flex-col items-center justify-center text-center">
                     <span class="material-symbols-outlined text-6xl text-white/10 mb-4">search_off</span>
                     <p class="text-white/40 text-lg font-medium">No animes found matching your criteria.</p>
@@ -297,7 +297,7 @@
         @endif
 
         @if ($hasMorePages && $readyToLoad)
-            <div wire:intersect="loadMore" wire:key="intersect-studio-animes"
+            <div x-intersect.once="$wire.loadMore()" wire:key="intersect-studio-animes-{{ $perPage }}"
                 class="py-12 flex flex-col items-center gap-4">
                 <div class="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
             </div>

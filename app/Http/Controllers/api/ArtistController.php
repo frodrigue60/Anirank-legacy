@@ -57,18 +57,18 @@ class ArtistController extends Controller
 
         $query = Song::whereHas('artists', function ($query) use ($artist) {
             $query->where('artists.id', $artist->id);
-        })->whereHas('post', function ($query) use ($status) {
+        })->whereHas('anime', function ($query) use ($status) {
             $query->where('status', $status);
         });
 
         if ($year_id) {
-            $query->whereHas('post', function($q) use ($year_id) {
+            $query->whereHas('anime', function($q) use ($year_id) {
                 $q->where('year_id', $year_id);
             });
         }
         
         if ($season_id) {
-            $query->whereHas('post', function($q) use ($season_id) {
+            $query->whereHas('anime', function($q) use ($season_id) {
                 $q->where('season_id', $season_id);
             });
         }
@@ -76,7 +76,7 @@ class ArtistController extends Controller
         if ($name) {
             $query->where(function($q) use ($name) {
                 $q->where('title', 'like', '%'.$name.'%')
-                  ->orWhereHas('post', function($sq) use ($name) {
+                  ->orWhereHas('anime', function($sq) use ($name) {
                       $sq->where('title', 'like', '%'.$name.'%');
                   });
             });
@@ -86,7 +86,7 @@ class ArtistController extends Controller
             $query->where('type', $type);
         }
 
-        $query->with(['artists:id,name,slug', 'artists.images', 'post', 'post.images'])
+        $query->with(['artists:id,name,slug', 'artists.images', 'anime', 'anime.images'])
             ->withUserInteractions()
             ->withAvg('ratings', 'rating')
             ->withCount('songVariants as view_count')
@@ -112,9 +112,9 @@ class ArtistController extends Controller
         $songs = $this->setScoreSongs($songs, $user);
 
         $songs->getCollection()->each(function ($song) {
-            if ($song->post) {
-                $song->post->append('thumbnail_url');
-                $song->post->append('banner_url');
+            if ($song->anime) {
+                $song->anime->append('thumbnail_url');
+                $song->anime->append('banner_url');
             }
         });
 
@@ -154,7 +154,7 @@ class ArtistController extends Controller
         switch ($sort) {
             case 'title':
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
 
                 return $songs;
@@ -181,7 +181,7 @@ class ArtistController extends Controller
 
             default:
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
 
                 return $songs;

@@ -28,6 +28,8 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **⚡ Backend Query Optimization**: Systematic eager loading implementation across controllers (e.g., `PlaylistController`) to resolve N+1 bottlenecks and improve API response times.
 - **❤️ Standardized UX**: Real-time favorite and interaction feedback using consistent Material Symbols logic across all discovery views.
 - **💬 Livewire Request Modal**: Fully interactive and reactive user request system, replacing legacy modal patterns.
+- **♾️ Reliable Infinite Scroll**: All paginated lists use Alpine's `x-intersect.once` with dynamic `wire:key` for stable, loop-free infinite scrolling across 11 Livewire components.
+- **✅ Livewire V3 Compliance**: Full audit and cleanup of deprecated patterns (`wire:submit.prevent`, `#[On('loadMore')]`, static `wire:key`), ensuring all components follow Livewire 3.x best practices.
 
 ## Tech Stack
 

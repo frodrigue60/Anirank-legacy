@@ -11,8 +11,8 @@ class Genre extends Model
 
     protected $fillable = ['name', 'slug'];
 
-    public function posts()
+    public function animes()
     {
-        return $this->belongsToMany(Post::class);
+        return $this->belongsToMany(Anime::class);
     }
 }

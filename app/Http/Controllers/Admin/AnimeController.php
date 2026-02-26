@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Anime;
 use App\Models\DailyMetric;
 use App\Models\ExternalLink;
 use App\Models\Format;
 use App\Models\Genre;
-use App\Models\Post;
 use App\Models\Producer;
 use App\Models\Season;
 use App\Models\Song;
@@ -27,17 +27,17 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManagerStatic as Image;
 
-class PostController extends Controller
+class AnimeController extends Controller
 {
     public function autocomplete(Request $request)
     {
         $q = $request->q;
-        $posts = Post::where('title', 'like', "%{$q}%")
+        $animes = Anime::where('title', 'like', "%{$q}%")
             ->latest()
             ->limit(10)
             ->get(['id', 'title']);
 
-        return response()->json($posts);
+        return response()->json($animes);
     }
 
     /**
@@ -57,19 +57,19 @@ class PostController extends Controller
     public function index(Request $request)
     {
         $breadcrumb = Breadcrumb::generate([
-            ['name' => 'Posts', 'url' => route('admin.posts.index')],
+            ['name' => 'Animes', 'url' => route('admin.animes.index')],
         ]);
 
-        $query = Post::query();
+        $query = Anime::query();
 
         if ($request->filled('q')) {
             $query->where('title', 'like', "%{$request->q}%")
                 ->orWhere('description', 'like', "%{$request->q}%");
         }
 
-        $posts = $query->latest()->paginate(20);
+        $animes = $query->latest()->paginate(20);
 
-        return view('admin.posts.index', compact('posts', 'breadcrumb'));
+        return view('admin.animes.index', compact('animes', 'breadcrumb'));
     }
 
     public function create()
@@ -77,109 +77,109 @@ class PostController extends Controller
         $seasons = Season::all();
         $years = Year::all();
         $types = self::songTypes();
-        $postStatus = self::postStatuses();
+        $animeStatus = self::animeStatuses();
 
         $breadcrumb = Breadcrumb::generate([
-            ['name' => 'Index', 'url' => route('admin.posts.index')],
-            ['name' => 'Create post', 'url' => ''],
+            ['name' => 'Animes', 'url' => route('admin.animes.index')],
+            ['name' => 'Create anime', 'url' => ''],
         ]);
 
-        return view('admin.posts.create', compact('years', 'seasons', 'types', 'postStatus', 'breadcrumb'));
+        return view('admin.animes.create', compact('years', 'seasons', 'types', 'animeStatus', 'breadcrumb'));
     }
 
     public function store(Request $request)
     {
-        $post = new Post;
-        $post->title = $request->title;
-        $post->slug = Str::slug($request->title);
-        $post->description = $request->description;
-        $post->year_id = $request->year;
-        $post->season_id = $request->season;
-        $post->status = $this->resolvePostStatus($request);
+        $anime = new Anime;
+        $anime->title = $request->title;
+        $anime->slug = Str::slug($request->title);
+        $anime->description = $request->description;
+        $anime->year_id = $request->year;
+        $anime->season_id = $request->season;
+        $anime->status = $this->resolveAnimeStatus($request);
 
-        $this->storePostImages($post, $request);
+        $this->storeAnimeImages($anime, $request);
 
-        if ($post->save()) {
-            return redirect(route('admin.songs.index', ['post_id' => $post->id]))
-                ->with('success', 'Post created successfully');
+        if ($anime->save()) {
+            return redirect(route('admin.songs.index', ['anime_id' => $anime->id]))
+                ->with('success', 'Anime created successfully');
         }
 
-        return redirect(route('admin.posts.index'))->with('error', 'Something went wrong!');
+        return redirect(route('admin.animes.index'))->with('error', 'Something went wrong!');
     }
 
-    public function show(Post $post)
+    public function show(Anime $anime)
     {
         $score_format = Auth::user()->score_format;
 
         $breadcrumb = Breadcrumb::generate([
-            ['name' => 'Posts', 'url' => route('admin.posts.index')],
-            ['name' => $post->title, 'url' => route('admin.posts.show', $post->id)],
+            ['name' => 'Animes', 'url' => route('admin.animes.index')],
+            ['name' => $anime->title, 'url' => route('admin.animes.show', $anime->id)],
         ]);
 
-        $ops = $post->songs->where('type', 'OP');
-        $eds = $post->songs->where('type', 'ED');
+        $ops = $anime->songs->where('type', 'OP');
+        $eds = $anime->songs->where('type', 'ED');
 
-        return view('admin.posts.show', compact('post', 'score_format', 'ops', 'eds', 'breadcrumb'));
+        return view('admin.animes.show', compact('anime', 'score_format', 'ops', 'eds', 'breadcrumb'));
     }
 
-    public function edit(Post $post)
+    public function edit(Anime $anime)
     {
         $seasons = Season::all();
         $years = Year::all();
         $types = self::songTypes();
-        $postStatus = self::postStatuses();
+        $animeStatus = self::animeStatuses();
 
         $breadcrumb = Breadcrumb::generate([
-            ['name' => 'Posts', 'url' => route('admin.posts.index')],
-            ['name' => $post->title, 'url' => ''],
+            ['name' => 'Animes', 'url' => route('admin.animes.index')],
+            ['name' => $anime->title, 'url' => ''],
         ]);
 
-        return view('admin.posts.edit', compact('post', 'types', 'postStatus', 'breadcrumb', 'years', 'seasons'));
+        return view('admin.animes.edit', compact('anime', 'types', 'animeStatus', 'breadcrumb', 'years', 'seasons'));
     }
 
-    public function update(Request $request, Post $post)
+    public function update(Request $request, Anime $anime)
     {
-        $old_thumbnail = $post->thumbnail;
-        $old_banner = $post->banner;
+        $old_thumbnail = $anime->thumbnail;
+        $old_banner = $anime->banner;
 
-        $post->title = $request->title;
-        $post->slug = Str::slug($request->title);
-        $post->description = $request->description;
-        $post->status = $this->resolvePostStatus($request);
+        $anime->title = $request->title;
+        $anime->slug = Str::slug($request->title);
+        $anime->description = $request->description;
+        $anime->status = $this->resolveAnimeStatus($request);
 
-        $this->storePostImages($post, $request);
+        $this->storeAnimeImages($anime, $request);
 
-        if ($post->update()) {
-            if ($old_thumbnail && $old_thumbnail !== $post->thumbnail) {
+        if ($anime->update()) {
+            if ($old_thumbnail && $old_thumbnail !== $anime->thumbnail) {
                 Storage::disk()->delete($old_thumbnail);
             }
-            if ($old_banner && $old_banner !== $post->banner) {
+            if ($old_banner && $old_banner !== $anime->banner) {
                 Storage::disk()->delete($old_banner);
             }
 
-            return redirect(route('admin.posts.index'))->with('success', 'Post Updated Successfully');
+            return redirect(route('admin.animes.index'))->with('success', 'Anime Updated Successfully');
         }
 
-        return redirect(route('admin.posts.index'))->with('error', 'Something went wrong');
+        return redirect(route('admin.animes.index'))->with('error', 'Something went wrong');
     }
 
-    public function destroy(Post $post)
+    public function destroy(Anime $anime)
     {
-        if ($post->delete()) {
-            return Redirect::route('admin.posts.index')->with('success', 'Post Deleted successfully!');
+        if ($anime->delete()) {
+            return Redirect::route('admin.animes.index')->with('success', 'Anime Deleted successfully!');
         }
 
-        return Redirect::route('admin.posts.index')->with('error', 'Post has not been deleted!');
+        return Redirect::route('admin.animes.index')->with('error', 'Anime has not been deleted!');
     }
 
-    public function toggleStatus(Post $post)
+    public function toggleStatus(Anime $anime)
     {
         try {
-            $post->toggleStatus();
+            $anime->toggleStatus();
 
-            return redirect()->back()->with('success', 'Post status updated: '.$post->id);
+            return redirect()->back()->with('success', 'Anime status updated: '.$anime->id);
         } catch (\Throwable $th) {
-            return redirect(route('admin.posts.index'))->with('error', $th->getMessage());
+            return redirect(route('admin.animes.index'))->with('error', $th->getMessage());
         }
     }
 
@@ -190,7 +190,7 @@ class PostController extends Controller
     public function searchInAnilist(Request $request)
     {
         $breadcrumb = [
-            ['name' => 'Posts', 'url' => route('admin.posts.index')],
+            ['name' => 'Animes', 'url' => route('admin.animes.index')],
             ['name' => 'Search Animes', 'url' => ''],
         ];
 
@@ -208,9 +208,9 @@ class PostController extends Controller
         ]);
 
         $json = json_decode($response->getBody()->__toString());
-        $posts = $json->data->Page->media;
+        $animes = $json->data->Page->media;
 
-        return view('admin.posts.select', compact('posts', 'breadcrumb', 'q'));
+        return view('admin.animes.select', compact('animes', 'breadcrumb', 'q'));
     }
 
     public function getById($anilist_id)
@@ -220,46 +220,41 @@ class PostController extends Controller
         $data[] = $json->data->Media;
         $this->generateMassive($data);
 
-        return redirect(route('admin.posts.index'))->with('success', 'Single post created successfully');
+        return redirect(route('admin.animes.index'))->with('success', 'Single anime created successfully');
     }
 
     public function syncAllFromAnilist()
     {
-        $posts = Post::whereNotNull('anilist_id')->get();
+        $animes = Anime::whereNotNull('anilist_id')->get();
 
-        foreach ($posts as $post) {
+        foreach ($animes as $anime) {
             try {
-                $json = $this->fetchAnilistById($post->anilist_id);
-                $this->updatePostFromAnilistData($post, $json->data->Media);
+                $json = $this->fetchAnilistById($anime->anilist_id);
+                $this->updateAnimeFromAnilistData($anime, $json->data->Media);
             } catch (\Throwable $th) {
-                Log::error("SyncAll failed for post {$post->id} ({$post->title}): ".$th->getMessage());
+                Log::error("SyncAll failed for anime {$anime->id} ({$anime->title}): ".$th->getMessage());
 
                 continue;
             }
         }
 
-        return redirect(route('admin.posts.index'))->with('success', 'All posts synchronized with AniList');
+        return redirect(route('admin.animes.index'))->with('success', 'All animes synchronized with AniList');
     }
 
-    public function forceUpdate(Post $post)
+    public function forceUpdate(Anime $anime)
     {
         try {
-            $json = $this->fetchAnilistById($post->anilist_id);
-            $this->updatePostFromAnilistData($post, $json->data->Media);
+            $json = $this->fetchAnilistById($anime->anilist_id);
+            $this->updateAnimeFromAnilistData($anime, $json->data->Media);
 
-            return redirect(route('admin.posts.show', $post->id))->with('success', 'Post updated');
+            return redirect(route('admin.animes.show', $anime->id))->with('success', 'Anime updated');
         } catch (\Throwable $th) {
-            return redirect(route('admin.posts.show', $post->id))->with('error', $th->getMessage());
+            return redirect(route('admin.animes.show', $anime->id))->with('error', $th->getMessage());
         }
     }
 
     public function getSeasonalAnimes(Request $request)
     {
-        $breadcrumb = [
-            ['name' => 'Posts', 'url' => route('admin.posts.index')],
-            ['name' => 'Seasonal', 'url' => ''],
-        ];
-
         $variables = [
             'year' => $request->year ?? now()->year,
             'season' => $request->season ?? $this->assignSeason(now()->month),
@@ -276,21 +271,23 @@ class PostController extends Controller
         ]);
 
         $json = json_decode($response->getBody()->__toString());
-        $posts = $json->data->Page->media;
+        $animes = $json->data->Page->media;
 
-        return view('admin.posts.select', compact('posts', 'breadcrumb'));
+        $this->generateMassive($animes);
+
+        return redirect(route('admin.animes.index'))->with('success', 'Seasonal animes imported successfully');
     }
 
-    public function wipePosts()
+    public function wipeAnimes()
     {
-        Post::each(function ($post) {
-            $post->delete();
+        Anime::each(function ($anime) {
+            $anime->delete();
         }, 100);
 
         Storage::disk()->delete(Storage::disk()->files('thumbnails'));
         Storage::disk()->delete(Storage::disk()->files('anime_banner'));
 
-        return redirect(route('admin.posts.index'))->with('success', 'All posts deleted');
+        return redirect(route('admin.animes.index'))->with('success', 'All animes deleted');
     }
 
     // ──────────────────────────────────────────────
@@ -321,7 +318,7 @@ class PostController extends Controller
             'total_users' => User::count(),
             'active_users_24h' => User::where('last_login_at', '>=', now()->subDays(1))->count(),
             'total_songs' => Song::count(),
-            'total_posts' => Post::count(),
+            'total_animes' => Anime::count(),
             'total_views' => Song::sum('views'),
         ];
 
@@ -383,12 +380,12 @@ class PostController extends Controller
     }
 
     /**
-     * Update a Post from AniList API data (studios, producers, genres, images, season, year).
+     * Update an Anime from AniList API data (studios, producers, genres, images, season, year).
      */
-    private function updatePostFromAnilistData(Post $post, object $item): void
+    private function updateAnimeFromAnilistData(Anime $anime, object $item): void
     {
-        $post->description = $item->description;
-        $post->anilist_id = $item->id;
+        $anime->description = $item->description;
+        $anime->anilist_id = $item->id;
 
         // Studios & Producers
         $idStudios = [];
@@ -424,26 +421,26 @@ class PostController extends Controller
             ['slug' => Str::slug($item->format)],
             ['name' => $item->format, 'slug' => Str::slug($item->format)]
         );
-        $post->format()->associate($format);
+        $anime->format()->associate($format);
 
         // Season & Year
         if (! empty($item->season) && ! empty($item->seasonYear)) {
-            $post->season_id = Season::firstOrCreate(['name' => $item->season])->id;
-            $post->year_id = Year::firstOrCreate(['name' => $item->seasonYear])->id;
+            $anime->season_id = Season::firstOrCreate(['name' => $item->season])->id;
+            $anime->year_id = Year::firstOrCreate(['name' => $item->seasonYear])->id;
         } elseif (isset($item->startDate->month)) {
-            $post->season_id = Season::firstOrCreate(['name' => $this->assignSeason($item->startDate->month)])->id;
-            $post->year_id = Year::firstOrCreate(['name' => $item->startDate->year])->id;
+            $anime->season_id = Season::firstOrCreate(['name' => $this->assignSeason($item->startDate->month)])->id;
+            $anime->year_id = Year::firstOrCreate(['name' => $item->startDate->year])->id;
         }
 
-        // Save FIRST so $post->id exists for image relationships
-        if ($post->save()) {
-            $post->studios()->sync($idStudios);
-            $post->producers()->sync($idProducers);
-            $post->externalLinks()->sync($idLinks);
+        // Save FIRST so $anime->id exists for image relationships
+        if ($anime->save()) {
+            $anime->studios()->sync($idStudios);
+            $anime->producers()->sync($idProducers);
+            $anime->externalLinks()->sync($idLinks);
 
-            // Images (require saved post for imageable_id)
-            $this->downloadAndStoreAnilistImage($item->bannerImage, $post, 'anime_banner', 'banner');
-            $this->downloadAndStoreAnilistImage($item->coverImage->extraLarge ?? null, $post, 'thumbnails', 'thumbnail');
+            // Images (require saved anime for imageable_id)
+            $this->downloadAndStoreAnilistImage($item->bannerImage, $anime, 'anime_banner', 'banner');
+            $this->downloadAndStoreAnilistImage($item->coverImage->extraLarge ?? null, $anime, 'thumbnails', 'thumbnail');
 
             // Genres
             if (! empty($item->genres)) {
@@ -455,7 +452,7 @@ class PostController extends Controller
                     );
                     $genreIds[] = $genre->id;
                 }
-                $post->genres()->sync($genreIds);
+                $anime->genres()->sync($genreIds);
             }
         }
     }
@@ -466,16 +463,16 @@ class PostController extends Controller
     private function generateMassive(array $data): void
     {
         foreach ($data as $item) {
-            if (Post::where('title', $item->title->romaji)->exists()) {
+            if (Anime::where('title', $item->title->romaji)->exists()) {
                 continue;
             }
 
-            $post = new Post;
-            $post->title = $item->title->romaji;
-            $post->slug = Str::slug($post->title);
-            $post->status = true;
+            $anime = new Anime;
+            $anime->title = $item->title->romaji;
+            $anime->slug = Str::slug($anime->title);
+            $anime->status = true;
 
-            $this->updatePostFromAnilistData($post, $item);
+            $this->updateAnimeFromAnilistData($anime, $item);
         }
     }
 
@@ -483,7 +480,7 @@ class PostController extends Controller
      * Download an image from a URL and store it locally.
      * Unified handler for both thumbnails and banners from AniList.
      */
-    private function downloadAndStoreAnilistImage(?string $imageUrl, Post $post, string $directory, string $type): void
+    private function downloadAndStoreAnilistImage(?string $imageUrl, Anime $anime, string $directory, string $type): void
     {
         if (! $imageUrl) {
             return;
@@ -494,34 +491,34 @@ class PostController extends Controller
 
         if (extension_loaded('gd')) {
             $imageContent = Image::make($imageContent)->encode('webp', 100);
-            $file_name = Str::slug($post->slug).'-'.time().'.webp';
+            $file_name = Str::slug($anime->slug).'-'.time().'.webp';
         } else {
             $contentType = $response->getHeaders()['Content-Type'][0] ?? 'image/jpeg';
             $extension = $this->mimeToExtension($contentType);
-            $file_name = Str::slug($post->slug).'-'.time().'.'.$extension;
+            $file_name = Str::slug($anime->slug).'-'.time().'.'.$extension;
         }
 
         $path = $directory.'/'.$file_name;
         Storage::disk()->put($path, $imageContent);
-        $post->updateOrCreateImage($path, $type);
+        $anime->updateOrCreateImage($path, $type);
     }
 
     /**
      * Handle image uploads (file or URL) for thumbnails and banners.
      */
-    private function storePostImages(Post $post, Request $request): void
+    private function storeAnimeImages(Anime $anime, Request $request): void
     {
         // Thumbnail
-        $this->processImageUpload($post, $request, 'file', 'thumbnail_src', 'thumbnails', 'thumbnail');
+        $this->processImageUpload($anime, $request, 'file', 'thumbnail_src', 'thumbnails', 'thumbnail');
 
         // Banner
-        $this->processImageUpload($post, $request, 'banner', 'banner_src', 'anime_banner', 'banner');
+        $this->processImageUpload($anime, $request, 'banner', 'banner_src', 'anime_banner', 'banner');
     }
 
     /**
      * Process a single image upload — from file or URL.
      */
-    private function processImageUpload(Post $post, Request $request, string $fileField, string $urlField, string $directory, string $imageType): void
+    private function processImageUpload(Anime $anime, Request $request, string $fileField, string $urlField, string $directory, string $imageType): void
     {
         if ($request->hasFile($fileField)) {
             // Validate
@@ -547,7 +544,7 @@ class PostController extends Controller
 
             $path = $directory.'/'.$file_name;
             Storage::disk()->put($path, $imageContent);
-            $post->updateOrCreateImage($path, $imageType);
+            $anime->updateOrCreateImage($path, $imageType);
 
         } elseif ($request->filled($urlField)) {
             $response = $this->httpClient()->get($request->input($urlField));
@@ -564,14 +561,14 @@ class PostController extends Controller
 
             $path = $directory.'/'.$file_name;
             Storage::disk()->put($path, $imageContent);
-            $post->updateOrCreateImage($path, $imageType);
+            $anime->updateOrCreateImage($path, $imageType);
         }
     }
 
     /**
-     * Determine the post status based on the user's role.
+     * Determine the anime status based on the user's role.
      */
-    private function resolvePostStatus(Request $request): bool
+    private function resolveAnimeStatus(Request $request): bool
     {
         $user = Auth::user();
 
@@ -580,7 +577,7 @@ class PostController extends Controller
         }
 
         if ($user->hasRole('admin') || $user->hasRole('editor')) {
-            return (bool) $request->postStatus;
+            return (bool) $request->animeStatus;
         }
 
         return false;
@@ -627,9 +624,9 @@ class PostController extends Controller
     }
 
     /**
-     * Static data for post status dropdown.
+     * Static data for anime status dropdown.
      */
-    private static function postStatuses(): array
+    private static function animeStatuses(): array
     {
         return [
             ['name' => 'Staged', 'value' => false],

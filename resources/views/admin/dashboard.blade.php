@@ -13,7 +13,7 @@
                 </p>
             </div>
             <div class="flex items-center gap-4">
-                <form action="{{ route('admin.posts.track.ranking') }}" method="POST">
+                <form action="{{ route('admin.animes.track.ranking') }}" method="POST">
                     @csrf
                     <button type="submit"
                         class="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-2xl text-primary transition-all active:scale-95 group">
@@ -23,7 +23,7 @@
                     </button>
                 </form>
 
-                <form action="{{ route('admin.posts.track.seasonal.ranking') }}" method="POST">
+                <form action="{{ route('admin.animes.track.seasonal.ranking') }}" method="POST">
                     @csrf
                     <button type="submit"
                         class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-2xl text-emerald-400 transition-all active:scale-95 group">
@@ -95,14 +95,14 @@
                             <div
                                 class="bg-zinc-950/50 border border-zinc-800 rounded-2xl p-4 flex items-center gap-4 group hover:border-zinc-700 transition-all">
                                 <div class="w-12 h-16 rounded-lg bg-zinc-900 overflow-hidden shrink-0">
-                                    <img src="{{ $song->post->thumbnail_url }}"
+                                    <img src="{{ $song->anime->thumbnail_url }}"
                                         class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
                                         alt="">
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <h4 class="text-xs font-bold text-white truncate">{{ $song->name }}</h4>
                                     <p class="text-[10px] text-zinc-500 font-black tracking-widest uppercase truncate">
-                                        {{ $song->post->title }}</p>
+                                        {{ $song->anime->title }}</p>
                                 </div>
                                 <div class="text-right">
                                     <span

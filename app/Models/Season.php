@@ -14,9 +14,9 @@ class Season extends Model
         'name',
     ];
 
-    public function posts()
+    public function animes()
     {
-        return $this->hasMany(Post::class);
+        return $this->hasMany(Anime::class);
     }
 
     public function songs()

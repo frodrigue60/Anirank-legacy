@@ -6,7 +6,7 @@
 
     $score = $song->score ?? $song->formattedAvgScore($format);
     $userScore = $song->userScore ?? ($user ? $song->formattedUserScore($format, $user->id) : null);
-    $url = $song->url ?? route('songs.show.nested', [$song->post->slug, $song->slug]);
+    $url = $song->url ?? route('songs.show.nested', [$song->anime->slug, $song->slug]);
     $number = $song->theme_num ?? $song->number;
 @endphp
 
@@ -14,8 +14,8 @@
     {{ $attributes->merge(['class' => 'group relative overflow-hidden rounded-xl h-48 card-hover transition-all duration-300 border border-white/5 bg-surface-dark/30']) }}>
     {{-- Background Image --}}
     <div class="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
-        <x-ui.image :src="$song->post->banner_url" class="w-full h-full object-cover opacity-40 shadow-inner"
-            style="filter: brightness(0.4);" fallback="default-banner.webp" />
+        <x-ui.image :src="$song->anime->banner_url" class="w-full h-full object-cover opacity-40 shadow-inner"
+            style="filter: brightness(0.7);" fallback="default-banner.webp" />
     </div>
 
     {{-- Overlay --}}
@@ -39,13 +39,13 @@
                 @endforeach
             </div>
             <div class="text-slate-500 text-xs italic mt-2 line-clamp-1">
-                {{ $song->post->title }}</div>
+                {{ $song->anime->title }}</div>
         </div>
 
         <div class="flex flex-col items-end gap-2 shrink-0">
-            <div class="glass px-3 py-2 rounded-lg border-primary/30 flex items-center gap-1.5 shadow-lg">
-                <span class="material-symbols-outlined text-primary text-sm fill-1">star</span>
-                <span class="text-white font-bold text-lg">{{ $score }}</span>
+            <div class="glass px-3 py-2 rounded-lg border-primary/30 flex items-center gap-1.5 text-lg">
+                <span class="material-symbols-outlined text-primary fill-1">star</span>
+                <span class="text-white font-bold">{{ $score ?? 'N/A' }}</span>
             </div>
             @if (isset($userScore))
                 <div class="text-xs text-white/40 uppercase font-black tracking-widest mt-1">

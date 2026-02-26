@@ -15,7 +15,7 @@ class PlaylistController extends Controller
         $songId = $request->query('song_id') ?? $request->input('song_id');
         $user = auth('sanctum')->user();
 
-        $query = Playlist::with(['user', 'user.images', 'songs.post', 'songs.post.images'])->withCount('songs');
+        $query = Playlist::with(['user', 'user.images', 'songs.anime', 'songs.anime.images'])->withCount('songs');
 
         if ($request->has('mine') && $user) {
             $query->where('user_id', $user->id);
@@ -103,13 +103,13 @@ class PlaylistController extends Controller
         $playlist->load([
             'songs' => function ($q) {
                 $q->withUserInteractions()
-                  ->with(['post', 'post.images', 'artists', 'artists.images', 'songVariants.video']);
+                  ->with(['anime', 'anime.images', 'artists', 'artists.images', 'songVariants.video']);
             },
         ]);
 
         $playlist->songs->each(function ($song) {
-            if ($song->post) {
-                $song->post->append(['thumbnail_url', 'banner_url']);
+            if ($song->anime) {
+                $song->anime->append(['thumbnail_url', 'banner_url']);
             }
             if ($song->artists) {
                 $song->artists->each->append('avatar_url');
@@ -152,11 +152,11 @@ class PlaylistController extends Controller
             if ($exists) {
                 $playlist->songs()->detach($songId);
                 $action = 'removed';
-                $message = 'Post removido de la playlist correctamente';
+                $message = 'Anime removido de la playlist correctamente';
             } else {
                 $playlist->songs()->attach($songId);
                 $action = 'added';
-                $message = 'Post agregado a la playlist correctamente';
+                $message = 'Anime agregado a la playlist correctamente';
             }
 
             return response()->json([
@@ -180,7 +180,7 @@ class PlaylistController extends Controller
 
     public function userPlaylists(Request $request, \App\Models\User $user)
     {
-        $query = $user->playlists()->with(['songs.post', 'songs.post.images'])->withCount('songs');
+        $query = $user->playlists()->with(['songs.anime', 'songs.anime.images'])->withCount('songs');
 
         // Solo mostrar privadas si es el propio usuario autenticado
         $currentUser = auth('sanctum')->user();

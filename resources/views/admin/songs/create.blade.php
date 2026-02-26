@@ -25,9 +25,9 @@
                 {{--  POST  --}}
                 <div>
                     <label for="post_search"
-                        class="block text-sm font-bold text-zinc-400 uppercase tracking-widest mb-2">Post / Anime</label>
+                        class="block text-sm font-bold text-zinc-400 uppercase tracking-widest mb-2">Anime</label>
                     <div class="relative">
-                        <input type="hidden" name="post_id" :value="selectedId" id="post_id">
+                        <input type="hidden" name="anime_id" :value="selectedId" id="anime_id">
 
                         {{-- Search Input / Selected View --}}
                         <div class="relative group">
@@ -91,7 +91,7 @@
                             return {
                                 search: '',
                                 results: [],
-                                selectedId: {{ old('post_id') ?? $selectedPostId ? old('post_id') ?? $selectedPostId : 'null' }},
+                                selectedId: {{ old('anime_id') ?? $selectedPostId ? old('anime_id') ?? $selectedPostId : 'null' }},
                                 selectedTitle: '{{ $currentPost ? addslashes($currentPost->title) : '' }}',
                                 loading: false,
                                 showResults: false,
@@ -115,7 +115,7 @@
                                 fetchSuggestedNumber() {
                                     if (!this.selectedId || !this.type) return;
 
-                                    fetch(`{{ route('admin.songs.latest_number') }}?post_id=${this.selectedId}&type=${this.type}`)
+                                    fetch(`{{ route('admin.songs.latest_number') }}?anime_id=${this.selectedId}&type=${this.type}`)
                                         .then(res => res.json())
                                         .then(data => {
                                             this.themeNum = data.next_number;
@@ -130,7 +130,7 @@
                                     }
 
                                     this.loading = true;
-                                    fetch(`{{ route('admin.posts.autocomplete') }}?q=${encodeURIComponent(this.search)}`)
+                                    fetch(`{{ route('admin.animes.autocomplete') }}?q=${encodeURIComponent(this.search)}`)
                                         .then(res => res.json())
                                         .then(data => {
                                             this.results = data;

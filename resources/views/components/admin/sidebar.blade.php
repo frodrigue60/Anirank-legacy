@@ -27,7 +27,7 @@
                 </p>
                 <div class="space-y-1">
                     <x-admin.sidebar-link route="admin.dashboard" icon="dashboard" label="Dashboard" />
-                    <x-admin.sidebar-link route="admin.posts.index" icon="movie" label="Animes" />
+                    <x-admin.sidebar-link route="admin.animes.index" icon="movie" label="Animes" />
                     <x-admin.sidebar-link route="admin.songs.index" icon="music_note" label="Songs" />
                     <x-admin.sidebar-link route="admin.artists.index" icon="mic" label="Artists" />
                     <x-admin.sidebar-link route="admin.users.index" icon="group" label="Users" />

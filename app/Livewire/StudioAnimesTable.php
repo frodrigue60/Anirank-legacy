@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Year;
 use App\Models\Season;
 use App\Models\Format;
@@ -93,7 +93,7 @@ class StudioAnimesTable extends Component
     {
         if (!$this->readyToLoad) {
             return view('livewire.studio-animes-table', [
-                'posts' => collect(),
+                'animes' => collect(),
                 'years' => collect(),
                 'seasons' => collect(),
                 'formats' => collect(),
@@ -101,7 +101,7 @@ class StudioAnimesTable extends Component
             ]);
         }
 
-        $posts = Post::query()
+        $animes = Anime::query()
             ->when(!Auth::check() || !Auth::user()->isStaff(), function ($query) {
                 $query->where('status', true);
             })
@@ -136,10 +136,10 @@ class StudioAnimesTable extends Component
             ->orderBy('title', 'asc')
             ->paginate($this->perPage);
 
-        $this->hasMorePages = $posts->hasMorePages();
+        $this->hasMorePages = $animes->hasMorePages();
 
         return view('livewire.studio-animes-table', [
-            'posts' => $posts,
+            'animes' => $animes,
             'years' => \App\Models\Year::orderBy('name', 'desc')->get(['id', 'name']),
             'seasons' => \App\Models\Season::all(['id', 'name']),
             'formats' => \App\Models\Format::all(['id', 'name']),

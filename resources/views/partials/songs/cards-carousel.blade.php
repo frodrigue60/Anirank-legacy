@@ -3,7 +3,7 @@
         class="group relative w-80 h-40 rounded-xl overflow-hidden border border-white/5 shrink-0 cursor-pointer
                 hover:border-primary/30 transition-all duration-300">
         {{-- Background --}}
-        <x-ui.image :src="$song->post->thumbnail_url" :alt="$song->name"
+        <x-ui.image :src="$song->anime->thumbnail_url" :alt="$song->name"
             class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105
                    transition-transform duration-500"
             style="filter: brightness(0.4);" />
@@ -26,7 +26,7 @@
                         {{ $artist->name }}{{ !$loop->last ? ', ' : '' }}
                     @endforeach
                 </p>
-                <p class="text-[11px] text-white/25 truncate italic">{{ $song->post->title }}</p>
+                <p class="text-[11px] text-white/25 truncate italic">{{ $song->anime->title }}</p>
             </div>
 
             <div class="flex flex-col items-end gap-2 shrink-0 ml-3">

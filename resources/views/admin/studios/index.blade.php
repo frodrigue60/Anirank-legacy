@@ -68,7 +68,7 @@
                                     <td class="px-6 py-4 text-center">
                                         <span
                                             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300 border border-zinc-700">
-                                            {{ $studio->posts->count() }} animes
+                                            {{ $studio->animes->count() }} animes
                                         </span>
                                     </td>
                                     <td class="px-6 py-4">

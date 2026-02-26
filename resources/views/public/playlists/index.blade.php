@@ -34,7 +34,7 @@
                         $cover = asset('resources/images/song_cover.png');
                         $firstSong = $playlist->songs->first();
                         if ($firstSong && $firstSong->post) {
-                            $cover = $firstSong->post->thumbnail_url;
+                            $cover = $firstSong->anime->thumbnail_url;
                         }
                     @endphp
 

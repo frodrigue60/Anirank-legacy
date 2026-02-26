@@ -83,6 +83,47 @@ To maintain a lean production bundle, `vite.config.mjs` only registers high-leve
 - **Client-Side Dispatching**: For component-to-component communication (like opening modals), we use Alpine's `@click="$dispatch('event')"` instead of `wire:click="$dispatch('event')"`. This bypasses the unnecessary server roundtrip of the origin component, sending the request directly to the target listener.
 - **Server-Side Submission Guards**: Sensitive actions (like submitting reports) implement a protected `$isSubmitting` boolean state to prevent double-processing on the backend.
 
+### Livewire Infinite Scroll Pattern
+
+All infinite scroll implementations use **Alpine's `x-intersect.once`** instead of Livewire's `wire:intersect`. This prevents the IntersectionObserver from re-firing in a loop after each Livewire re-render.
+
+**Required pattern:**
+
+```blade
+@if ($hasMorePages && $readyToLoad)
+    <div x-intersect.once="$wire.loadMore()" wire:key="intersect-{name}-{{ $perPage }}">
+        {{-- spinner --}}
+    </div>
+@endif
+```
+
+| Rule                | Correct                                    | ❌ Never Do                           |
+| ------------------- | ------------------------------------------ | ------------------------------------- |
+| Intersect directive | `x-intersect.once="$wire.loadMore()"`      | `wire:intersect="loadMore"`           |
+| Wire key            | Dynamic: `wire:key="name-{{ $perPage }}"`  | Static: `wire:key="name"`             |
+| Event listener      | None needed (Alpine calls method directly) | `#[On('loadMore')]` on the PHP method |
+
+**Why:**
+
+- `x-intersect.once` fires **exactly once** per element instance, preventing infinite loops.
+- The dynamic `wire:key` (with `$perPage` or `$page`) forces Livewire to destroy and recreate the sentinel div on each load, creating a fresh observer.
+- `#[On('loadMore')]` creates a **global** event listener that can cause cross-component interference when multiple Livewire components with `loadMore` are on the same page.
+
+**Components using this pattern:**
+`AnimesTable`, `ArtistsTable`, `StudiosTable`, `ProducersTable`, `SongsTable`, `RankingTable`, `SeasonalTable`, `StudioAnimesTable`, `ProducerAnimesTable`, `ArtistThemesTable`, `UserFavoritesTable`.
+
+### Livewire V3 Conventions (Deprecated Patterns)
+
+The following patterns are **deprecated** in Livewire v3 and must not be used:
+
+| Deprecated                             | Replacement       | Reason                                    |
+| -------------------------------------- | ----------------- | ----------------------------------------- |
+| `wire:submit.prevent`                  | `wire:submit`     | Livewire v3 auto-calls `preventDefault()` |
+| `@livewireStyles` / `@livewireScripts` | Remove entirely   | Livewire v3 auto-injects assets           |
+| `$emit()`                              | `$dispatch()`     | V2 syntax removed in V3                   |
+| `wire:model.defer`                     | `wire:model`      | V3 is lazy by default (updates on blur)   |
+| `wire:model` (for live updates)        | `wire:model.live` | Explicit opt-in for real-time binding     |
+
 ---
 
 ### Dynamic Storage System

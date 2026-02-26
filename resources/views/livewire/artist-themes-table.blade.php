@@ -110,7 +110,8 @@
             @endif
 
             @if ($hasMorePages && $readyToLoad)
-                <div wire:intersect="loadMore" wire:key="intersect-artist-themes" class="flex justify-center py-12">
+                <div x-intersect.once="$wire.loadMore()" wire:key="intersect-artist-themes-{{ $perPage }}"
+                    class="flex justify-center py-12">
                     <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                 </div>
             @endif

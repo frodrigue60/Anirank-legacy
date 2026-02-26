@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Artist;
 use App\Models\Format;
 use Illuminate\Http\Request;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Season;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
@@ -16,7 +16,7 @@ use App\Models\Year;
 use App\Models\Song;
 use App\Models\User;
 
-class PostController extends Controller
+class AnimeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -28,55 +28,55 @@ class PostController extends Controller
         $user = Auth::check() ? Auth::User() : null;
         $status = true;
 
-        $recently = Song::with(['post' => function ($q) {
+        $recently = Song::with(['anime' => function ($q) {
             $q->select('id', 'title', 'slug');
         }])
-            ->whereHas('post', function ($query) use ($status) {
+            ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             })
             ->latest()
             ->take(25)
             ->get();
 
-        $popular = Song::with(['post' => function ($q) {
+        $popular = Song::with(['anime' => function ($q) {
             $q->select('id', 'title', 'slug');
         }])
             ->withCount('likes')
-            ->whereHas('post', function ($query) use ($status) {
+            ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             })
             ->orderByDesc('likes_count')
             ->take(25)
             ->get();
 
-        $viewed = Song::with(['post' => function ($q) {
+        $viewed = Song::with(['anime' => function ($q) {
             $q->select('id', 'title', 'slug');
         }])
-            ->whereHas('post', function ($query) use ($status) {
+            ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             })
             ->orderByDesc('views')
             ->take(25)
             ->get();
 
-        $openings = Song::with(['post' => function ($q) {
+        $openings = Song::with(['anime' => function ($q) {
             $q->select('id', 'title', 'slug');
         }, 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'OP')
-            ->whereHas('post', function ($q) use ($status) {
+            ->whereHas('anime', function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->orderByDesc('ratings_avg_rating')
             ->take(3)
             ->get();
 
-        $endings = Song::with(['post' => function ($q) {
+        $endings = Song::with(['anime' => function ($q) {
             $q->select('id', 'title', 'slug');
         }, 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'ED')
-            ->whereHas('post', function ($q) use ($status) {
+            ->whereHas('anime', function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->orderByDesc('ratings_avg_rating')
@@ -88,10 +88,10 @@ class PostController extends Controller
 
         $artists = Artist::select('id', 'name', 'slug')->latest()->take(20)->get();
 
-        $featuredSong = Song::with(['post' => function ($q) {
+        $featuredSong = Song::with(['anime' => function ($q) {
             $q->select('id', 'title', 'slug');
         }, 'artists:id,name,slug'])
-            ->whereHas('post', function ($q) use ($status) {
+            ->whereHas('anime', function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->inRandomOrder()
@@ -106,27 +106,27 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Post $post)
+    public function show(Anime $anime)
     {
-        $post->load(['songs' => function ($q) {
+        $anime->load(['songs' => function ($q) {
             $q->with(['songVariants.video', 'artists:id,name,slug', 'favorites', 'ratings']);
             $q->withAvg('ratings', 'rating');
         }]);
 
         $user = Auth::user();
 
-        if (!$post->status) {
+        if (!$anime->status) {
             if ($user && $user->isAdmin()) {
                 // Admin can view
             } else {
-                return redirect('/')->with('danger', $user ? 'User not autorized!' : 'Post status: Private');
+                return redirect('/')->with('danger', $user ? 'User not autorized!' : 'Anime status: Private');
             }
         }
 
-        $openings = $post->songs->where('type', 'OP')->sortBy('theme_num');
-        $endings = $post->songs->where('type', 'ED')->sortBy('theme_num');
+        $openings = $anime->songs->where('type', 'OP')->sortBy('theme_num');
+        $endings = $anime->songs->where('type', 'ED')->sortBy('theme_num');
 
-        return view('public.posts.show', compact('post', 'openings', 'endings'));
+        return view('public.animes.show', compact('anime', 'openings', 'endings'));
     }
 
     /**
@@ -135,7 +135,7 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post) {}
+    public function destroy(Anime $anime) {}
 
     public function animes(Request $request)
     {
@@ -143,7 +143,7 @@ class PostController extends Controller
         $years = Year::all()->sortByDesc('name');
         $formats = Format::all();
 
-        return view('public.posts.index', compact('seasons', 'years', 'formats'));
+        return view('public.animes.index', compact('seasons', 'years', 'formats'));
     }
 
 
@@ -246,7 +246,7 @@ class PostController extends Controller
             case 'title':
 
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
                 return $songs;
                 break;
@@ -268,7 +268,7 @@ class PostController extends Controller
 
             default:
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
                 return $songs;
                 break;
@@ -280,7 +280,7 @@ class PostController extends Controller
         switch ($sort) {
             case 'title':
                 $song_variants = $song_variants->sortBy(function ($song_variant) {
-                    return $song_variant->song->post->title;
+                    return $song_variant->song->anime->title;
                 });
                 return $song_variants;
                 break;
@@ -307,7 +307,7 @@ class PostController extends Controller
 
             default:
                 $song_variants = $song_variants->sortBy(function ($song_variant) {
-                    return $song_variant->song->post->title;
+                    return $song_variant->song->anime->title;
                 });
                 return $song_variants;
                 break;

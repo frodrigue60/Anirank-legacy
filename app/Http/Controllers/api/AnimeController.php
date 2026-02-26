@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Artist;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Song;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class PostController extends Controller
+class AnimeController extends Controller
 {
     public function home()
     {
@@ -19,10 +19,10 @@ class PostController extends Controller
 
         // Weakly Ranking (3 OP + 3 ED)
         $openings = Song::withUserInteractions()
-            ->with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
+            ->with(['anime:id,title,slug', 'anime.images', 'artists:id,name,slug', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'OP')
-            ->whereHas('post', function ($q) use ($status) {
+            ->whereHas('anime', function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->orderByDesc('ratings_avg_rating')
@@ -30,10 +30,10 @@ class PostController extends Controller
             ->get();
 
         $endings = Song::withUserInteractions()
-            ->with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
+            ->with(['anime:id,title,slug', 'anime.images', 'artists:id,name,slug', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'ED')
-            ->whereHas('post', function ($q) use ($status) {
+            ->whereHas('anime', function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->orderByDesc('ratings_avg_rating')
@@ -44,9 +44,9 @@ class PostController extends Controller
 
         // Recently Added Songs
         $recently = Song::withUserInteractions()
-            ->with(['post:id,title,slug', 'post.images'])
+            ->with(['anime:id,title,slug', 'anime.images'])
             ->withAvg('ratings', 'rating')
-            ->whereHas('post', function ($query) use ($status) {
+            ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             })
             ->latest()
@@ -55,10 +55,10 @@ class PostController extends Controller
 
         // Popular Songs (Likes)
         $popular = Song::withUserInteractions()
-            ->with(['post:id,title,slug', 'post.images'])
+            ->with(['anime:id,title,slug', 'anime.images'])
             ->withAvg('ratings', 'rating')
             ->withCount('likes')
-            ->whereHas('post', function ($query) use ($status) {
+            ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             })
             ->orderByDesc('likes_count')
@@ -67,9 +67,9 @@ class PostController extends Controller
 
         // Most Viewed Songs
         $viewed = Song::withUserInteractions()
-            ->with(['post:id,title,slug', 'post.images'])
+            ->with(['anime:id,title,slug', 'anime.images'])
             ->withAvg('ratings', 'rating')
-            ->whereHas('post', function ($query) use ($status) {
+            ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             })
             ->orderByDesc('views')
@@ -81,9 +81,9 @@ class PostController extends Controller
 
         // Featured Song (Random)
         $featured_song = Song::withUserInteractions()
-            ->with(['post:id,title,slug', 'post.images', 'artists:id,name,slug', 'artists.images'])
+            ->with(['anime:id,title,slug', 'anime.images', 'artists:id,name,slug', 'artists.images'])
             ->withAvg('ratings', 'rating')
-            ->whereHas('post', function ($q) use ($status) {
+            ->whereHas('anime', function ($q) use ($status) {
                 $q->where('status', $status);
             })
             ->latest()
@@ -91,8 +91,8 @@ class PostController extends Controller
 
         if ($featured_song) {
             $featured_song->append('average_rating');
-            if ($featured_song->post) {
-                $featured_song->post->append(['thumbnail_url', 'banner_url']);
+            if ($featured_song->anime) {
+                $featured_song->anime->append(['thumbnail_url', 'banner_url']);
             }
             if ($featured_song->artists) {
                 $featured_song->artists->each->append('avatar_url');
@@ -104,8 +104,8 @@ class PostController extends Controller
         $appendUrls = function ($collection) {
             $collection->each(function ($item) {
                 $item->append('average_rating');
-                if ($item->post) {
-                    $item->post->append(['thumbnail_url', 'banner_url']);
+                if ($item->anime) {
+                    $item->anime->append(['thumbnail_url', 'banner_url']);
                 }
                 if ($item->artists) {
                     $item->artists->each->append('avatar_url');
@@ -136,7 +136,7 @@ class PostController extends Controller
 
         $status = true;
 
-        $posts = Post::where('status', $status)
+        $animes = Anime::where('status', $status)
             ->when($season_id, function ($query, $season_id) {
                 $query->where('season_id', $season_id);
             })
@@ -166,7 +166,7 @@ class PostController extends Controller
             ->addSelect(['average_rating' => \App\Models\Rating::selectRaw('avg(rating)')
                 ->join('songs', 'songs.id', '=', 'ratings.rateable_id')
                 ->where('ratings.rateable_type', \App\Models\Song::class)
-                ->whereColumn('songs.post_id', 'posts.id')
+                ->whereColumn('songs.anime_id', 'animes.id')
             ])
             ->withCount('songs')
             ->when($sort === 'latest', fn ($q) => $q->orderByDesc('created_at'))
@@ -175,18 +175,18 @@ class PostController extends Controller
             ->when($sort === 'title', fn ($q) => $q->orderBy('title'))
             ->paginate($request->input('per_page', 18));
 
-        $posts->getCollection()->each(function ($post) {
-            $post->append('thumbnail_url');
-            $post->average_rating = (float) ($post->average_rating ?? 0);
+        $animes->getCollection()->each(function ($anime) {
+            $anime->append('thumbnail_url');
+            $anime->average_rating = (float) ($anime->average_rating ?? 0);
         });
 
-        return response()->json($posts);
+        return response()->json($animes);
     }
 
-    public function show(Post $post)
+    public function show(Anime $anime)
     {
         Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
-        $post->load([
+        $anime->load([
             'year',
             'season',
             'studios',
@@ -201,9 +201,9 @@ class PostController extends Controller
             },
         ]);
 
-        $post->append(['thumbnail_url', 'banner_url']);
+        $anime->append(['thumbnail_url', 'banner_url']);
 
-        $post->songs->each(function ($song) {
+        $anime->songs->each(function ($song) {
             $song->append('average_rating');
             if ($song->artists) {
                 $song->artists->each->append('avatar_url');
@@ -211,22 +211,22 @@ class PostController extends Controller
         });
 
         // Calcular rating promedio del anime basado en sus canciones
-        $post->average_rating = $post->songs->avg('ratings_avg_rating') ?: 0;
+        $anime->average_rating = $anime->songs->avg('ratings_avg_rating') ?: 0;
 
-        return response()->json($post);
+        return response()->json($anime);
     }
 
     public function globalSearch(Request $request)
     {
         $q = $request->q;
-        $posts = Post::where('title', 'LIKE', '%'.$q.'%')->limit(5)->get(['title', 'slug']);
+        $animes = Anime::where('title', 'LIKE', '%'.$q.'%')->limit(5)->get(['title', 'slug']);
 
         $artists = Artist::where('name', 'LIKE', '%'.$q.'%')->limit(5)->get(['name', 'slug']);
 
         $users = User::where('name', 'LIKE', '%'.$q.'%')->limit(5)->get(['name', 'slug']);
 
         return response()->json([
-            'posts' => $posts,
+            'animes' => $animes,
             'artists' => $artists,
             'users' => $users,
         ]);

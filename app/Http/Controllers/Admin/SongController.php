@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Anime;
 use App\Models\Artist;
-use App\Models\Post;
 use App\Models\Season;
 use App\Models\Song;
 use App\Models\Year;
@@ -16,23 +16,23 @@ class SongController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Song::query()->with('post', 'artists');
+        $query = Song::query()->with('anime', 'artists');
 
-        $currentPost = null;
+        $currentAnime = null;
         $currentArtist = null;
         $breadcrumbItems = [
             ['name' => 'Songs', 'url' => route('admin.songs.index')],
         ];
 
-        if ($request->filled('post_id')) {
-            $query->where('post_id', $request->post_id);
-            $currentPost = Post::find($request->post_id);
+        if ($request->filled('anime_id')) {
+            $query->where('anime_id', $request->anime_id);
+            $currentAnime = Anime::find($request->anime_id);
 
-            if ($currentPost) {
+            if ($currentAnime) {
                 $breadcrumbItems = [
-                    ['name' => 'Posts', 'url' => route('admin.posts.index')],
-                    ['name' => $currentPost->title, 'url' => route('admin.posts.show', $currentPost->id)],
-                    ['name' => 'Songs', 'url' => route('admin.songs.index', ['post_id' => $currentPost->id])],
+                    ['name' => 'Animes', 'url' => route('admin.animes.index')],
+                    ['name' => $currentAnime->title, 'url' => route('admin.animes.show', $currentAnime->id)],
+                    ['name' => 'Songs', 'url' => route('admin.songs.index', ['anime_id' => $currentAnime->id])],
                 ];
             }
         }
@@ -61,7 +61,7 @@ class SongController extends Controller
                     ->orWhere('song_en', 'like', "%{$q}%")
                     ->orWhere('song_jp', 'like', "%{$q}%")
                     ->orWhere('slug', 'like', "%{$q}%")
-                    ->orWhereHas('post', function ($query) use ($q) {
+                    ->orWhereHas('anime', function ($query) use ($q) {
                         $query->where('title', 'like', "%{$q}%");
                     });
             });
@@ -69,21 +69,21 @@ class SongController extends Controller
 
         $songs = $query->latest()->paginate(20);
 
-        return view('admin.songs.index', compact('songs', 'currentPost', 'currentArtist', 'breadcrumb'));
+        return view('admin.songs.index', compact('songs', 'currentAnime', 'currentArtist', 'breadcrumb'));
     }
 
     public function create(Request $request)
     {
-        $selectedPostId = $request->post_id;
-        $currentPost = null;
-        if ($selectedPostId) {
-            $currentPost = Post::find($selectedPostId);
+        $selectedAnimeId = $request->anime_id;
+        $currentAnime = null;
+        if ($selectedAnimeId) {
+            $currentAnime = Anime::find($selectedAnimeId);
         }
 
         $breadcrumb = Breadcrumb::generate([
             [
-                'name' => 'Posts',
-                'url' => route('admin.posts.index'),
+                'name' => 'Animes',
+                'url' => route('admin.animes.index'),
             ],
             [
                 'name' => 'Songs',
@@ -105,7 +105,7 @@ class SongController extends Controller
         $seasons = Season::all();
         $years = Year::all();
 
-        return view('admin.songs.create', compact('breadcrumb', 'types', 'seasons', 'years', 'selectedPostId', 'currentPost'));
+        return view('admin.songs.create', compact('breadcrumb', 'types', 'seasons', 'years', 'selectedAnimeId', 'currentAnime'));
     }
 
     public function store(Request $request)
@@ -137,7 +137,7 @@ class SongController extends Controller
         $song->song_en = $song->song_en ?: null;
         $song->song_jp = $song->song_jp ?: null;
 
-        $song->post_id = $request->post_id;
+        $song->anime_id = $request->anime_id;
         $song->season_id = $request->season_id;
         $song->year_id = $request->year_id;
         $song->type = $request->type;
@@ -168,7 +168,7 @@ class SongController extends Controller
             }
         }
 
-        $latestVersion = Song::where('post_id', $request->post_id)
+        $latestVersion = Song::where('anime_id', $request->anime_id)
             ->where('type', $request->type)
             ->max('theme_num');
 
@@ -184,7 +184,7 @@ class SongController extends Controller
         if ($song->save()) {
             $song->artists()->sync($artistsIds);
 
-            return redirect(route('admin.songs.index', ['post_id' => $request->post_id]))->with('success', 'Song added successfully');
+            return redirect(route('admin.songs.index', ['anime_id' => $request->anime_id]))->with('success', 'Song added successfully');
         } else {
             return redirect(route('admin.songs.index'))->with('error', 'error');
         }
@@ -209,16 +209,16 @@ class SongController extends Controller
     {
         $breadcrumb = Breadcrumb::generate([
             [
-                'name' => 'Posts',
-                'url' => route('admin.posts.index'),
+                'name' => 'Animes',
+                'url' => route('admin.animes.index'),
             ],
             [
-                'name' => $song->post->title,
-                'url' => route('admin.posts.show', $song->post_id),
+                'name' => $song->anime->title,
+                'url' => route('admin.animes.show', $song->anime_id),
             ],
             [
                 'name' => 'Songs',
-                'url' => route('admin.songs.index', ['post_id' => $song->post_id]),
+                'url' => route('admin.songs.index', ['anime_id' => $song->anime_id]),
             ],
             [
                 'name' => 'Show',
@@ -233,16 +233,16 @@ class SongController extends Controller
     {
         $breadcrumb = Breadcrumb::generate([
             [
-                'name' => 'Posts',
-                'url' => route('admin.posts.index'),
+                'name' => 'Animes',
+                'url' => route('admin.animes.index'),
             ],
             [
-                'name' => $song->post->title,
-                'url' => route('admin.posts.show', $song->post_id),
+                'name' => $song->anime->title,
+                'url' => route('admin.animes.show', $song->anime_id),
             ],
             [
                 'name' => 'Songs',
-                'url' => route('admin.songs.index', ['post_id' => $song->post_id]),
+                'url' => route('admin.songs.index', ['anime_id' => $song->anime_id]),
             ],
             [
                 'name' => 'Edit',
@@ -264,12 +264,12 @@ class SongController extends Controller
 
     public function update(Request $request, $songId)
     {
-        $song = Song::with('post')->findOrFail($songId);
+        $song = Song::with('anime')->findOrFail($songId);
 
         $song->song_romaji = trim($request->song_romaji) ?: null;
         $song->song_jp = trim($request->song_jp) ?: null;
         $song->song_en = trim($request->song_en) ?: null;
-        $song->post_id = $song->post->id;
+        $song->anime_id = $song->anime->id;
         $song->season_id = $request->season_id;
         $song->year_id = $request->year_id;
         $song->type = $request->type;
@@ -295,7 +295,7 @@ class SongController extends Controller
             }
         }
 
-        $latestVersion = Song::where('post_id', $song->post_id)
+        $latestVersion = Song::where('anime_id', $song->anime_id)
             ->where('type', $request->type)
             ->where('id', '!=', $song->id)
             ->max('theme_num');
@@ -312,23 +312,23 @@ class SongController extends Controller
         if ($song->update()) {
             $song->artists()->sync($artistsIds);
 
-            return redirect(route('admin.songs.index', ['post_id' => $song->post_id]))->with('success', 'Song updated successfully');
+            return redirect(route('admin.songs.index', ['anime_id' => $song->anime_id]))->with('success', 'Song updated successfully');
         } else {
             return redirect(route('admin.songs.index'))->with('error', 'error, something went wrong');
         }
     }
 
     /**
-     * Get the latest theme number for a specific post and type.
+     * Get the latest theme number for a specific anime and type.
      */
     public function getLatestNumber(Request $request)
     {
         $request->validate([
-            'post_id' => 'required|exists:posts,id',
+            'anime_id' => 'required|exists:animes,id',
             'type' => 'required|string|in:OP,ED,INS,OTH',
         ]);
 
-        $latestVersion = Song::where('post_id', $request->post_id)
+        $latestVersion = Song::where('anime_id', $request->anime_id)
             ->where('type', $request->type)
             ->max('theme_num');
 

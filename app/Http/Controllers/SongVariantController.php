@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Song;
 use App\Models\Reaction;
 use App\Models\Season;
@@ -65,8 +65,8 @@ class SongVariantController extends Controller
             return redirect(route('home'))->with('warning', 'Item no exist!');
         }
 
-        if ($songVariant->song->post->status == 'stagged') {
-            return redirect(route('home'))->with('warning', 'Paused post!');
+        if ($songVariant->song->anime->status == 'stagged') {
+            return redirect(route('home'))->with('warning', 'Paused anime!');
         }
 
         $comments = $songVariant->comments;
@@ -160,23 +160,23 @@ class SongVariantController extends Controller
     public function showVariant($animeSlug, $songSlug, $variantSlug)
     {
         $user = Auth::check() ? Auth::User() : null;
-        $post = Post::where('slug', $animeSlug)->first();
+        $anime = Anime::where('slug', $animeSlug)->first();
 
-        if (!$post) {
-            return redirect(route('/'))->with('warning', 'Post not exist!');
+        if (!$anime) {
+            return redirect(route('/'))->with('warning', 'Anime not found!');
         }
-        if (!$post->status) {
+        if (!$anime->status) {
             if ($user) {
                 if (!$user->isAdmin()) {
                     return redirect('/')->with('danger', 'User not autorized!');
                 }
             } else {
-                return redirect('/')->with('danger', 'Post status: Private');
+                return redirect('/')->with('danger', 'Anime status: Private');
             }
         }
 
         $song = Song::where('slug', $songSlug)
-            ->where('post_id', $post->id)
+            ->where('anime_id', $anime->id)
             ->firstOrFail();
 
         $songVariant = SongVariant::where('slug', $variantSlug)
@@ -190,8 +190,8 @@ class SongVariantController extends Controller
             return redirect(route('/'))->with('warning', 'Item no exist!');
         }
 
-        if ($songVariant->song->post->status == 'stagged') {
-            return redirect(route('/'))->with('warning', 'Paused post!');
+        if ($songVariant->song->anime->status == 'stagged') {
+            return redirect(route('/'))->with('warning', 'Paused anime!');
         }
 
         $comments = $songVariant->comments;
@@ -280,7 +280,7 @@ class SongVariantController extends Controller
             if ($score >= 1 && $score <= 100) {
                 // Utilizar el score ajustado
                 $songVariant->rateOnce($score, Auth::User()->id);
-                return redirect()->back()->with('success', 'Post rated Successfully');
+                return redirect()->back()->with('success', 'Rated Successfully');
             } else {
                 return redirect()->back()->with('warning', 'Only values between 1 and 100');
             }
@@ -320,7 +320,7 @@ class SongVariantController extends Controller
     {
         $user = Auth::user();
 
-        // Buscar si ya existe una reacción del usuario para este post
+        // Buscar si ya existe una reacción del usuario para este anime
         $reaction = Reaction::where('user_id', $user->id)
             ->where('reactable_id', $songVariant->id)
             ->where('reactable_type', SongVariant::class)
@@ -466,7 +466,7 @@ class SongVariantController extends Controller
 
         $user = Auth::user();
 
-        // Verificar si el post ya está en favoritos
+        // Verificar si el tema ya está en favoritos
         $favorite = Favorite::where('user_id', $user->id)
             ->where('favoritable_id', $songVariant->id)
             ->where('favoritable_type', SongVariant::class)

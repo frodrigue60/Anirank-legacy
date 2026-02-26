@@ -23,7 +23,7 @@ class GlobalBottomPlayer extends Component
     public function handlePlaySong($songId)
     {
         Log::info("GlobalBottomPlayer: Requested song ID $songId");
-        $this->song = Song::with(['post', 'artists', 'firstSongVariant.video'])->find($songId);
+        $this->song = Song::with(['anime', 'artists', 'firstSongVariant.video'])->find($songId);
 
         if (!$this->song) {
             Log::error("GlobalBottomPlayer: Song not found $songId");
@@ -40,12 +40,12 @@ class GlobalBottomPlayer extends Component
             ? $this->song->firstSongVariant->video
             : $this->song->videos()->first();
 
-        // Build thumbnail URL from the post's thumbnail
+        // Build thumbnail URL from the anime's thumbnail
         $thumbnailUrl = null;
-        if ($this->song->post->thumbnail && Storage::disk()->exists($this->song->post->thumbnail)) {
-            $thumbnailUrl = Storage::url($this->song->post->thumbnail);
-        } elseif ($this->song->post->thumbnail_src) {
-            $thumbnailUrl = $this->song->post->thumbnail_src;
+        if ($this->song->anime->thumbnail && Storage::disk()->exists($this->song->anime->thumbnail)) {
+            $thumbnailUrl = Storage::url($this->song->anime->thumbnail);
+        } elseif ($this->song->anime->thumbnail_src) {
+            $thumbnailUrl = $this->song->anime->thumbnail_src;
         }
 
         if ($video) {
@@ -69,7 +69,7 @@ class GlobalBottomPlayer extends Component
                 url: $videoUrl,
                 type: $video->type, // 'file' or 'embed'
                 title: $this->song->name,
-                anime: $this->song->post->title,
+                anime: $this->song->anime->title,
                 artists: $this->song->artists->pluck('name')->join(', '),
                 thumbnail: $thumbnailUrl
             );

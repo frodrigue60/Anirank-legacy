@@ -23,7 +23,7 @@
 
                     <div id="discover-dropdown"
                         class="z-50 hidden absolute left-0 mt-3 w-48 glass-panel rounded-xl border border-white/10 shadow-2xl overflow-hidden py-1 bg-surface-darker">
-                        <a href="{{ route('posts.animes') }}"
+                        <a href="{{ route('animes.index') }}"
                             class="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-[18px]">movie</span> Animes
                         </a>
@@ -192,7 +192,7 @@
             <div class="h-px bg-white/5 my-4"></div>
             <div class="px-4 mb-2 text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Discover</div>
 
-            <a href="{{ route('posts.animes') }}"
+            <a href="{{ route('animes.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 transition-all">
                 <span class="material-symbols-outlined">movie</span>
                 <span class="font-medium text-sm">Series</span>

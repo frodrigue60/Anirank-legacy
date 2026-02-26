@@ -3,10 +3,10 @@
 @php
     $artists_string = $song->artists->pluck('name')->join(', ');
     $desc = 'Song: ' . $song->getNameAttribute() . ' - Artist: ' . $artists_string;
-    $thumbnail_url = $post->thumbnail_url ?? asset('/storage/thumbnails/' . $post->thumbnail);
+    $thumbnail_url = $anime->thumbnail_url ?? asset('/storage/thumbnails/' . $anime->thumbnail);
 @endphp
 
-@section('title', $post->title . ' ' . ($song->slug ?? $song->type))
+@section('title', $anime->title . ' ' . ($song->slug ?? $song->type))
 @section('description', $desc)
 @section('og_image', $thumbnail_url)
 @section('og_type', 'article')
@@ -17,7 +17,7 @@
 @endsection
 
 @section('content')
-    <livewire:song-detail :song="$song" :post="$post" />
+    <livewire:song-detail :song="$song" :anime="$anime" />
 @endsection
 
 @push('scripts')

@@ -35,8 +35,8 @@ class SongController extends Controller
                 $q->where('song_romaji', 'like', '%'.$name.'%')
                     ->orWhere('song_en', 'like', '%'.$name.'%')
                     ->orWhere('song_jp', 'like', '%'.$name.'%')
-                    ->orWhereHas('post', function ($postQuery) use ($name) {
-                        $postQuery->where('title', 'like', '%'.$name.'%');
+                    ->orWhereHas('anime', function ($animeQuery) use ($name) {
+                        $animeQuery->where('title', 'like', '%'.$name.'%');
                     });
             });
         })
@@ -46,12 +46,12 @@ class SongController extends Controller
             ->when(Auth::guard('sanctum')->check(), function ($q) {
                 $userId = Auth::guard('sanctum')->id();
                 $q->withExists([
-                    'reactions as liked' => fn($q) => $q->where('user_id', $userId)->where('type', 1),
-                    'reactions as disliked' => fn($q) => $q->where('user_id', $userId)->where('type', -1),
-                    'favorites as is_favorited' => fn($q) => $q->where('user_id', $userId)
+                    'reactions as liked' => fn ($q) => $q->where('user_id', $userId)->where('type', 1),
+                    'reactions as disliked' => fn ($q) => $q->where('user_id', $userId)->where('type', -1),
+                    'favorites as is_favorited' => fn ($q) => $q->where('user_id', $userId),
                 ]);
             })
-            ->with(['post', 'post.images', 'artists', 'artists.images', 'year', 'season'])
+            ->with(['anime', 'anime.images', 'artists', 'artists.images', 'year', 'season'])
             ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
             ->when($sort === 'title', fn ($q) => $q->orderBy('song_romaji'))
@@ -60,9 +60,9 @@ class SongController extends Controller
             ->paginate(18);
 
         $songs->getCollection()->each(function ($song) {
-            if ($song->post) {
-                $song->post->append('thumbnail_url');
-                $song->post->append('banner_url');
+            if ($song->anime) {
+                $song->anime->append('thumbnail_url');
+                $song->anime->append('banner_url');
             }
             if ($song->artists) {
                 $song->artists->each->append('avatar_url');
@@ -95,11 +95,9 @@ class SongController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Post  $post
-     * @param  \App\Models\Song  $song
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show(\App\Models\Post $post, Song $song)
+    public function show(\App\Models\Anime $anime, Song $song)
     {
         Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
         $song->load([
@@ -107,20 +105,20 @@ class SongController extends Controller
             'artists.images',
             'year',
             'season',
-            'post.images',
+            'anime.images',
             'songVariants.video',
         ]);
 
         if (Auth::guard('sanctum')->check()) {
             $userId = Auth::guard('sanctum')->id();
             $song->loadExists([
-                'reactions as liked' => fn($q) => $q->where('user_id', $userId)->where('type', 1),
-                'reactions as disliked' => fn($q) => $q->where('user_id', $userId)->where('type', -1),
-                'favorites as is_favorited' => fn($q) => $q->where('user_id', $userId)
+                'reactions as liked' => fn ($q) => $q->where('user_id', $userId)->where('type', 1),
+                'reactions as disliked' => fn ($q) => $q->where('user_id', $userId)->where('type', -1),
+                'favorites as is_favorited' => fn ($q) => $q->where('user_id', $userId),
             ]);
         }
 
-        $song->post->append(['thumbnail_url', 'banner_url']);
+        $song->anime->append(['thumbnail_url', 'banner_url']);
         $song->artists->each->append('avatar_url');
 
         // Transform videos to have correct URLs
@@ -131,18 +129,18 @@ class SongController extends Controller
         });
 
         // Interaction states are now automatically appended via the Song model
-        
+
         // Get related songs from the same series (YouTube style)
-        $relatedSongs = Song::where('post_id', $post->id)
+        $relatedSongs = Song::where('anime_id', $anime->id)
             ->where('id', '!=', $song->id)
             ->with(['artists', 'artists.images'])
             ->withAvg('ratings', 'rating')
             ->when(Auth::guard('sanctum')->check(), function ($q) {
                 $userId = Auth::guard('sanctum')->id();
                 $q->withExists([
-                    'reactions as liked' => fn($q) => $q->where('user_id', $userId)->where('type', 1),
-                    'reactions as disliked' => fn($q) => $q->where('user_id', $userId)->where('type', -1),
-                    'favorites as is_favorited' => fn($q) => $q->where('user_id', $userId)
+                    'reactions as liked' => fn ($q) => $q->where('user_id', $userId)->where('type', 1),
+                    'reactions as disliked' => fn ($q) => $q->where('user_id', $userId)->where('type', -1),
+                    'favorites as is_favorited' => fn ($q) => $q->where('user_id', $userId),
                 ]);
             })
             ->get();
@@ -232,7 +230,7 @@ class SongController extends Controller
     {
         $user = Auth::check() ? Auth::user() : null;
 
-        // Buscar si ya existe una reacción del usuario para este post
+        // Buscar si ya existe una reacción del usuario para este anime
         $reaction = Reaction::where('user_id', $user->id)
             ->where('reactable_id', $song->id)
             ->where('reactable_type', Song::class)
@@ -262,7 +260,7 @@ class SongController extends Controller
 
         $user = Auth::check() ? Auth::user() : null;
 
-        // Verificar si el post ya está en favoritos
+        // Verificar si el tema ya está en favoritos
         $favorite = Favorite::where('user_id', $user->id)
             ->where('favoritable_id', $song->id)
             ->where('favoritable_type', Song::class)
@@ -343,7 +341,7 @@ class SongController extends Controller
         $sort = 'title';
         if ($currentSeason && $currentYear) {
 
-            $songs = Song::with(['post', 'post.images'])
+            $songs = Song::with(['anime', 'anime.images'])
                 ->where('type', $type)
                 ->when($currentSeason, function ($query, $currentSeason) {
                     $query->where('season_id', $currentSeason->id);
@@ -351,7 +349,7 @@ class SongController extends Controller
                 ->when($currentYear, function ($query, $currentYear) {
                     $query->where('year_id', $currentYear->id);
                 })
-                ->whereHas('post', fn ($query) => $query->where('status', $status))
+                ->whereHas('anime', fn ($query) => $query->where('status', $status))
                 ->get();
 
             $songs = $this->sortSongs($sort, $songs);
@@ -377,8 +375,8 @@ class SongController extends Controller
         $limit = 18;
 
         $songs = Song::when($type, fn ($q) => $q->where('type', $type))
-            ->whereHas('post', fn ($q) => $q->where('status', $status))
-            ->with(['post', 'post.images', 'artists', 'artists.images'])
+            ->whereHas('anime', fn ($q) => $q->where('status', $status))
+            ->with(['anime', 'anime.images', 'artists', 'artists.images'])
             ->withUserInteractions()
             ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
@@ -386,8 +384,8 @@ class SongController extends Controller
             ->paginate($limit);
 
         $songs->getCollection()->each(function ($item) {
-            if (isset($item->post)) {
-                $item->post->append('thumbnail_url');
+            if (isset($item->anime)) {
+                $item->anime->append('thumbnail_url');
             }
             if (isset($item->artists)) {
                 $item->artists->each->append('avatar_url');
@@ -414,12 +412,12 @@ class SongController extends Controller
         $currentYear = Year::where('current', true)->first();
 
         $songs = Song::when($type, fn ($q) => $q->where('type', $type))
-            ->whereHas('post', function ($query) use ($currentSeason, $currentYear, $status) {
+            ->whereHas('anime', function ($query) use ($currentSeason, $currentYear, $status) {
                 $query->where('status', $status)
                     ->when($currentSeason, fn ($q) => $q->where('season_id', $currentSeason->id))
                     ->when($currentYear, fn ($q) => $q->where('year_id', $currentYear->id));
             })
-            ->with(['post', 'post.images', 'artists', 'artists.images'])
+            ->with(['anime', 'anime.images', 'artists', 'artists.images'])
             ->withUserInteractions()
             ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
@@ -427,8 +425,8 @@ class SongController extends Controller
             ->paginate($limit);
 
         $songs->getCollection()->each(function ($item) {
-            if (isset($item->post)) {
-                $item->post->append('thumbnail_url');
+            if (isset($item->anime)) {
+                $item->anime->append('thumbnail_url');
             }
             if (isset($item->artists)) {
                 $item->artists->each->append('avatar_url');
@@ -450,7 +448,7 @@ class SongController extends Controller
         $songs->each(function ($song) use ($user) {
             $song->userScore = null;
             $factor = 1;
-            // $isDecimalFormat = false;
+            $isDecimalFormat = false;
             $denominator = 100; // Por defecto para POINT_100
 
             if ($user) {
@@ -462,7 +460,7 @@ class SongController extends Controller
                     case 'POINT_10_DECIMAL':
                         $factor = 0.1;
                         $denominator = 10;
-                        // $isDecimalFormat = true;
+                        $isDecimalFormat = true;
                         break;
                     case 'POINT_10':
                         $factor = 1 / 10;
@@ -471,7 +469,7 @@ class SongController extends Controller
                     case 'POINT_5':
                         $factor = 1 / 20;
                         $denominator = 5;
-                        // $isDecimalFormat = true;
+                        $isDecimalFormat = true;
                         break;
                 }
 
@@ -510,7 +508,7 @@ class SongController extends Controller
             case 'title':
 
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
 
                 return $songs;
@@ -537,7 +535,7 @@ class SongController extends Controller
 
             default:
                 $songs = $songs->sortBy(function ($song) {
-                    return $song->post->title;
+                    return $song->anime->title;
                 });
 
                 return $songs;

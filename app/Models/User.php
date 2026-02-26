@@ -143,7 +143,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Obtener playlists con conteo de posts (para eficiencia)
+     * Obtener playlists con conteo de animes (para eficiencia)
      */
     public function playlistsWithCount()
     {
@@ -178,7 +178,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Obtener el número total de posts en todas las playlists del usuario
+     * Obtener el número total de animes en todas las playlists del usuario
      */
     public function getTotalPlaylistSongsAttribute()
     {

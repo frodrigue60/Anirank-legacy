@@ -21,12 +21,12 @@ class VideoController extends Controller
 
         $breadcrumb = Breadcrumb::generate([
             [
-                'name' => 'Index',
-                'url' => route('admin.posts.index'),
+                'name' => 'Animes',
+                'url' => route('admin.animes.index'),
             ],
             [
-                'name' => $songVariant->song->post->title,
-                'url' => route('admin.songs.index', ['post_id' => $songVariant->song->post->id]),
+                'name' => $songVariant->song->anime->title,
+                'url' => route('admin.songs.index', ['anime_id' => $songVariant->song->anime->id]),
             ],
             [
                 'name' => $songVariant->song->slug,
@@ -46,21 +46,21 @@ class VideoController extends Controller
         $variantId = $request->query('variant_id') ?? $request->query('variant');
 
         if (! $variantId) {
-            return redirect(route('admin.posts.index'))->with('error', 'Variant ID is required to add a video.');
+            return redirect(route('admin.animes.index'))->with('error', 'Variant ID is required to add a video.');
         }
 
-        $songVariant = SongVariant::with('song', 'song.post')->findOrFail($variantId);
+        $songVariant = SongVariant::with('song', 'song.anime')->findOrFail($variantId);
         $song = $songVariant->song;
-        $post = $song->post;
+        $anime = $song->anime;
 
         $breadcrumb = Breadcrumb::generate([
             [
                 'name' => 'Index',
-                'url' => route('admin.posts.index'),
+                'url' => route('admin.animes.index'),
             ],
             [
-                'name' => $post->title,
-                'url' => route('admin.songs.index', ['post_id' => $post->id]),
+                'name' => $anime->title,
+                'url' => route('admin.songs.index', ['anime_id' => $anime->id]),
             ],
             [
                 'name' => $song->slug,
@@ -77,9 +77,9 @@ class VideoController extends Controller
 
     public function store(Request $request)
     {
-        $songVariant = SongVariant::with('song.post')->findOrFail($request->song_variant_id);
+        $songVariant = SongVariant::with('song.anime')->findOrFail($request->song_variant_id);
         $song = $songVariant->song;
-        $post = $song->post;
+        $anime = $song->anime;
 
         try {
             $video = new Video;
@@ -103,7 +103,7 @@ class VideoController extends Controller
                 $mimeType = $request->video->getMimeType();
                 $extension = $this->getExtensionFromMimeType($mimeType);
 
-                $file_name = ($post->slug ?? 'untitled').'-'.($song->slug ?? 'song').'-'.($songVariant->slug ?? 'default').'.'.$extension;
+                $file_name = ($anime->slug ?? 'untitled').'-'.($song->slug ?? 'song').'-'.($songVariant->slug ?? 'default').'.'.$extension;
 
                 // Store file FIRST — only save DB record if storage succeeds
                 $request->video->storeAs($path, $file_name);
@@ -146,17 +146,17 @@ class VideoController extends Controller
     public function edit(Video $video)
     {
         try {
-            $post = $video->songVariant->song->post;
+            $anime = $video->songVariant->song->anime;
             $song = $video->songVariant->song;
 
             $breadcrumb = Breadcrumb::generate([
                 [
-                    'name' => 'Index',
-                    'url' => route('admin.posts.index'),
+                    'name' => 'Animes',
+                    'url' => route('admin.animes.index'),
                 ],
                 [
-                    'name' => $post->title,
-                    'url' => route('admin.songs.index', ['post_id' => $post->id]),
+                    'name' => $anime->title,
+                    'url' => route('admin.songs.index', ['anime_id' => $anime->id]),
                 ],
                 [
                     'name' => $song->slug,
@@ -179,7 +179,7 @@ class VideoController extends Controller
         try {
             $songVariant = $video->songVariant;
             $song = $songVariant->song;
-            $post = $song->post;
+            $anime = $song->anime;
 
             if ($request->hasFile('video')) {
                 $validator = Validator::make($request->all(), [
@@ -199,7 +199,7 @@ class VideoController extends Controller
                 $mimeType = $request->video->getMimeType();
                 $extension = $this->getExtensionFromMimeType($mimeType);
 
-                $file_name = ($post->slug ?? 'untitled').'-'.($song->slug ?? 'song').'-'.($songVariant->slug ?? 'default').'.'.$extension;
+                $file_name = ($anime->slug ?? 'untitled').'-'.($song->slug ?? 'song').'-'.($songVariant->slug ?? 'default').'.'.$extension;
 
                 // Store new file FIRST
                 $request->video->storeAs($path, $file_name);

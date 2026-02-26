@@ -38,12 +38,12 @@
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
                                         @if ($report->song)
-                                            <a href="{{ route('admin.songs.index', ['post_id' => $report->song->post_id]) }}"
+                                            <a href="{{ route('admin.songs.index', ['anime_id' => $report->song->anime_id]) }}"
                                                 class="text-sm font-bold text-white hover:text-blue-400 transition-colors line-clamp-1">
                                                 {{ $report->song->name }}
                                             </a>
                                             <span class="text-[10px] text-zinc-500 mt-1 font-medium truncate max-w-xs">
-                                                {{ $report->song->post->title ?? 'N/A' }}
+                                                {{ $report->song->anime->title ?? 'N/A' }}
                                             </span>
                                         @else
                                             <span class="text-sm text-zinc-500 italic line-clamp-1">Broken Link / Deleted

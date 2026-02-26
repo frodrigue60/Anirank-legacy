@@ -48,12 +48,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($studios as $studio)
                     @php
-                        $featuredPost = $studio->posts->first();
+                        $featuredAnime = $studio->animes->first();
                     @endphp
                     <a wire:key="studio-{{ $studio->id }}" href="{{ route('studios.show', $studio) }}"
                         class="group relative overflow-hidden rounded-xl bg-slate-800 aspect-16/10 border border-transparent hover:border-primary/50 transition-all cursor-pointer shadow-lg shadow-black/20">
                         <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                            style="background-image: url('{{ $featuredPost->banner_url }}');filter: brightness(0.5);">
+                            style="background-image: url('{{ $featuredAnime->banner_url }}');filter: brightness(0.5);">
                         </div>
                         <div
                             class="absolute inset-0 bg-linear-to-t from-background-dark/95 via-background-dark/40 to-transparent">
@@ -70,7 +70,7 @@
                                 <div class="flex flex-col">
                                     <span
                                         class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Produced</span>
-                                    <span class="text-white text-sm font-semibold">{{ $studio->posts_count }}
+                                    <span class="text-white text-sm font-semibold">{{ $studio->animes_count }}
                                         Series</span>
                                 </div>
                                 <div class="flex flex-col items-end">
@@ -98,7 +98,8 @@
 
     {{-- Infinite Scroll Trigger --}}
     @if ($readyToLoad && $hasMorePages)
-        <div wire:intersect="loadMore" wire:key="intersect-studios" class="flex justify-center py-12">
+        <div x-intersect.once="$wire.loadMore()" wire:key="intersect-studios-{{ $perPage }}"
+            class="flex justify-center py-12">
             <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
         </div>
     @endif

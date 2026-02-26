@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Producer;
 use Illuminate\Http\Request;
 
@@ -14,14 +14,14 @@ class ProducerController extends Controller
         $name = $request->name;
         $sort = $request->sort ?? 'most_animes';
 
-        $query = Producer::query()->whereHas('posts', function ($q) {
+        $query = Producer::query()->whereHas('animes', function ($q) {
             $q->where('status', true);
-        })->withCount(['posts' => function ($q) {
+        })->withCount(['animes' => function ($q) {
             $q->where('status', true);
         }]);
 
-        // Load posts to get a banner image (taking the latest one)
-        $query->with(['posts' => function ($q) {
+        // Load animes to get a banner image (taking the latest one)
+        $query->with(['animes' => function ($q) {
             $q->where('status', true)->latest();
         }]);
 
@@ -37,18 +37,18 @@ class ProducerController extends Controller
                 $query->orderBy('name', 'desc');
                 break;
             case 'least_animes':
-                $query->orderBy('posts_count', 'asc');
+                $query->orderBy('animes_count', 'asc');
                 break;
             case 'most_animes':
             default:
-                $query->orderBy('posts_count', 'desc');
+                $query->orderBy('animes_count', 'desc');
                 break;
         }
 
         $producers = $query->paginate(18);
 
         foreach ($producers as $producer) {
-            $featured = $producer->posts->first();
+            $featured = $producer->animes->first();
             if ($featured) {
                 $featured->append('banner_url');
                 $producer->featured_image = $featured->banner_url;
@@ -58,7 +58,7 @@ class ProducerController extends Controller
                 $producer->featured_title = null;
             }
             // Remove the collection to keep the response clean
-            unset($producer->posts);
+            unset($producer->animes);
         }
 
         return response()->json([
@@ -82,7 +82,7 @@ class ProducerController extends Controller
         $season_id = $request->season_id;
         $sort = $request->sort ?? 'title';
 
-        $query = Post::where('status', $status)
+        $query = Anime::where('status', $status)
             ->whereHas('producers', function ($query) use ($producer) {
                 $query->where('producers.id', $producer->id);
             })
@@ -90,7 +90,7 @@ class ProducerController extends Controller
             ->addSelect(['average_rating' => \App\Models\Rating::selectRaw('avg(rating)')
                 ->join('songs', 'songs.id', '=', 'ratings.rateable_id')
                 ->where('ratings.rateable_type', \App\Models\Song::class)
-                ->whereColumn('songs.post_id', 'posts.id')
+                ->whereColumn('songs.anime_id', 'animes.id')
             ])
             ->withCount('songs')
             ->when($name, function ($query) use ($name) {
@@ -118,15 +118,15 @@ class ProducerController extends Controller
             $query->orderBy('created_at', 'desc');
         }
 
-        $posts = $query->paginate(18);
+        $animes = $query->paginate(18);
 
-        $posts->getCollection()->each(function ($post) {
-            $post->append('thumbnail_url');
-            $post->average_rating = (float) ($post->average_rating ?? 0);
+        $animes->getCollection()->each(function ($anime) {
+            $anime->append('thumbnail_url');
+            $anime->average_rating = (float) ($anime->average_rating ?? 0);
         });
 
         return response()->json([
-            'posts' => $posts,
+            'animes' => $animes,
             'producer' => $producer,
         ]);
     }

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Artist;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -19,7 +19,7 @@ class SearchController extends Controller
 
         if (! $query || strlen($query) < 2) {
             return response()->json([
-                'posts' => [],
+                'animes' => [],
                 'artists' => [],
                 'users' => [],
             ]);
@@ -28,8 +28,8 @@ class SearchController extends Controller
         // Limit results per category to keep response fast and concise
         $limit = 5;
 
-        // Search Posts (Animes)
-        $posts = Post::where('title', 'LIKE', "%{$query}%")
+        // Search Animes
+        $animes = Anime::where('title', 'LIKE', "%{$query}%")
             ->select('id', 'title', 'slug')
             ->with('images')
             ->limit($limit)
@@ -53,7 +53,7 @@ class SearchController extends Controller
             ->append('avatar_url');
 
         return response()->json([
-            'posts' => $posts,
+            'animes' => $animes,
             'artists' => $artists,
             'users' => $users,
         ]);

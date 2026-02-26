@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Song;
 
 class Playlist extends Model
 {
@@ -24,14 +23,15 @@ class Playlist extends Model
             ->orderBy('position');
     }
 
-    public function addPost(Song $song)
+    public function addAnime(Song $song)
     {
-        $currentMaxPosition = $this->songs()->max('position') ?? 0;
-        return $this->songs()->attach($song->id, ['position' => $currentMaxPosition + 1]);
+        if (! $this->songs()->where('songs.id', $song->id)->exists()) {
+            $this->songs()->attach($song->id);
+        }
     }
 
-    public function removePost(Song $song)
+    public function removeAnime(Song $song)
     {
-        return $this->songs()->detach($song->id);
+        $this->songs()->detach($song->id);
     }
 }

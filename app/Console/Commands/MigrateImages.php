@@ -13,23 +13,23 @@ class MigrateImages extends Command
     {
         $this->info('Starting image migration...');
 
-        // 1. Migrate Posts (Thumbnails & Banners)
-        \App\Models\Post::all()->each(function ($post) {
-            if ($post->thumbnail) {
+        // 1. Migrate Animes (Thumbnails & Banners)
+        \App\Models\Anime::all()->each(function ($anime) {
+            if ($anime->thumbnail) {
                 \App\Models\Image::firstOrCreate([
-                    'imageable_id' => $post->id,
-                    'imageable_type' => \App\Models\Post::class,
+                    'imageable_id' => $anime->id,
+                    'imageable_type' => \App\Models\Anime::class,
                     'type' => 'thumbnail',
-                    'path' => $post->thumbnail,
+                    'path' => $anime->thumbnail,
                     'disk' => 'public'
                 ]);
             }
-            if ($post->banner) {
+            if ($anime->banner) {
                 \App\Models\Image::firstOrCreate([
-                    'imageable_id' => $post->id,
-                    'imageable_type' => \App\Models\Post::class,
+                    'imageable_id' => $anime->id,
+                    'imageable_type' => \App\Models\Anime::class,
                     'type' => 'banner',
-                    'path' => $post->banner,
+                    'path' => $anime->banner,
                     'disk' => 'public'
                 ]);
             }

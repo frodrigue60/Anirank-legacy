@@ -25,8 +25,8 @@ class Producer extends Model
         });
     }
 
-    public function posts()
+    public function animes()
     {
-        return $this->belongsToMany(Post::class);
+        return $this->belongsToMany(Anime::class);
     }
 }

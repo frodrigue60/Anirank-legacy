@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\Post;
+use App\Models\Anime;
 use App\Models\Genre;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
@@ -22,15 +22,15 @@ class SyncGenres extends Command
      *
      * @var string
      */
-    protected $description = 'Sync genres for all existing posts from AniList';
+    protected $description = 'Sync genres for all existing animes from AniList';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $posts = Post::whereNotNull('anilist_id')->get();
-        $this->info("Found {$posts->count()} posts to sync.");
+        $animes = Anime::whereNotNull('anilist_id')->get();
+        $this->info("Found {$animes->count()} animes to sync.");
 
         $client = new Client();
         $query = '
@@ -41,15 +41,15 @@ class SyncGenres extends Command
             }
         ';
 
-        $bar = $this->output->createProgressBar($posts->count());
+        $bar = $this->output->createProgressBar($animes->count());
         $bar->start();
 
-        foreach ($posts as $post) {
+        foreach ($animes as $anime) {
             try {
                 $response = $client->post('https://graphql.anilist.co', [
                     'json' => [
                         'query' => $query,
-                        'variables' => ['id' => $post->anilist_id],
+                        'variables' => ['id' => $anime->anilist_id],
                     ]
                 ]);
 
@@ -64,9 +64,9 @@ class SyncGenres extends Command
                     $genreIds[] = $genre->id;
                 }
 
-                $post->genres()->sync($genreIds);
+                $anime->genres()->sync($genreIds);
             } catch (\Exception $e) {
-                $this->error("\nError syncing post {$post->id}: " . $e->getMessage());
+                $this->error("\nError syncing anime {$anime->id}: " . $e->getMessage());
             }
             $bar->advance();
         }

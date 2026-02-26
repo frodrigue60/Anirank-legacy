@@ -8,7 +8,7 @@
                 <h2 class="text-xl font-bold text-white uppercase tracking-tight">Profile Avatar</h2>
             </div>
 
-            <form wire:submit.prevent="saveAvatar" class="space-y-4">
+            <form wire:submit="saveAvatar" class="space-y-4">
                 <div class="relative group">
                     <label for="profile-file"
                         class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Upload
@@ -73,7 +73,7 @@
                 <h2 class="text-xl font-bold text-white uppercase tracking-tight">Profile Banner</h2>
             </div>
 
-            <form wire:submit.prevent="saveBanner" class="space-y-4">
+            <form wire:submit="saveBanner" class="space-y-4">
                 <div class="relative group">
                     <label for="banner-file"
                         class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Upload
@@ -141,7 +141,7 @@
                 <h2 class="text-xl font-bold text-white uppercase tracking-tight">Site Settings</h2>
             </div>
 
-            <form wire:submit.prevent="saveScoreFormat" class="flex flex-col flex-1">
+            <form wire:submit="saveScoreFormat" class="flex flex-col flex-1">
                 <div class="relative group flex-1">
                     <label for="select-score-format"
                         class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Scoring

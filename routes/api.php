@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\InitController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\PlaylistController;
-use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\AnimeController;
 use App\Http\Controllers\Api\ProducerController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SongController;
@@ -29,13 +29,13 @@ Route::get('init', [InitController::class, 'index'])->name('api.init');
 Route::get('search', SearchController::class)->name('api.search');
 
 // Posts / Animes
-Route::controller(PostController::class)->group(function () {
+Route::controller(AnimeController::class)->group(function () {
     Route::get('home', 'home')->name('api.home');
     
     // Public routes (Auth handled optionally in controllers/models)
     Route::get('animes', 'index')->name('api.animes.index');
-    Route::get('animes/{post:slug}', 'show')->name('api.animes.show');
-    Route::get('animes/{post:slug}/songs/{song:slug}', [SongController::class, 'show'])->name('api.songs.show');
+    Route::get('animes/{anime:slug}', 'show')->name('api.animes.show');
+    Route::get('animes/{anime:slug}/songs/{song:slug}', [SongController::class, 'show'])->name('api.songs.show');
 });
 
 // Songs

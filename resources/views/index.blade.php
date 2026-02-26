@@ -58,7 +58,7 @@
                 @endphp
                 <section class="relative w-full rounded-2xl overflow-hidden bg-surface-dark group">
                     <div class="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-overlay transition-transform duration-700 group-hover:scale-105"
-                        style="background-image: url('{{ $featuredSong->post->banner_url }}');">
+                        style="background-image: url('{{ $featuredSong->anime->banner_url }}');">
                     </div>
                     <div class="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/80 to-transparent">
                     </div>
@@ -66,7 +66,7 @@
                         <div class="relative shrink-0 hero-glow">
                             <div
                                 class="w-48 h-48 md:w-64 md:h-64 rounded-xl shadow-2xl overflow-hidden relative border-2 border-white/10">
-                                <x-ui.image :src="$featuredSong->post->thumbnail_url" :alt="$featuredSong->name" class="w-full h-full object-cover" />
+                                <x-ui.image :src="$featuredSong->anime->thumbnail_url" :alt="$featuredSong->name" class="w-full h-full object-cover" />
                                 <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/80 to-transparent p-4 pt-10">
                                     <div class="flex items-center gap-1 text-yellow-400 font-bold text-lg">
                                         <span class="material-symbols-outlined filled">star</span>
@@ -87,7 +87,7 @@
                                     {{ $featuredSong->name }}</h1>
                                 <div
                                     class="flex flex-col md:flex-col items-center md:items-start gap-1 md:gap-3 text-md md:text-lg text-white/80">
-                                    <span class="font-bold text-primary truncate">{{ $featuredSong->post->title }}</span>
+                                    <span class="font-bold text-primary truncate">{{ $featuredSong->anime->title }}</span>
                                     <span class="font-medium text-white truncate">
                                         @foreach ($featuredSong->artists as $artist)
                                             {{ $artist->name }}{{ !$loop->last ? ', ' : '' }}
@@ -96,7 +96,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-4 mt-2 justify-center md:justify-start">
-                                <a href="{{ route('songs.show.nested', ['post' => $featuredSong->post->slug, 'song' => $featuredSong->slug]) }}"
+                                <a href="{{ route('songs.show.nested', ['anime' => $featuredSong->anime->slug, 'song' => $featuredSong->slug]) }}"
                                     class="bg-primary hover:bg-primary/80 text-white h-12 px-8 rounded-full font-bold flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-primary/30">
                                     <span class="material-symbols-outlined filled">play_circle</span>
                                     <span>Play Now</span>
@@ -155,7 +155,7 @@
                                 <div
                                     class="group relative p-3 rounded-xl hover:bg-surface-dark transition-colors border flex gap-4 items-center {{ $cardClass }}">
                                     <div class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
-                                        <x-ui.image :src="$song->post->thumbnail_url" :alt="$song->name"
+                                        <x-ui.image :src="$song->anime->thumbnail_url" :alt="$song->name"
                                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                         <div
                                             class="absolute top-1 left-1 {{ $badgeClass }} text-xs font-bold px-1.5 py-0.5 rounded shadow">
@@ -163,7 +163,7 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center justify-between gap-2">
-                                            <a href="{{ route('songs.show.nested', ['post' => $song->post->slug, 'song' => $song->slug]) }}"
+                                            <a href="{{ route('songs.show.nested', ['anime' => $song->anime->slug, 'song' => $song->slug]) }}"
                                                 class="font-bold text-white truncate text-lg hover:text-primary transition-colors">{{ $song->name }}</a>
                                             <div
                                                 class="flex items-center gap-1 bg-surface-dark/80 text-yellow-400 text-xs font-bold px-2 py-1 rounded-lg border border-white/5 shrink-0">
@@ -171,7 +171,7 @@
                                                 <span>{{ $score }}</span>
                                             </div>
                                         </div>
-                                        <p class="text-sm text-primary font-medium truncate">{{ $song->post->title }}</p>
+                                        <p class="text-sm text-primary font-medium truncate">{{ $song->anime->title }}</p>
                                         <p class="text-xs text-white/50 truncate">
                                             @foreach ($song->artists as $artist)
                                                 @if ($artist->slug)
