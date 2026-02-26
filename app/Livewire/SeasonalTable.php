@@ -4,12 +4,15 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use App\Models\Song;
 use App\Models\Season;
 use App\Models\Year;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+#[Lazy]
 class SeasonalTable extends Component
 {
     use WithPagination;
@@ -17,7 +20,6 @@ class SeasonalTable extends Component
         setScoreSongs as traitSetScoreSongs;
     }
 
-    public $readyToLoad = false;
     public $currentSection = 'ALL';
     public $perPage = 15;
     public $page = 1;
@@ -27,9 +29,9 @@ class SeasonalTable extends Component
     public $seasonName;
     public $yearName;
 
-    public function loadData()
+    public function placeholder()
     {
-        $this->readyToLoad = true;
+        return view('livewire.skeletons.seasonal-table-skeleton');
     }
 
     public function mount($season, $year)
@@ -49,7 +51,7 @@ class SeasonalTable extends Component
 
     public function loadMore()
     {
-        if (!$this->hasMorePages || !$this->readyToLoad) return;
+        if (!$this->hasMorePages) return;
         $this->page++;
     }
 
@@ -65,9 +67,9 @@ class SeasonalTable extends Component
         }
     }
 
-    public function getSongsProperty()
+    #[Computed]
+    public function songs()
     {
-        if (!$this->readyToLoad) return collect();
 
         $status = true;
         $limit = 100;

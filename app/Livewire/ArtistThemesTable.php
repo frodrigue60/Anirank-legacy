@@ -5,6 +5,8 @@ namespace App\Livewire;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Url;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use App\Models\Song;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Year;
@@ -12,6 +14,7 @@ use App\Models\Season;
 use App\Models\Artist;
 use Illuminate\Support\Facades\Storage;
 
+#[Lazy]
 class ArtistThemesTable extends Component
 {
     use WithPagination;
@@ -35,16 +38,10 @@ class ArtistThemesTable extends Component
 
     public $perPage = 18;
     public $hasMorePages = false;
-    public $readyToLoad = false;
 
-    public function mount(Artist $artist)
+    public function placeholder()
     {
-        $this->artist = $artist;
-    }
-
-    public function loadData()
-    {
-        $this->readyToLoad = true;
+        return view('livewire.skeletons.artist-themes-skeleton');
     }
 
     public function updatingName()
@@ -74,9 +71,7 @@ class ArtistThemesTable extends Component
 
     public function loadMore()
     {
-        if ($this->readyToLoad) {
-            $this->perPage += 18;
-        }
+        $this->perPage += 18;
     }
 
     public function clearFilters()
@@ -84,17 +79,43 @@ class ArtistThemesTable extends Component
         $this->reset(['name', 'type', 'year_id', 'season_id', 'sort', 'perPage']);
     }
 
+    #[Computed]
+    public function years()
+    {
+        return Year::orderBy('name', 'desc')->get(['id', 'name']);
+    }
+
+    #[Computed]
+    public function seasons()
+    {
+        return Season::all(['id', 'name']);
+    }
+
+    #[Computed]
+    public function types()
+    {
+        return [
+            ['name' => 'Opening', 'value' => 'OP'],
+            ['name' => 'Ending', 'value' => 'ED'],
+            ['name' => 'Insert', 'value' => 'INS'],
+            ['name' => 'Other', 'value' => 'OTH'],
+        ];
+    }
+
+    #[Computed]
+    public function sortMethods()
+    {
+        return [
+            ['name' => 'Recent', 'value' => 'recent'],
+            ['name' => 'Title', 'value' => 'title'],
+            ['name' => 'Score', 'value' => 'averageRating'],
+            ['name' => 'Views', 'value' => 'view_count'],
+            ['name' => 'Popular', 'value' => 'likeCount'],
+        ];
+    }
+
     public function render()
     {
-        if (!$this->readyToLoad) {
-            return view('livewire.artist-themes-table', [
-                'songs' => collect(),
-                'years' => collect(),
-                'seasons' => collect(),
-                'types' => [],
-                'sortMethods' => []
-            ]);
-        }
 
         $query = Song::query()
             ->with(['anime:id,title,slug', 'artists:id,name,slug'])
@@ -153,21 +174,6 @@ class ArtistThemesTable extends Component
 
         return view('livewire.artist-themes-table', [
             'songs' => $songs,
-            'years' => Year::orderBy('name', 'desc')->get(['id', 'name']),
-            'seasons' => Season::all(['id', 'name']),
-            'types' => [
-                ['name' => 'Opening', 'value' => 'OP'],
-                ['name' => 'Ending', 'value' => 'ED'],
-                ['name' => 'Insert', 'value' => 'INS'],
-                ['name' => 'Other', 'value' => 'OTH'],
-            ],
-            'sortMethods' => [
-                ['name' => 'Recent', 'value' => 'recent'],
-                ['name' => 'Title', 'value' => 'title'],
-                ['name' => 'Score', 'value' => 'averageRating'],
-                ['name' => 'Views', 'value' => 'view_count'],
-                ['name' => 'Popular', 'value' => 'likeCount'],
-            ]
         ]);
     }
 }

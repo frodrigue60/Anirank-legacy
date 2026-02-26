@@ -1,4 +1,4 @@
-<div wire:init="loadData">
+<div x-data="{}" class="flex flex-col gap-8">
     <div class="flex flex-col gap-6 mb-8">
         {{-- Filters Bar --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 bg-surface-dark/30 p-4 rounded-xl border border-white/5 shadow-2xl backdrop-blur-sm"
@@ -11,9 +11,9 @@
                 <div class="relative">
                     <span
                         class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors text-base">search</span>
-                    <input wire:model.live.debounce.300ms="name" type="text" placeholder="Search anime..."
+                    <input wire:model.live.debounce.300ms="name" type="text" placeholder="Search themes..."
                         wire:loading.attr="disabled"
-                        class="w-full bg-surface-darker! border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white! focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
+                        class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
                 </div>
             </div>
 
@@ -25,7 +25,7 @@
                     <select wire:model.live="type" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="">All Types</option>
-                        @foreach ($types as $t)
+                        @foreach ($this->types as $t)
                             <option value="{{ $t['value'] }}">{{ $t['name'] }}</option>
                         @endforeach
                     </select>
@@ -42,7 +42,7 @@
                     <select wire:model.live="year_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="">All Years</option>
-                        @foreach ($years as $year)
+                        @foreach ($this->years as $year)
                             <option value="{{ $year->id }}">{{ $year->name }}</option>
                         @endforeach
                     </select>
@@ -59,7 +59,7 @@
                     <select wire:model.live="season_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
                         <option value="">All Seasons</option>
-                        @foreach ($seasons as $season)
+                        @foreach ($this->seasons as $season)
                             <option value="{{ $season->id }}">{{ $season->name }}</option>
                         @endforeach
                     </select>
@@ -76,7 +76,7 @@
                 <div class="relative">
                     <select wire:model.live="sort" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
-                        @foreach ($sortMethods as $m)
+                        @foreach ($this->sortMethods as $m)
                             <option value="{{ $m['value'] }}">{{ $m['name'] }}</option>
                         @endforeach
                     </select>
@@ -89,30 +89,26 @@
 
     {{-- Content Grid --}}
     <div class="min-h-[400px]">
-        @if ($readyToLoad)
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                @foreach ($songs as $song)
-                    <x-songs.card :song="$song" wire:key="user-fav-{{ $song->id }}" />
-                @endforeach
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+            @foreach ($songs as $song)
+                <x-songs.card :song="$song" wire:key="user-fav-{{ $song->id }}" />
+            @endforeach
+        </div>
 
-            {{-- Empty State --}}
-            @if ($songs->isEmpty())
-                <div class="py-24 flex flex-col items-center justify-center text-center opacity-40">
-                    <span class="material-symbols-outlined text-7xl mb-4">favorite_border</span>
-                    <p class="text-xl font-bold">No favorite themes found matching your filters.</p>
-                    <button wire:click="$set('name', '')"
-                        class="mt-4 text-primary hover:text-primary-light text-sm font-bold uppercase tracking-widest">Clear
-                        Searches</button>
-                </div>
-            @endif
-        @else
-            @include('livewire.skeletons.card-skeleton')
+        {{-- Empty State --}}
+        @if ($songs->isEmpty())
+            <div class="py-24 flex flex-col items-center justify-center text-center opacity-40">
+                <span class="material-symbols-outlined text-7xl mb-4">favorite_border</span>
+                <p class="text-xl font-bold">No favorite themes found matching your filters.</p>
+                <button wire:click="$set('name', '')"
+                    class="mt-4 text-primary hover:text-primary-light text-sm font-bold uppercase tracking-widest">Clear
+                    Searches</button>
+            </div>
         @endif
     </div>
 
     {{-- Loader/Infinite Scroll --}}
-    @if ($hasMorePages && $readyToLoad)
+    @if ($hasMorePages)
         <div x-intersect.once="$wire.loadMore()" wire:key="intersect-user-favorites-{{ $perPage }}"
             class="py-12 flex flex-col items-center gap-4">
             <div class="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin">

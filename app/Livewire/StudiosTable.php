@@ -2,12 +2,15 @@
 
 namespace App\Livewire;
 
-use App\Models\Studio;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+use App\Models\Studio;
 use Illuminate\Support\Facades\Auth;
 
+#[Lazy]
 class StudiosTable extends Component
 {
     use WithPagination;
@@ -20,11 +23,10 @@ class StudiosTable extends Component
 
     public $perPage = 18;
     public $hasMorePages = false;
-    public $readyToLoad = false;
 
-    public function loadData()
+    public function placeholder()
     {
-        $this->readyToLoad = true;
+        return view('livewire.skeletons.studios-table-skeleton');
     }
 
     public function updatingSearch()
@@ -39,18 +41,13 @@ class StudiosTable extends Component
 
     public function loadMore()
     {
-        if ($this->hasMorePages && $this->readyToLoad) {
+        if ($this->hasMorePages) {
             $this->perPage += 12;
         }
     }
 
     public function render()
     {
-        if (!$this->readyToLoad) {
-            return view('livewire.studios-table', [
-                'studios' => collect(),
-            ]);
-        }
 
         $studiosQuery = Studio::query()
             ->withCount(['animes' => function ($query) {

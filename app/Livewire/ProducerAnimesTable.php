@@ -6,12 +6,16 @@ use App\Models\Anime;
 use App\Models\Year;
 use App\Models\Season;
 use App\Models\Format;
+use App\Models\Genre;
 use App\Models\Producer;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Url;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\Auth;
 
+#[Lazy]
 class ProducerAnimesTable extends Component
 {
     use WithPagination;
@@ -39,7 +43,11 @@ class ProducerAnimesTable extends Component
     
     public $perPage = 18;
     public $hasMorePages = false;
-    public $readyToLoad = false;
+
+    public function placeholder()
+    {
+        return view('livewire.skeletons.producer-animes-skeleton');
+    }
 
     public function mount($producerId)
     {
@@ -49,7 +57,7 @@ class ProducerAnimesTable extends Component
 
     public function loadData()
     {
-        $this->readyToLoad = true;
+        // No longer needed with #[Lazy]
     }
 
     public function updatingName()
@@ -79,9 +87,7 @@ class ProducerAnimesTable extends Component
 
     public function loadMore()
     {
-        if ($this->readyToLoad) {
-            $this->perPage += 12;
-        }
+        $this->perPage += 12;
     }
 
     public function setViewMode($mode)
@@ -89,17 +95,32 @@ class ProducerAnimesTable extends Component
         $this->viewMode = $mode;
     }
 
+    #[Computed]
+    public function years()
+    {
+        return Year::orderBy('name', 'desc')->get(['id', 'name']);
+    }
+
+    #[Computed]
+    public function seasons()
+    {
+        return Season::all(['id', 'name']);
+    }
+
+    #[Computed]
+    public function formats()
+    {
+        return Format::all(['id', 'name']);
+    }
+
+    #[Computed]
+    public function allGenres()
+    {
+        return Genre::orderBy('name')->get(['id', 'name']);
+    }
+
     public function render()
     {
-        if (!$this->readyToLoad) {
-            return view('livewire.producer-animes-table', [
-                'animes' => collect(),
-                'years' => collect(),
-                'seasons' => collect(),
-                'formats' => collect(),
-                'all_genres' => collect(),
-            ]);
-        }
 
         $animes = Anime::query()
             ->when(!Auth::check() || !Auth::user()->isStaff(), function ($query) {
@@ -140,10 +161,6 @@ class ProducerAnimesTable extends Component
 
         return view('livewire.producer-animes-table', [
             'animes' => $animes,
-            'years' => \App\Models\Year::orderBy('name', 'desc')->get(['id', 'name']),
-            'seasons' => \App\Models\Season::all(['id', 'name']),
-            'formats' => \App\Models\Format::all(['id', 'name']),
-            'all_genres' => \App\Models\Genre::orderBy('name')->get(['id', 'name']),
         ]);
     }
 }

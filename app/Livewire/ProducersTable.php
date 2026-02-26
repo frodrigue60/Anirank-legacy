@@ -2,12 +2,15 @@
 
 namespace App\Livewire;
 
-use App\Models\Producer;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+use App\Models\Producer;
 use Illuminate\Support\Facades\Auth;
 
+#[Lazy]
 class ProducersTable extends Component
 {
     use WithPagination;
@@ -20,11 +23,10 @@ class ProducersTable extends Component
 
     public $perPage = 18;
     public $hasMorePages = false;
-    public $readyToLoad = false;
 
-    public function loadData()
+    public function placeholder()
     {
-        $this->readyToLoad = true;
+        return view('livewire.skeletons.producers-table-skeleton');
     }
 
     public function updatingSearch()
@@ -39,18 +41,13 @@ class ProducersTable extends Component
 
     public function loadMore()
     {
-        if ($this->hasMorePages && $this->readyToLoad) {
+        if ($this->hasMorePages) {
             $this->perPage += 12;
         }
     }
 
     public function render()
     {
-        if (!$this->readyToLoad) {
-            return view('livewire.producers-table', [
-                'producers' => collect(),
-            ]);
-        }
 
         $producersQuery = Producer::query()
             ->withCount(['animes' => function ($query) {

@@ -1,4 +1,4 @@
-<div wire:init="loadData" x-data="{}" class="flex flex-col gap-8">
+<div x-data="{}" class="flex flex-col gap-8">
     {{-- Filter Panel --}}
     <section class="bg-surface-dark/30 p-6 rounded-2xl border border-white/5 shadow-2xl backdrop-blur-md"
         wire:loading.class="opacity-50 pointer-events-none transition-opacity">
@@ -25,7 +25,7 @@
                     <select wire:model.live="type" wire:loading.attr="disabled"
                         class="w-full h-11 bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">
                         <option value="">All Types</option>
-                        @foreach ($types as $t)
+                        @foreach ($this->types as $t)
                             <option value="{{ $t['value'] }}">{{ $t['name'] }}</option>
                         @endforeach
                     </select>
@@ -42,7 +42,7 @@
                     <select wire:model.live="year_id" wire:loading.attr="disabled"
                         class="w-full h-11 bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">
                         <option value="">All Years</option>
-                        @foreach ($years as $y)
+                        @foreach ($this->years as $y)
                             <option value="{{ $y->id }}">{{ $y->name }}</option>
                         @endforeach
                     </select>
@@ -59,7 +59,7 @@
                     <select wire:model.live="season_id" wire:loading.attr="disabled"
                         class="w-full h-11 bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">
                         <option value="">All Seasons</option>
-                        @foreach ($seasons as $s)
+                        @foreach ($this->seasons as $s)
                             <option value="{{ $s->id }}">{{ $s->name }}</option>
                         @endforeach
                     </select>
@@ -76,7 +76,7 @@
                 <div class="relative">
                     <select wire:model.live="sort" wire:loading.attr="disabled"
                         class="w-full h-11 bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">
-                        @foreach ($sortMethods as $m)
+                        @foreach ($this->sortMethods as $m)
                             <option value="{{ $m['value'] }}">{{ $m['name'] }}</option>
                         @endforeach
                     </select>
@@ -89,34 +89,30 @@
 
     {{-- Data Container --}}
     <div class="min-h-[400px]">
-        @if ($readyToLoad)
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                @foreach ($songs as $song)
-                    <x-songs.card :song="$song" wire:key="artist-theme-{{ $song->id }}"
-                        class="border-primary/10 bg-background-dark" />
-                @endforeach
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+            @foreach ($songs as $song)
+                <x-songs.card :song="$song" wire:key="artist-theme-{{ $song->id }}"
+                    class="border-primary/10 bg-background-dark" />
+            @endforeach
+        </div>
+
+        {{-- Empty State --}}
+        @if ($songs->isEmpty())
+            <div
+                class="py-20 flex flex-col items-center justify-center text-center bg-surface-dark/10 rounded-3xl border-2 border-dashed border-white/5">
+                <span class="material-symbols-outlined text-6xl text-white/10 mb-4">music_off</span>
+                <p class="text-white/40 text-lg font-black uppercase tracking-widest">No themes found</p>
+                <button wire:click="clearFilters"
+                    class="mt-4 text-primary hover:text-primary-light text-sm font-black uppercase tracking-widest">Clear
+                    Filters</button>
             </div>
+        @endif
 
-            {{-- Empty State --}}
-            @if ($songs->isEmpty())
-                <div
-                    class="py-20 flex flex-col items-center justify-center text-center bg-surface-dark/10 rounded-3xl border-2 border-dashed border-white/5">
-                    <span class="material-symbols-outlined text-6xl text-white/10 mb-4">music_off</span>
-                    <p class="text-white/40 text-lg font-black uppercase tracking-widest">No themes found</p>
-                    <button wire:click="clearFilters"
-                        class="mt-4 text-primary hover:text-primary-light text-sm font-black uppercase tracking-widest">Clear
-                        Filters</button>
-                </div>
-            @endif
-
-            @if ($hasMorePages && $readyToLoad)
-                <div x-intersect.once="$wire.loadMore()" wire:key="intersect-artist-themes-{{ $perPage }}"
-                    class="flex justify-center py-12">
-                    <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                </div>
-            @endif
-        @else
-            @include('livewire.skeletons.card-skeleton')
+        @if ($hasMorePages)
+            <div x-intersect.once="$wire.loadMore()" wire:key="intersect-artist-themes-{{ $perPage }}"
+                class="flex justify-center py-12">
+                <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            </div>
         @endif
     </div>
 </div>

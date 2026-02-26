@@ -4,11 +4,14 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use App\Models\Song;
 use App\Models\Year;
 use App\Models\Season;
 
+#[Lazy]
 class SongsTable extends Component
 {
     use WithPagination;
@@ -30,11 +33,10 @@ class SongsTable extends Component
 
     public $perPage = 18;
     public $hasMorePages = true;
-    public $readyToLoad = false;
 
-    public function loadData()
+    public function placeholder()
     {
-        $this->readyToLoad = true;
+        return view('livewire.skeletons.songs-table-skeleton');
     }
 
     public function updatingName()
@@ -72,18 +74,43 @@ class SongsTable extends Component
         $this->perPage += 18;
     }
 
+    #[Computed]
+    public function years()
+    {
+        return Year::select('id', 'name')->orderBy('name', 'desc')->get();
+    }
+
+    #[Computed]
+    public function seasons()
+    {
+        return Season::select('id', 'name')->get();
+    }
+
+    #[Computed]
+    public function types()
+    {
+        return [
+            ['name' => 'Opening', 'value' => 'OP'],
+            ['name' => 'Ending', 'value' => 'ED'],
+            ['name' => 'Insert', 'value' => 'INS'],
+            ['name' => 'Other', 'value' => 'OTH'],
+        ];
+    }
+
+    #[Computed]
+    public function sortMethods()
+    {
+        return [
+            ['name' => 'Recent', 'value' => 'recent'],
+            ['name' => 'Title', 'value' => 'title'],
+            ['name' => 'Score', 'value' => 'averageRating'],
+            ['name' => 'Views', 'value' => 'view_count'],
+            ['name' => 'Popular', 'value' => 'likeCount'],
+        ];
+    }
+
     public function render()
     {
-        if (!$this->readyToLoad) {
-            return view('livewire.songs-table', [
-                'songs' => collect(),
-                'years' => collect(),
-                'seasons' => collect(),
-                'types' => [],
-                'sortMethods' => []
-            ]);
-        }
-
         $query = Song::query()
             ->with(['anime:id,title,slug', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
@@ -133,21 +160,6 @@ class SongsTable extends Component
 
         return view('livewire.songs-table', [
             'songs' => $songs,
-            'years' => Year::select('id', 'name')->orderBy('name', 'desc')->get(),
-            'seasons' => Season::select('id', 'name')->get(),
-            'types' => [
-                ['name' => 'Opening', 'value' => 'OP'],
-                ['name' => 'Ending', 'value' => 'ED'],
-                ['name' => 'Insert', 'value' => 'INS'],
-                ['name' => 'Other', 'value' => 'OTH'],
-            ],
-            'sortMethods' => [
-                ['name' => 'Recent', 'value' => 'recent'],
-                ['name' => 'Title', 'value' => 'title'],
-                ['name' => 'Score', 'value' => 'averageRating'],
-                ['name' => 'Views', 'value' => 'view_count'],
-                ['name' => 'Popular', 'value' => 'likeCount'],
-            ]
         ]);
     }
 }

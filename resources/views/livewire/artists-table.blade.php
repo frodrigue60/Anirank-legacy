@@ -1,4 +1,4 @@
-<div wire:init="loadData" x-data="{}" class="max-w-[1440px] mx-auto px-6 py-12">
+<div x-data="{}" class="max-w-[1440px] mx-auto px-6 py-12">
     <div class="mb-4">
         <h1 class="text-3xl font-black tracking-tight text-white mb-2">Search Artists</h1>
         <div class="h-1 w-20 bg-primary rounded-full"></div>
@@ -42,68 +42,55 @@
 
         {{-- Artists Grid Section --}}
         <section class="mt-8">
-            @if ($readyToLoad)
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
-                    @foreach ($artists as $artist)
-                        <a wire:key="artist-{{ $artist->id }}" href="{{ route('artists.show', $artist->slug) }}"
-                            class="group flex flex-col items-center gap-4 cursor-pointer">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
+                @foreach ($artists as $artist)
+                    <a wire:key="artist-{{ $artist->id }}" href="{{ route('artists.show', $artist->slug) }}"
+                        class="group flex flex-col items-center gap-4 cursor-pointer">
+                        <div
+                            class="relative w-full aspect-square rounded-full overflow-hidden card-shadow ring-4 ring-transparent group-hover:ring-primary/50 transition-all duration-300">
+                            <x-ui.image src="{{ $artist->thumbnail_url }}" alt="{{ $artist->name }}"
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                fallback="default-artist.webp" />
                             <div
-                                class="relative w-full aspect-square rounded-full overflow-hidden card-shadow ring-4 ring-transparent group-hover:ring-primary/50 transition-all duration-300">
-                                @if ($artist->images()->where('type', 'thumbnail')->exists())
-                                    <x-ui.image src="{{ $artist->thumbnail_url }}" alt="{{ $artist->name }}"
-                                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                                @else
-                                    <div
-                                        class="w-full h-full bg-surface-darker flex flex-col items-center justify-center text-white/10">
-                                        <span class="material-symbols-outlined text-5xl">person</span>
-                                    </div>
-                                @endif
-                                <div
-                                    class="absolute inset-0 bg-linear-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                </div>
+                                class="absolute inset-0 bg-linear-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                             </div>
-                            <div class="text-center">
-                                <h3
-                                    class="font-bold text-white group-hover:text-primary transition-colors text-lg truncate max-w-[150px]">
-                                    {{ $artist->name }}
-                                </h3>
-                                <div
-                                    class="mt-1.5 inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-[11px] font-bold border border-primary/20">
-                                    {{ $artist->songs_count }} Themes
-                                </div>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-
-                {{-- Empty State --}}
-                @if ($artists->isEmpty())
-                    <div class="py-20 flex flex-col items-center justify-center text-center">
-                        <div class="w-20 h-20 rounded-full bg-surface-dark flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-5xl text-white/10">person_off</span>
                         </div>
-                        <h3 class="text-xl font-bold text-white mb-2">No artists found</h3>
-                        <p class="text-white/40 max-w-xs mx-auto mb-6">
-                            We couldn't find any artists matching your search or filters.
-                        </p>
-                        <button wire:click="clearFilters"
-                            class="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-primary/20">
-                            Clear Search
-                        </button>
+                        <div class="text-center">
+                            <h3
+                                class="font-bold text-white group-hover:text-primary transition-colors text-lg truncate max-w-[150px]">
+                                {{ $artist->name }}
+                            </h3>
+                            <div
+                                class="mt-1.5 inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-[11px] font-bold border border-primary/20">
+                                {{ $artist->songs_count }} Themes
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            {{-- Empty State --}}
+            @if ($artists->isEmpty())
+                <div class="py-20 flex flex-col items-center justify-center text-center">
+                    <div class="w-20 h-20 rounded-full bg-surface-dark flex items-center justify-center mb-6">
+                        <span class="material-symbols-outlined text-5xl text-white/10">person_off</span>
                     </div>
-                @endif
-            @else
-                @include('livewire.skeletons.circle-skeleton')
+                    <h3 class="text-xl font-bold text-white mb-2">No artists found</h3>
+                    <p class="text-white/40 max-w-xs mx-auto mb-6">
+                        We couldn't find any artists matching your search or filters.
+                    </p>
+                    <button wire:click="clearFilters"
+                        class="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-primary/20">
+                        Clear Search
+                    </button>
+                </div>
             @endif
 
-            @if ($hasMorePages && $readyToLoad)
+            {{-- Infinite Scroll Trigger --}}
+            @if ($hasMorePages)
                 <div x-intersect.once="$wire.loadMore()" wire:key="intersect-artists-{{ $perPage }}"
                     class="py-12 flex flex-col items-center gap-4">
                     <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                </div>
-            @elseif($readyToLoad)
-                <div class="py-12 text-center text-white/20 text-sm font-medium">
-                    Showing all artists
                 </div>
             @endif
         </section>

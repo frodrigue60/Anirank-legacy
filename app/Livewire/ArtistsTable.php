@@ -4,10 +4,13 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use App\Models\Artist;
 use Illuminate\Support\Facades\Auth;
 
+#[Lazy]
 class ArtistsTable extends Component
 {
     use WithPagination;
@@ -23,11 +26,10 @@ class ArtistsTable extends Component
 
     public $perPage = 24;
     public $hasMorePages = false;
-    public $readyToLoad = false;
 
-    public function loadData()
+    public function placeholder()
     {
-        $this->readyToLoad = true;
+        return view('livewire.skeletons.artists-table-skeleton');
     }
 
     public function updatingName()
@@ -47,7 +49,7 @@ class ArtistsTable extends Component
 
     public function loadMore()
     {
-        if ($this->hasMorePages && $this->readyToLoad) {
+        if ($this->hasMorePages) {
             $this->perPage += 24;
         }
     }
@@ -59,12 +61,6 @@ class ArtistsTable extends Component
 
     public function render()
     {
-        if (!$this->readyToLoad) {
-            return view('livewire.artists-table', [
-                'artists' => collect(),
-                'total' => 0,
-            ]);
-        }
 
         $query = Artist::query()
             ->select(['id', 'name', 'slug'])

@@ -9,11 +9,14 @@ use App\Models\Season;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Url;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Livewire\Traits\HasRankingScore;
 use Illuminate\Support\Facades\Auth;
 
+#[Lazy]
 class UserFavoritesTable extends Component
 {
     use WithPagination;
@@ -39,11 +42,10 @@ class UserFavoritesTable extends Component
 
     public $perPage = 18;
     public $hasMorePages = true;
-    public $readyToLoad = false;
 
-    public function loadData()
+    public function placeholder()
     {
-        $this->readyToLoad = true;
+        return view('livewire.skeletons.songs-table-skeleton');
     }
 
     public function mount($userId)
@@ -79,23 +81,46 @@ class UserFavoritesTable extends Component
 
     public function loadMore()
     {
-        if ($this->readyToLoad) {
-            $this->perPage += 12;
-        }
+        $this->perPage += 12;
+    }
+
+    #[Computed]
+    public function years()
+    {
+        return Year::orderBy('name', 'desc')->get(['id', 'name']);
+    }
+
+    #[Computed]
+    public function seasons()
+    {
+        return Season::all(['id', 'name']);
+    }
+
+    #[Computed]
+    public function sortMethods()
+    {
+        return [
+            ['name' => 'Sort by', 'value' => ''],
+            ['name' => 'Recent', 'value' => 'recent'],
+            ['name' => 'Title', 'value' => 'title'],
+            ['name' => 'Score', 'value' => 'averageRating'],
+            ['name' => 'Views', 'value' => 'view_count'],
+        ];
+    }
+
+    #[Computed]
+    public function types()
+    {
+        return [
+            ['name' => 'Opening', 'value' => 'OP'],
+            ['name' => 'Ending', 'value' => 'ED'],
+            ['name' => 'Insert', 'value' => 'INS'],
+            ['name' => 'Other', 'value' => 'OTH']
+        ];
     }
 
     public function render()
     {
-        if (!$this->readyToLoad) {
-            return view('livewire.user-favorites-table', [
-                'songs' => collect(),
-                'years' => collect(),
-                'seasons' => collect(),
-                'sortMethods' => [],
-                'types' => []
-            ]);
-        }
-
         $query = Song::query()
             ->with(['anime:id,title,slug', 'artists:id,name,slug'])
             ->withAvg('ratings', 'rating')
@@ -141,21 +166,6 @@ class UserFavoritesTable extends Component
 
         return view('livewire.user-favorites-table', [
             'songs' => $songs,
-            'years' => Year::orderBy('name', 'desc')->get(['id', 'name']),
-            'seasons' => Season::all(['id', 'name']),
-            'sortMethods' => [
-                ['name' => 'Sort by', 'value' => ''],
-                ['name' => 'Recent', 'value' => 'recent'],
-                ['name' => 'Title', 'value' => 'title'],
-                ['name' => 'Score', 'value' => 'averageRating'],
-                ['name' => 'Views', 'value' => 'view_count'],
-            ],
-            'types' => [
-                ['name' => 'Opening', 'value' => 'OP'],
-                ['name' => 'Ending', 'value' => 'ED'],
-                ['name' => 'Insert', 'value' => 'INS'],
-                ['name' => 'Other', 'value' => 'OTH']
-            ]
         ]);
     }
 }

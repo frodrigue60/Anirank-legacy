@@ -3,11 +3,14 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use App\Models\Song;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 
+#[Lazy]
 class RankingTable extends Component
 {
     use Traits\HasRankingScore {
@@ -18,11 +21,10 @@ class RankingTable extends Component
     public $perPage = 15;
     public $page = 1;
     public $hasMorePages = true;
-    public $readyToLoad = false;
 
-    public function loadData()
+    public function placeholder()
     {
-        $this->readyToLoad = true;
+        return view('livewire.skeletons.ranking-table-skeleton');
     }
 
     public function mount()
@@ -38,7 +40,7 @@ class RankingTable extends Component
 
     public function loadMore()
     {
-        if (!$this->hasMorePages || !$this->readyToLoad) return;
+        if (!$this->hasMorePages) return;
         $this->page++;
     }
 
@@ -54,9 +56,9 @@ class RankingTable extends Component
         }
     }
 
-    public function getSongsProperty()
+    #[Computed]
+    public function songs()
     {
-        if (!$this->readyToLoad) return collect();
 
         $status = true;
         $limit = 100;

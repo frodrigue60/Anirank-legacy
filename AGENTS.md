@@ -124,6 +124,16 @@ The following patterns are **deprecated** in Livewire v3 and must not be used:
 | `wire:model.defer`                     | `wire:model`      | V3 is lazy by default (updates on blur)   |
 | `wire:model` (for live updates)        | `wire:model.live` | Explicit opt-in for real-time binding     |
 
+### Livewire V3 Performance Patterns
+
+To ensure maximum perceived performance and minimal server load, all discovery tables (Animes, Songs, Artists, etc.) must follow these patterns:
+
+1.  **🚀 Lazy Loading**: Use the `#[Lazy]` attribute on the component class. This allows the page to render immediately with a skeleton placeholder while the data fetches in the background.
+2.  **⚡ Computed Properties**: Use the `#[Computed]` attribute for data-fetching methods (e.g., `songs()`). This ensures the query is only executed once per request and can be accessed as `$this->songs` in the view.
+3.  **💎 High-Fidelity Skeletons**: Skeleton views must match the final UI's grid spacing, card dimensions, and element positioning (including circular avatars for artists and aspect ratios for cards) to prevent layout shifts.
+
+**Skeleton Implementation Rule:** Skeletons should now manage the **entire** content area, including titles and filter bars, to provide a seamless shimmering experience from the moment the user hits the route.
+
 ---
 
 ### Dynamic Storage System

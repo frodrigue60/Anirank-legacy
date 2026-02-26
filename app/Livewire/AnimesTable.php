@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Lazy;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use App\Models\Anime;
 use App\Models\Season;
@@ -11,6 +13,7 @@ use App\Models\Year;
 use App\Models\Format;
 use App\Models\Genre;
 
+#[Lazy]
 class AnimesTable extends Component
 {
     use WithPagination;
@@ -35,11 +38,9 @@ class AnimesTable extends Component
     
     public $perPage = 15;
     public $hasMorePages = false;
-    public $readyToLoad = false;
-
-    public function loadData()
+    public function placeholder()
     {
-        $this->readyToLoad = true;
+        return view('livewire.skeletons.animes-table-skeleton');
     }
 
     public function mount()
@@ -84,23 +85,37 @@ class AnimesTable extends Component
 
     public function loadMore()
     {
-        if ($this->hasMorePages && $this->readyToLoad) {
+        if ($this->hasMorePages) {
             $this->perPage += 15;
         }
     }
 
+    #[Computed]
+    public function years()
+    {
+        return Year::orderBy('name', 'desc')->get(['id', 'name']);
+    }
+
+    #[Computed]
+    public function seasons()
+    {
+        return Season::all(['id', 'name']);
+    }
+
+    #[Computed]
+    public function formats()
+    {
+        return Format::all(['id', 'name']);
+    }
+
+    #[Computed]
+    public function all_genres()
+    {
+        return Genre::orderBy('name')->get(['id', 'name']);
+    }
+
     public function render()
     {
-        if (!$this->readyToLoad) {
-            return view('livewire.animes-table', [
-                'animes' => collect(),
-                'years' => collect(),
-                'seasons' => collect(),
-                'formats' => collect(),
-                'all_genres' => collect(),
-            ]);
-        }
-
         $query = Anime::where('status', true);
 
         if ($this->name) {
@@ -131,17 +146,8 @@ class AnimesTable extends Component
         $this->hasMorePages = $results->count() > $this->perPage;
         $animes = $results->take($this->perPage);
 
-        $years = Year::orderBy('name', 'desc')->get(['id', 'name']);
-        $seasons = Season::all(['id', 'name']);
-        $formats = Format::all(['id', 'name']);
-        $all_genres = Genre::orderBy('name')->get(['id', 'name']);
-
         return view('livewire.animes-table', [
             'animes' => $animes,
-            'years' => $years,
-            'seasons' => $seasons,
-            'formats' => $formats,
-            'all_genres' => $all_genres,
         ]);
     }
 }

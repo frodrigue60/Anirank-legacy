@@ -1,4 +1,10 @@
-<div wire:init="loadData" x-data="{}" class="flex flex-col gap-8">
+<div x-data="{}" class="flex flex-col gap-8">
+    {{-- Header --}}
+    <div class="mb-4">
+        <h1 class="text-3xl font-black tracking-tight text-white mb-2">Search Studios</h1>
+        <div class="h-1 w-20 bg-primary rounded-full"></div>
+    </div>
+
     {{-- Search Section --}}
     <div class="bg-surface-dark/30 p-4 rounded-xl border border-white/5 backdrop-blur-sm"
         wire:loading.class="opacity-50 pointer-events-none transition-opacity">
@@ -44,63 +50,58 @@
 
     {{-- Grid Section --}}
     <div class="min-h-[400px]">
-        @if ($readyToLoad)
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach ($studios as $studio)
-                    @php
-                        $featuredAnime = $studio->animes->first();
-                    @endphp
-                    <a wire:key="studio-{{ $studio->id }}" href="{{ route('studios.show', $studio) }}"
-                        class="group relative overflow-hidden rounded-xl bg-slate-800 aspect-16/10 border border-transparent hover:border-primary/50 transition-all cursor-pointer shadow-lg shadow-black/20">
-                        <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                            style="background-image: url('{{ $featuredAnime->banner_url }}');filter: brightness(0.5);">
-                        </div>
-                        <div
-                            class="absolute inset-0 bg-linear-to-t from-background-dark/95 via-background-dark/40 to-transparent">
-                        </div>
-                        <div class="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-1">
-                            <div class="flex justify-between items-end">
-                                <div>
-                                    <h3
-                                        class="text-2xl font-bold text-white group-hover:text-primary transition-colors">
-                                        {{ $studio->name }}</h3>
-                                </div>
-                            </div>
-                            <div class="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
-                                <div class="flex flex-col">
-                                    <span
-                                        class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Produced</span>
-                                    <span class="text-white text-sm font-semibold">{{ $studio->animes_count }}
-                                        Series</span>
-                                </div>
-                                <div class="flex flex-col items-end">
-                                    <span
-                                        class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Founded</span>
-                                    <span class="text-white text-sm font-semibold">N/A</span>
-                                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach ($studios as $studio)
+                @php
+                    $featuredAnime = $studio->animes->first();
+                @endphp
+                <a wire:key="studio-{{ $studio->id }}" href="{{ route('studios.show', $studio) }}"
+                    class="group relative overflow-hidden rounded-xl bg-slate-800 aspect-16/10 border border-transparent hover:border-primary/50 transition-all cursor-pointer shadow-lg shadow-black/20">
+                    <div class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                        style="background-image: url('{{ $featuredAnime?->banner_url }}');filter: brightness(0.5);">
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-linear-to-t from-background-dark/95 via-background-dark/40 to-transparent">
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-1">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h3 class="text-2xl font-bold text-white group-hover:text-primary transition-colors">
+                                    {{ $studio->name }}</h3>
                             </div>
                         </div>
-                    </a>
-                @endforeach
-            </div>
+                        <div class="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
+                            <div class="flex flex-col">
+                                <span
+                                    class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Produced</span>
+                                <span class="text-white text-sm font-semibold">{{ $studio->animes_count }}
+                                    Series</span>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <span
+                                    class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Founded</span>
+                                <span class="text-white text-sm font-semibold">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            @endforeach
+        </div>
 
-            {{-- Empty State --}}
-            @if ($studios->isEmpty())
-                <div class="flex flex-col items-center justify-center py-20 opacity-40">
-                    <span class="material-symbols-outlined text-6xl mb-4">search_off</span>
-                    <p class="text-xl font-bold">No studios found</p>
-                </div>
-            @endif
-        @else
-            @include('livewire.skeletons.rectangle-skeleton')
+        {{-- Empty State --}}
+        @if ($studios->isEmpty())
+            <div class="flex flex-col items-center justify-center py-20 opacity-40">
+                <span class="material-symbols-outlined text-6xl mb-4">search_off</span>
+                <p class="text-xl font-bold">No studios found</p>
+            </div>
+        @endif
+
+        {{-- Infinite Scroll Trigger --}}
+        @if ($hasMorePages)
+            <div x-intersect.once="$wire.loadMore()" wire:key="intersect-studios-{{ $perPage }}"
+                class="flex justify-center py-12">
+                <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            </div>
         @endif
     </div>
-
-    {{-- Infinite Scroll Trigger --}}
-    @if ($readyToLoad && $hasMorePages)
-        <div x-intersect.once="$wire.loadMore()" wire:key="intersect-studios-{{ $perPage }}"
-            class="flex justify-center py-12">
-            <div class="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-        </div>
-    @endif
 </div>

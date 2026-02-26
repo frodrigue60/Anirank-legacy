@@ -1,4 +1,4 @@
-<div x-data="{}" wire:init="loadData" class="max-w-[1440px] mx-auto px-6 md:px-14 py-8 md:py-12">
+<div x-data="{}" class="max-w-[1440px] mx-auto px-6 md:px-14 py-8 md:py-12">
     {{-- Header Section --}}
     <div class="flex flex-col mb-12">
         <div class="flex flex-col md:flex-row justify-between items-end gap-6">
@@ -48,113 +48,108 @@
 
         {{-- Table Body --}}
         <div class="flex flex-col min-h-[500px]">
-            @if ($readyToLoad)
-                @foreach ($songs as $index => $song)
-                    @isset($song->anime)
-                        @php
-                            $rankNumber = $index + 1;
-                            $formattedRank = str_pad($rankNumber, 2, '0', STR_PAD_LEFT);
-                        @endphp
+            @foreach ($this->songs as $index => $song)
+                @isset($song->anime)
+                    @php
+                        $rankNumber = $index + 1;
+                        $formattedRank = str_pad($rankNumber, 2, '0', STR_PAD_LEFT);
+                    @endphp
 
-                        <div wire:key="seasonal-rank-{{ $song->id }}"
-                            class="ranking-row grid grid-cols-[40px_1fr] sm:grid-cols-[60px_1fr_120px_140px] gap-3 sm:gap-4 px-4 sm:px-8 py-4 sm:py-5 items-center transition-colors border-b border-white/5 hover:bg-white/5 group">
-                            {{-- Rank Column --}}
-                            <div class="flex flex-col sm:flex-row items-center gap-0 sm:gap-1">
-                                <span
-                                    class="text-xl sm:text-2xl font-black {{ $rankNumber <= 3 ? 'text-primary' : 'text-white/90' }}">{{ $formattedRank }}</span>
+                    <div wire:key="seasonal-rank-{{ $song->id }}"
+                        class="ranking-row grid grid-cols-[40px_1fr] sm:grid-cols-[60px_1fr_120px_140px] gap-3 sm:gap-4 px-4 sm:px-8 py-4 sm:py-5 items-center transition-colors border-b border-white/5 hover:bg-white/5 group">
+                        {{-- Rank Column --}}
+                        <div class="flex flex-col sm:flex-row items-center gap-0 sm:gap-1">
+                            <span
+                                class="text-xl sm:text-2xl font-black {{ $rankNumber <= 3 ? 'text-primary' : 'text-white/90' }}">{{ $formattedRank }}</span>
 
-                                {{-- Trend Indicator --}}
-                                <div class="flex items-center justify-center">
-                                    @if ($song->trend === 'UP')
-                                        <span class="material-symbols-outlined text-green-400 text-sm"
-                                            title="Up from #{{ $song->previous_rank }}">arrow_drop_up</span>
-                                    @elseif($song->trend === 'DOWN')
-                                        <span class="material-symbols-outlined text-red-400 text-sm"
-                                            title="Down from #{{ $song->previous_rank }}">arrow_drop_down</span>
-                                    @elseif($song->trend === 'NEW')
-                                        <span class="material-symbols-outlined text-blue-400 text-sm">fiber_new</span>
-                                    @else
-                                        <span class="material-symbols-outlined text-white/20 text-sm">remove</span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            {{-- Theme Info Column --}}
-                            <div class="flex items-center gap-4 sm:gap-6">
-                                <div
-                                    class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden shrink-0 shadow-lg shadow-black/40 border border-white/10">
-                                    <x-ui.image :src="$song->anime->thumbnail_url" :alt="$song->anime->title"
-                                        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        fallback="default-anime.webp" />
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <a href="{{ $song->url }}"
-                                        class="text-base sm:text-lg font-bold text-white truncate block leading-tight mb-1 hover:text-primary transition-colors">{{ $song->name }}
-                                    </a>
-                                    <div class="flex flex-col items-start gap-0.5 sm:gap-1 text-xs sm:text-sm">
-                                        <a href="{{ route('animes.show', $song->anime) }}"
-                                            class="text-primary font-bold truncate hover:underline">{{ $song->anime->title }}</a>
-
-                                        <span class="text-white/60 truncate">
-                                            @forelse ($song->artists as $artist)
-                                                <a href="{{ route('artists.show', $artist) }}"
-                                                    class="hover:text-primary transition-colors cursor-pointer">{{ $artist->name }}</a>{{ !$loop->last ? ', ' : '' }}
-                                            @empty
-                                                N/A
-                                            @endforelse
-                                        </span>
-                                    </div>
-
-                                    {{-- Mobile-only: Score + Actions inline --}}
-                                    <div class="flex items-center gap-3 mt-2 sm:hidden">
-                                        <span class="text-base font-black text-white">
-                                            {{ number_format($song->averageRating ?? 0, 1) }}
-                                        </span>
-                                        <a href="{{ $song->url }}"
-                                            class="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary text-white transition-all">
-                                            <span class="material-symbols-outlined text-base filled">play_arrow</span>
-                                        </a>
-                                        <button wire:click="toggleFavorite({{ $song->id }})"
-                                            wire:loading.attr="disabled"
-                                            class="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-red-400 transition-all">
-                                            <span
-                                                class="material-symbols-outlined text-base {{ $song->is_favorited ? 'filled text-red-400' : '' }}">favorite</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Score Column (hidden on mobile) --}}
-                            <div class="text-center hidden sm:block">
-                                <div class="text-2xl font-black text-white tracking-tight">
-                                    {{ number_format($song->averageRating ?? 0, 1) }}
-                                </div>
-                                <div class="text-[10px] font-bold text-white/30 uppercase tracking-widest">Avg Rating</div>
-                            </div>
-
-                            {{-- Actions Column (hidden on mobile) --}}
-                            <div class="hidden sm:flex items-center justify-end gap-2">
-                                <a href="{{ $song->url }}"
-                                    class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary text-white transition-all shadow-lg hover:shadow-primary/20 cursor-pointer z-10">
-                                    <span
-                                        class="material-symbols-outlined text-[20px] filled pointer-events-none">play_arrow</span>
-                                </a>
-                                <button wire:click="toggleFavorite({{ $song->id }})" wire:loading.attr="disabled"
-                                    class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-red-400 transition-all">
-                                    <span
-                                        class="material-symbols-outlined text-[20px] {{ $song->is_favorited ? 'filled text-red-400' : '' }}">favorite</span>
-                                </button>
+                            {{-- Trend Indicator --}}
+                            <div class="flex items-center justify-center">
+                                @if ($song->trend === 'UP')
+                                    <span class="material-symbols-outlined text-green-400 text-sm"
+                                        title="Up from #{{ $song->previous_rank }}">arrow_drop_up</span>
+                                @elseif($song->trend === 'DOWN')
+                                    <span class="material-symbols-outlined text-red-400 text-sm"
+                                        title="Down from #{{ $song->previous_rank }}">arrow_drop_down</span>
+                                @elseif($song->trend === 'NEW')
+                                    <span class="material-symbols-outlined text-blue-400 text-sm">fiber_new</span>
+                                @else
+                                    <span class="material-symbols-outlined text-white/20 text-sm">remove</span>
+                                @endif
                             </div>
                         </div>
-                    @endisset
-                @endforeach
-            @else
-                @include('livewire.skeletons.table-skeleton')
-            @endif
+
+                        {{-- Theme Info Column --}}
+                        <div class="flex items-center gap-4 sm:gap-6">
+                            <div
+                                class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden shrink-0 shadow-lg shadow-black/40 border border-white/10">
+                                <x-ui.image :src="$song->anime->thumbnail_url" :alt="$song->anime->title"
+                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    fallback="default-anime.webp" />
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <a href="{{ $song->url }}"
+                                    class="text-base sm:text-lg font-bold text-white truncate block leading-tight mb-1 hover:text-primary transition-colors">{{ $song->name }}
+                                </a>
+                                <div class="flex flex-col items-start gap-0.5 sm:gap-1 text-xs sm:text-sm">
+                                    <a href="{{ route('animes.show', $song->anime) }}"
+                                        class="text-primary font-bold truncate hover:underline">{{ $song->anime->title }}</a>
+
+                                    <span class="text-white/60 truncate">
+                                        @forelse ($song->artists as $artist)
+                                            <a href="{{ route('artists.show', $artist) }}"
+                                                class="hover:text-primary transition-colors cursor-pointer">{{ $artist->name }}</a>{{ !$loop->last ? ', ' : '' }}
+                                        @empty
+                                            N/A
+                                        @endforelse
+                                    </span>
+                                </div>
+
+                                {{-- Mobile-only: Score + Actions inline --}}
+                                <div class="flex items-center gap-3 mt-2 sm:hidden">
+                                    <span class="text-base font-black text-white">
+                                        {{ number_format($song->averageRating ?? 0, 1) }}
+                                    </span>
+                                    <a href="{{ $song->url }}"
+                                        class="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary text-white transition-all">
+                                        <span class="material-symbols-outlined text-base filled">play_arrow</span>
+                                    </a>
+                                    <button wire:click="toggleFavorite({{ $song->id }})" wire:loading.attr="disabled"
+                                        class="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-red-400 transition-all">
+                                        <span
+                                            class="material-symbols-outlined text-base {{ $song->is_favorited ? 'filled text-red-400' : '' }}">favorite</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Score Column (hidden on mobile) --}}
+                        <div class="text-center hidden sm:block">
+                            <div class="text-2xl font-black text-white tracking-tight">
+                                {{ number_format($song->averageRating ?? 0, 1) }}
+                            </div>
+                            <div class="text-[10px] font-bold text-white/30 uppercase tracking-widest">Avg Rating</div>
+                        </div>
+
+                        {{-- Actions Column (hidden on mobile) --}}
+                        <div class="hidden sm:flex items-center justify-end gap-2">
+                            <a href="{{ $song->url }}"
+                                class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-primary text-white transition-all shadow-lg hover:shadow-primary/20 cursor-pointer z-10">
+                                <span
+                                    class="material-symbols-outlined text-[20px] filled pointer-events-none">play_arrow</span>
+                            </a>
+                            <button wire:click="toggleFavorite({{ $song->id }})" wire:loading.attr="disabled"
+                                class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-white/40 hover:text-red-400 transition-all">
+                                <span
+                                    class="material-symbols-outlined text-[20px] {{ $song->is_favorited ? 'filled text-red-400' : '' }}">favorite</span>
+                            </button>
+                        </div>
+                    </div>
+                @endisset
+            @endforeach
         </div>
 
         {{-- Infinite Scroll Trigger --}}
-        @if ($hasMorePages && $readyToLoad)
+        @if ($hasMorePages)
             <div x-intersect.once="$wire.loadMore()" wire:key="intersect-seasonal-{{ $page }}"
                 class="p-8 border-t border-white/5 bg-surface-darker/30 flex flex-col items-center gap-4">
                 <div class="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
