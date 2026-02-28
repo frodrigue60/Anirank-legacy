@@ -73,7 +73,9 @@ To maintain a lean production bundle, `vite.config.mjs` only registers high-leve
 
 - **🔒 Livewire Request Guard**: Application-wide optimization pattern that blocks redundant requests and disables interactive elements during data loading for a robust UX.
 - **🚀 Optimized Dispatching**: Improved performance by migrating inter-component events (like modal triggers) to Alpine-based `@click` dispatches, reducing server roundtrips.
-- **⚡ Eager Loading Optimization**: Systematic use of `.with(['songs.post'])` in `PlaylistController` to eliminate N+1 query bottlenecks during list retrieval.
+- **⚡ Eager Loading Optimization**: Systematic use of eager loading and relation checks in models (`Song.php`) and controllers (`RankingTable`, `SeasonalTable`) to eliminate N+1 query bottlenecks.
+- **⏳ Background Jobs**: Use of `SyncAnimeAnilistJob` for external API (AniList) synchronization to avoid PHP execution timeouts on large datasets. All bulk sync operations must be queued.
+- **🛡️ API Security**: Always return `JsonResource` (e.g., `AnimeResource`) from controllers instead of direct Eloquent models to prevent data exposure.
 - **🔥 Content Freshness**: Home featured song logic migrated from `inRandomOrder()` to `latest()` to prioritize new community additions over random rotation.
 - **💬 Livewire Request Modal**: Fully interactive and reactive user request system, replacing legacy modal patterns.
 - **Background Locking**: Filter containers use `wire:loading.class="opacity-50 pointer-events-none"` to prevent interaction during active requests.

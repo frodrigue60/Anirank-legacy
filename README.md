@@ -25,7 +25,9 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🏷️ Automated Genre System**: Multi-layered categorization with direct AniList synchronization and advanced filtering capabilities across all database views.
 - **🔒 Livewire Request Guard**: Application-wide optimization pattern that blocks redundant requests and disables interactive elements during data loading for a robust UX.
 - **🚀 Optimized Dispatching**: Migrated inter-component events (like modal triggers) to client-side dispatches, eliminating unnecessary server roundtrips.
-- **⚡ Backend Query Optimization**: Systematic eager loading implementation across controllers (e.g., `PlaylistController`) to resolve N+1 bottlenecks and improve API response times.
+- **⚡ Backend Query Optimization**: Systematic eager loading implementation across models and controllers (e.g., `Song`, `RankingTable`) to resolve N+1 bottlenecks and improve performance during large list iterations.
+- **⏳ Background AniList Sync**: Migrated high-latency AniList API synchronization loops to a queued background job (`SyncAnimeAnilistJob`) to prevent gateway timeouts and improve admin responsiveness.
+- **🛡️ API Data Masking**: Standardized use of Laravel API Resources (`AnimeResource`) to control data exposure and prevent leaking internal database structures in JSON responses.
 - **❤️ Standardized UX**: Real-time favorite and interaction feedback using consistent Material Symbols logic across all discovery views.
 - **💬 Livewire Request Modal**: Fully interactive and reactive user request system, replacing legacy modal patterns.
 - **♾️ Reliable Infinite Scroll**: All paginated lists use Alpine's `x-intersect.once` with dynamic `wire:key` for stable, loop-free infinite scrolling across 11 Livewire components.
