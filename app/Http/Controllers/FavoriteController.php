@@ -85,8 +85,9 @@ class FavoriteController extends Controller
         //
     }
 
-    public function toggle(SongVariant $songVariant)
+    public function toggle(SongVariant $variant)
     {
+        $songVariant = $variant;
 
         if (!Auth::check()) {
             return redirect()->back()->with('warning', 'Please login');

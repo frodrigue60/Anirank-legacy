@@ -1,7 +1,7 @@
 <div x-data="{}" class="max-w-[1440px] mx-auto px-6 py-12">
-    <div class="mb-4">
-        <h1 class="text-3xl font-black tracking-tight text-white mb-2">Search Artists</h1>
-        <div class="h-1 w-20 bg-primary rounded-full"></div>
+    <div class="">
+        <h1 class="text-3xl font-black tracking-tight text-white mb-2 sr-only">Search Artists</h1>
+        {{--  <div class="h-1 w-20 bg-primary rounded-full"></div> --}}
     </div>
     <div class="flex flex-col gap-10">
         {{-- Search & Filters Section --}}
@@ -24,7 +24,7 @@
                 <div class="relative min-w-[200px] group">
                     <label
                         class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Sort
-                        Alphabetical</label>
+                    </label>
                     <div class="relative">
                         <select wire:model.live="sortBy" wire:loading.attr="disabled"
                             class="w-full bg-surface-dark border-white/10 rounded-xl text-sm text-white/80 focus:ring-primary focus:border-primary py-2.5 pl-4 pr-10 appearance-none cursor-pointer transition-all hover:bg-surface-dark/80 focus:bg-surface-darker">

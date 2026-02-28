@@ -1,38 +1,13 @@
 <div x-data="{}" class="max-w-[1440px] mx-auto px-4 md:px-8 py-8">
 
-    {{-- Header & Filters --}}
-    <div class="flex flex-col gap-6 mb-8">
-        <div class="flex flex-col md:flex-row justify-between items-end gap-4">
-            <div>
-                <h1 class="text-3xl font-black tracking-tight text-white mb-2">Search Anime</h1>
-                <div class="h-1 w-20 bg-primary rounded-full"></div>
-            </div>
+    {{-- Header --}}
+    <div>
+        <h1 class="text-3xl font-black tracking-tight text-white mb-2 sr-only">Search Anime</h1>
+        <p class="text-white/60 mb-2 sr-only">Search your favorite animes by year, season, and format.</p>
+    </div>
 
-            {{-- View Mode Switcher --}}
-            <div class="flex items-center gap-1 bg-surface-darker/50 p-1 rounded-lg border border-white/5"
-                wire:loading.class="opacity-50 pointer-events-none transition-opacity">
-                <button @if ($viewMode !== 'grid_small') wire:click="setViewMode('grid_small')" @endif
-                    wire:loading.attr="disabled"
-                    class="p-2 rounded-md transition-all {{ $viewMode === 'grid_small' ? 'bg-primary/20 text-primary cursor-default' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
-                    title="Small Grid">
-                    <span class="material-symbols-outlined text-[20px]">grid_view</span>
-                </button>
-                <button @if ($viewMode !== 'grid_large') wire:click="setViewMode('grid_large')" @endif
-                    wire:loading.attr="disabled"
-                    class="p-2 rounded-md transition-all {{ $viewMode === 'grid_large' ? 'bg-primary/20 text-primary cursor-default' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
-                    title="Large Grid">
-                    <span class="material-symbols-outlined text-[20px]">window</span>
-                </button>
-                <button @if ($viewMode !== 'list') wire:click="setViewMode('list')" @endif
-                    wire:loading.attr="disabled"
-                    class="p-2 rounded-md transition-all {{ $viewMode === 'list' ? 'bg-primary/20 text-primary cursor-default' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
-                    title="List View">
-                    <span class="material-symbols-outlined text-[20px]">view_list</span>
-                </button>
-            </div>
-        </div>
-
-        {{-- Filters Bar --}}
+    {{-- Filters Bar --}}
+    <div class="mb-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 bg-surface-dark/30 p-4 rounded-xl border border-white/5"
             wire:loading.class="opacity-50 pointer-events-none transition-opacity">
             {{-- Search --}}
@@ -55,7 +30,7 @@
                 <div class="relative">
                     <select wire:model.live="year_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
-                        <option value="">All Years</option>
+                        <option value="">Any Year</option>
                         @foreach ($this->years as $year)
                             <option value="{{ $year->id }}">{{ $year->name }}</option>
                         @endforeach
@@ -72,7 +47,7 @@
                 <div class="relative">
                     <select wire:model.live="season_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
-                        <option value="">All Seasons</option>
+                        <option value="">Any Season</option>
                         @foreach ($this->seasons as $season)
                             <option value="{{ $season->id }}">{{ $season->name }}</option>
                         @endforeach
@@ -89,7 +64,7 @@
                 <div class="relative">
                     <select wire:model.live="format_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
-                        <option value="">All Formats</option>
+                        <option value="">Any Format</option>
                         @foreach ($this->formats as $format)
                             <option value="{{ $format->id }}">{{ $format->name }}</option>
                         @endforeach
@@ -106,7 +81,7 @@
                 <div class="relative">
                     <select wire:model.live="genre_id" wire:loading.attr="disabled"
                         class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
-                        <option value="">All Genres</option>
+                        <option value="">Any Genre</option>
                         @foreach ($this->all_genres as $genre)
                             <option value="{{ $genre->id }}">{{ $genre->name }}</option>
                         @endforeach
@@ -115,10 +90,50 @@
                         class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none text-lg group-focus-within:text-primary transition-colors">expand_more</span>
                 </div>
             </div>
+            {{-- Sort By --}}
+            <div class="relative group">
+                <label
+                    class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Sort
+                    By</label>
+                <div class="relative">
+                    <select wire:model.live="sort_by" wire:loading.attr="disabled"
+                        class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
+                        <option value="">Any Sort</option>
+                        @foreach ($this->sort_bys as $key => $label)
+                            <option value="{{ $key }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <span
+                        class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none text-lg group-focus-within:text-primary transition-colors">expand_more</span>
+                </div>
+            </div>
         </div>
     </div>
-
     {{-- Content Grid/List --}}
+    <div class="mb-4 flex justify-end">
+        {{-- View Mode Switcher --}}
+        <div class="flex items-center gap-1 bg-surface-darker/50 p-1 rounded-lg border border-white/5"
+            wire:loading.class="opacity-50 pointer-events-none transition-opacity">
+            <button @if ($viewMode !== 'grid_small') wire:click="setViewMode('grid_small')" @endif
+                wire:loading.attr="disabled"
+                class="p-2 rounded-md transition-all {{ $viewMode === 'grid_small' ? 'bg-primary/20 text-primary cursor-default' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
+                title="Small Grid">
+                <span class="material-symbols-outlined text-[20px]">grid_view</span>
+            </button>
+            <button @if ($viewMode !== 'grid_large') wire:click="setViewMode('grid_large')" @endif
+                wire:loading.attr="disabled"
+                class="p-2 rounded-md transition-all {{ $viewMode === 'grid_large' ? 'bg-primary/20 text-primary cursor-default' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
+                title="Large Grid">
+                <span class="material-symbols-outlined text-[20px]">window</span>
+            </button>
+            <button @if ($viewMode !== 'list') wire:click="setViewMode('list')" @endif
+                wire:loading.attr="disabled"
+                class="p-2 rounded-md transition-all {{ $viewMode === 'list' ? 'bg-primary/20 text-primary cursor-default' : 'text-white/40 hover:text-white hover:bg-white/5' }}"
+                title="List View">
+                <span class="material-symbols-outlined text-[20px]">view_list</span>
+            </button>
+        </div>
+    </div>
     <div class="min-h-[400px]">
         @if ($viewMode === 'grid_small')
             <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">

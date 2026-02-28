@@ -344,8 +344,19 @@ class Song extends Model
         return $this->hasMany(RankingHistory::class);
     }
 
+    public function previousRanking()
+    {
+        return $this->hasOne(RankingHistory::class)
+            ->where('date', '<', now()->toDateString())
+            ->orderBy('date', 'desc');
+    }
+
     public function getPreviousRank()
     {
+        if ($this->relationLoaded('previousRanking')) {
+            return $this->previousRanking?->rank;
+        }
+
         return $this->rankingHistory()
             ->where('date', '<', now()->toDateString())
             ->orderBy('date', 'desc')
@@ -354,6 +365,10 @@ class Song extends Model
 
     public function getPreviousSeasonalRank()
     {
+        if ($this->relationLoaded('previousRanking')) {
+            return $this->previousRanking?->seasonal_rank;
+        }
+
         return $this->rankingHistory()
             ->where('date', '<', now()->toDateString())
             ->orderBy('date', 'desc')
@@ -402,13 +417,17 @@ class Song extends Model
      */
     public function formattedUserScore(string $format = 'POINT_100', ?int $userId = null): int|float|null
     {
-        $userId ??= auth()->id();
+        $userId ??= \Illuminate\Support\Facades\Auth::id();
         if (! $userId) {
             return null;
         }
 
         // Uses the ratings() relationship from the Rateable trait (polymorphic).
-        $raw = $this->ratings()->where('user_id', $userId)->value('rating');
+        if ($this->relationLoaded('ratings')) {
+            $raw = $this->ratings->where('user_id', $userId)->first()?->rating;
+        } else {
+            $raw = $this->ratings()->where('user_id', $userId)->value('rating');
+        }
 
         return $this->convertScore($raw, $format);
     }

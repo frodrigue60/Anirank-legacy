@@ -2,19 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Season;
-use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use App\Models\SongVariant;
-use App\Models\Year;
 
 class UserController extends Controller
 {
@@ -24,29 +16,26 @@ class UserController extends Controller
     {
         return abort(404);
     }
+
     public function store(Request $request)
     {
         return abort(404);
     }
-
 
     public function show(User $user)
     {
         return view('public.users.show', compact('user'));
     }
 
-
     public function edit($id)
     {
         return abort(404);
     }
 
-
     public function update(Request $request, $id)
     {
         return abort(404);
     }
-
 
     public function destroy($id)
     {
@@ -63,22 +52,15 @@ class UserController extends Controller
         ];
 
         $user = Auth::user();
+
         return view('public.users.settings', compact('score_formats', 'user'));
     }
 
     public function favorites()
     {
         $user = Auth::user();
-        return view('public.users.show', compact('user'));
-    }
 
-    public function paginate($songs, $perPage = 18, $page = null, $options = [])
-    {
-        $page = Paginator::resolveCurrentPage();
-        $options = ['path' => Paginator::resolveCurrentPath()];
-        $items = $songs instanceof Collection ? $songs : Collection::make($songs);
-        $songs = new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
-        return $songs;
+        return view('public.users.show', compact('user'));
     }
 
     public function sortSongs($sort, $songs)
@@ -88,21 +70,26 @@ class UserController extends Controller
                 $songs = $songs->sortBy(function ($song) {
                     return $song->anime->title;
                 });
+
                 return $songs;
                 break;
             case 'averageRating':
                 $songs = $songs->sortByDesc('averageRating');
+
                 return $songs;
             case 'view_count':
                 $songs = $songs->sortByDesc('view_count');
+
                 return $songs;
 
             case 'likeCount':
                 $songs = $songs->sortByDesc('likeCount');
+
                 return $songs;
                 break;
             case 'recent':
                 $songs = $songs->sortByDesc('created_at');
+
                 return $songs;
                 break;
 
@@ -110,6 +97,7 @@ class UserController extends Controller
                 $songs = $songs->sortBy(function ($song) {
                     return $song->anime->title;
                 });
+
                 return $songs;
                 break;
         }
@@ -118,11 +106,12 @@ class UserController extends Controller
     public function setScore($songs, $score_format)
     {
         $songs->each(function ($song) use ($score_format) {
-            $song->score      = $song->formattedAvgScore($score_format);
+            $song->score = $song->formattedAvgScore($score_format);
             $song->user_score = isset($song->rating)
                 ? $song->formattedUserScore($score_format, auth()->id())
                 : null;
         });
+
         return $songs;
     }
 
@@ -130,7 +119,7 @@ class UserController extends Controller
     {
         if ($request->hasFile('image')) {
             $validator = Validator::make($request->all(), [
-                'image' => 'mimes:png,jpg,jpeg,webp|max:2048'
+                'image' => 'mimes:png,jpg,jpeg,webp|max:2048',
             ]);
 
             if ($validator->fails()) {
@@ -140,24 +129,26 @@ class UserController extends Controller
             $user = Auth::user();
 
             $extension = $request->image->extension();
-            $file_name = $user->slug . '-' . time() . '.' . $extension;
-            $path = 'profile/' . $file_name;
+            $file_name = $user->slug.'-'.time().'.'.$extension;
+            $path = 'profile/'.$file_name;
 
             $storedPath = $request->image->storeAs('profile', $file_name);
 
             if ($storedPath) {
                 $user->updateOrCreateImage($storedPath, 'avatar');
+
                 return redirect(route('users.profile'))->with('success', 'Profile picture updated successfully!');
             }
         }
 
         return redirect(route('users.profile'))->with('warning', 'File not found');
     }
+
     public function uploadBannerPic(Request $request)
     {
         if ($request->hasFile('banner')) {
             $validator = Validator::make($request->all(), [
-                'banner' => 'mimes:png,jpg,jpeg,webp|max:2048'
+                'banner' => 'mimes:png,jpg,jpeg,webp|max:2048',
             ]);
 
             if ($validator->fails()) {
@@ -167,18 +158,21 @@ class UserController extends Controller
             $user = Auth::user();
 
             $extension = $request->banner->extension();
-            $file_name = $user->slug . '-' . time() . '.' . $extension;
-            $path = 'banner/' . $file_name;
+            $file_name = $user->slug.'-'.time().'.'.$extension;
+            $path = 'banner/'.$file_name;
 
             $storedPath = $request->banner->storeAs('banner', $file_name);
 
             if ($storedPath) {
                 $user->updateOrCreateImage($storedPath, 'banner');
+
                 return redirect(route('users.profile'))->with('success', 'Banner updated successfully!');
             }
         }
+
         return redirect(route('users.profile'))->with('warning', 'File not found');
     }
+
     public function changeScoreFormat(Request $request)
     {
         if ($request->score_format == 'null') {
@@ -186,13 +180,12 @@ class UserController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'score_format' => 'required|in:POINT_100,POINT_10_DECIMAL,POINT_10,POINT_5'
+            'score_format' => 'required|in:POINT_100,POINT_10_DECIMAL,POINT_10,POINT_5',
         ]);
 
         if ($validator->fails()) {
             return Redirect::back()->with('error', '¡Ooops!');
         }
-
 
         if (Auth::check()) {
             $user = Auth::user();
@@ -214,12 +207,12 @@ class UserController extends Controller
         for ($i = 0; $i < count($tags); $i++) {
             [$name, $year] = explode(' ', $tags[$i]->name);
 
-            if (!in_array($year, $tagNames)) {
+            if (! in_array($year, $tagNames)) {
                 $years[] = ['name' => $year, 'value' => $year];
                 $tagNames[] = $year; // Agregamos el año al array de nombres para evitar duplicados
             }
 
-            if (!in_array($name, $tagYears)) {
+            if (! in_array($name, $tagYears)) {
                 $seasons[] = ['name' => $name, 'value' => $name];
                 $tagYears[] = $name; // Agregamos el año al array de nombres para evitar duplicados
             }
@@ -227,22 +220,24 @@ class UserController extends Controller
 
         $data = [
             'years' => $years,
-            'seasons' => $seasons
+            'seasons' => $seasons,
         ];
+
         return $data;
     }
+
     public function filterTypesSortChar()
     {
         $filters = [
             ['name' => 'All', 'value' => 'all'],
-            ['name' => 'Only Rated', 'value' => 'rated']
+            ['name' => 'Only Rated', 'value' => 'rated'],
         ];
 
         $types = [
             ['name' => 'Opening', 'value' => 'OP'],
             ['name' => 'Ending', 'value' => 'ED'],
             ['name' => 'Insert', 'value' => 'INS'],
-            ['name' => 'Other', 'value' => 'OTH']
+            ['name' => 'Other', 'value' => 'OTH'],
         ];
 
         $sortMethods = [
@@ -250,7 +245,7 @@ class UserController extends Controller
             ['name' => 'Title', 'value' => 'title'],
             ['name' => 'Score', 'value' => 'averageRating'],
             ['name' => 'Views', 'value' => 'view_count'],
-            ['name' => 'Popular', 'value' => 'likeCount']
+            ['name' => 'Popular', 'value' => 'likeCount'],
         ];
 
         $characters = range('A', 'Z');
@@ -259,8 +254,9 @@ class UserController extends Controller
             'filters' => $filters,
             'types' => $types,
             'sortMethods' => $sortMethods,
-            'characters' => $characters
+            'characters' => $characters,
         ];
+
         return $data;
     }
 }

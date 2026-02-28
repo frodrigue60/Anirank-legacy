@@ -85,8 +85,9 @@ class ReactionController extends Controller
         //
     }
 
-    public function react(SongVariant $songVariant)
+    public function react(SongVariant $variant)
     {
+        $songVariant = $variant;
         $user = Auth::user();
         $type = request('type'); // 1 para like, -1 para dislike
 

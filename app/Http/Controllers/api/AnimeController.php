@@ -180,7 +180,7 @@ class AnimeController extends Controller
             $anime->average_rating = (float) ($anime->average_rating ?? 0);
         });
 
-        return response()->json($animes);
+        return \App\Http\Resources\AnimeResource::collection($animes);
     }
 
     public function show(Anime $anime)
@@ -213,7 +213,7 @@ class AnimeController extends Controller
         // Calcular rating promedio del anime basado en sus canciones
         $anime->average_rating = $anime->songs->avg('ratings_avg_rating') ?: 0;
 
-        return response()->json($anime);
+        return new \App\Http\Resources\AnimeResource($anime);
     }
 
     public function globalSearch(Request $request)

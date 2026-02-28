@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'anilist' => [
+        'graphql_url' => env('ANILIST_GRAPHQL_URL', 'https://graphql.anilist.co'),
+    ],
+
 ];

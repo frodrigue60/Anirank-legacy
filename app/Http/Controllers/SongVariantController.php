@@ -2,21 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SongVariant;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use App\Models\Anime;
-use App\Models\Song;
+use App\Models\Favorite;
 use App\Models\Reaction;
 use App\Models\Season;
-use App\Models\Year;
-use App\Models\Favorite;
+use App\Models\Song;
+use App\Models\SongVariant;
 use App\Models\User;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Year;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class SongVariantController extends Controller
 {
@@ -43,7 +40,6 @@ class SongVariantController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -57,11 +53,12 @@ class SongVariantController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(SongVariant $songVariant)
+    public function show(SongVariant $variant)
     {
+        $songVariant = $variant;
         $user = Auth::check() ? Auth::User() : null;
 
-        if (!$songVariant) {
+        if (! $songVariant) {
             return redirect(route('home'))->with('warning', 'Item no exist!');
         }
 
@@ -70,12 +67,12 @@ class SongVariantController extends Controller
         }
 
         $comments = $songVariant->comments;
-        //dd($comments[0]->user);
+        // dd($comments[0]->user);
         $factor = 1;
 
         $songVariant->score = round($songVariant->averageRating * $factor, 1);
 
-        #Is used by rating form
+        // Is used by rating form
         $userRating = null;
 
         if ($user) {
@@ -102,7 +99,7 @@ class SongVariantController extends Controller
 
                     case 'POINT_5':
                         $factor = 1 / 20;
-                        //Divide the score in segments of [20, 40, 60, 80, 100]
+                        // Divide the score in segments of [20, 40, 60, 80, 100]
                         $userRating->formatRating = (int) max(20, min(100, ceil($userRating->rating / 20) * 20));
                         break;
 
@@ -116,7 +113,7 @@ class SongVariantController extends Controller
 
         $songVariant = $this->setScoreOnlyOneVariant($songVariant, $user);
 
-        //dd($songVariant);
+        // dd($songVariant);
 
         $songVariant->incrementViews();
 
@@ -137,7 +134,6 @@ class SongVariantController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -162,12 +158,12 @@ class SongVariantController extends Controller
         $user = Auth::check() ? Auth::User() : null;
         $anime = Anime::where('slug', $animeSlug)->first();
 
-        if (!$anime) {
+        if (! $anime) {
             return redirect(route('/'))->with('warning', 'Anime not found!');
         }
-        if (!$anime->status) {
+        if (! $anime->status) {
             if ($user) {
-                if (!$user->isAdmin()) {
+                if (! $user->is_admin) {
                     return redirect('/')->with('danger', 'User not autorized!');
                 }
             } else {
@@ -184,9 +180,9 @@ class SongVariantController extends Controller
             ->with('reactionsCounter')
             ->firstOrFail();
 
-        //dd($songVariant);
+        // dd($songVariant);
 
-        if (!$songVariant) {
+        if (! $songVariant) {
             return redirect(route('/'))->with('warning', 'Item no exist!');
         }
 
@@ -195,12 +191,12 @@ class SongVariantController extends Controller
         }
 
         $comments = $songVariant->comments;
-        //dd($comments[0]->user);
+        // dd($comments[0]->user);
         $factor = 1;
 
         $songVariant->score = round($songVariant->averageRating * $factor, 1);
 
-        #Is used by rating form
+        // Is used by rating form
         $userRating = null;
 
         if ($user) {
@@ -227,7 +223,7 @@ class SongVariantController extends Controller
 
                     case 'POINT_5':
                         $factor = 1 / 20;
-                        //Divide the score in segments of [20, 40, 60, 80, 100]
+                        // Divide the score in segments of [20, 40, 60, 80, 100]
                         $userRating->formatRating = (int) max(20, min(100, ceil($userRating->rating / 20) * 20));
                         break;
 
@@ -241,26 +237,28 @@ class SongVariantController extends Controller
 
         $songVariant = $this->setScoreOnlyOneVariant($songVariant, $user);
 
-        //dd($songVariant);
+        // dd($songVariant);
 
         $songVariant->incrementViews();
 
         return view('public.variants.show', compact('songVariant', 'comments', 'userRating'));
     }
 
-    public function rate(Request $request, SongVariant $songVariant)
+    public function rate(Request $request, SongVariant $variant)
     {
-        //dd($request->all());
+        $songVariant = $variant;
+        // dd($request->all());
         if (Auth::check()) {
 
             $score_format = Auth::user()->score_format;
 
             $validator = Validator::make($request->all(), [
-                'score' => 'required|numeric'
+                'score' => 'required|numeric',
             ]);
 
             if ($validator->fails()) {
                 $messageBag = $validator->getMessageBag();
+
                 return redirect()
                     ->back()
                     ->with('error', $messageBag);
@@ -280,6 +278,7 @@ class SongVariantController extends Controller
             if ($score >= 1 && $score <= 100) {
                 // Utilizar el score ajustado
                 $songVariant->rateOnce($score, Auth::User()->id);
+
                 return redirect()->back()->with('success', 'Rated Successfully');
             } else {
                 return redirect()->back()->with('warning', 'Only values between 1 and 100');
@@ -289,8 +288,9 @@ class SongVariantController extends Controller
         }
     }
 
-    public function getUserRating(SongVariant $songVariant, User $user)
+    public function getUserRating(SongVariant $variant, User $user)
     {
+        $songVariant = $variant;
         $userRating = DB::table('ratings')
             ->where('rateable_type', SongVariant::class)
             ->where('rateable_id', $songVariant->id)
@@ -300,24 +300,27 @@ class SongVariantController extends Controller
         return $userRating;
     }
 
-    public function like(SongVariant $songVariant)
+    public function like(SongVariant $variant)
     {
+        $songVariant = $variant;
         $this->handleReaction($songVariant, 1); // 1 para like
         $songVariant->updateReactionCounters(); // Actualiza los contadores manualmente
+
         return redirect()->back(); // Redirige de vuelta a la página anterior
     }
 
-    // Método para dislike
-    public function dislike(SongVariant $songVariant)
+    public function dislike(SongVariant $variant)
     {
+        $songVariant = $variant;
         $this->handleReaction($songVariant, -1); // -1 para dislike
         $songVariant->updateReactionCounters(); // Actualiza los contadores manualmente
+
         return redirect()->back(); // Redirige de vuelta a la página anterior
     }
 
-    // Método privado para manejar la reacción
-    private function handleReaction(SongVariant $songVariant, int $type)
+    private function handleReaction(SongVariant $variant, int $type)
     {
+        $songVariant = $variant;
         $user = Auth::user();
 
         // Buscar si ya existe una reacción del usuario para este anime
@@ -405,7 +408,7 @@ class SongVariantController extends Controller
         return $variants;
     }
 
-    #New
+    // New
     public function setScoreOnlyOneVariant(SongVariant $variant, User $user)
     {
         $variant->userScore = null;
@@ -453,14 +456,14 @@ class SongVariantController extends Controller
             $denominator
         );
 
-
         return $variant;
     }
 
-    public function toggleFavorite(SongVariant $songVariant)
+    public function toggleFavorite(SongVariant $variant)
     {
+        $songVariant = $variant;
 
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->back()->with('warning', 'Please login');
         }
 
@@ -474,6 +477,7 @@ class SongVariantController extends Controller
 
         if ($favorite) {
             $favorite->delete();
+
             return redirect()->back()->with('success', 'Theme removed to favorites');
         } else {
             Favorite::create([
@@ -481,6 +485,7 @@ class SongVariantController extends Controller
                 'favoritable_id' => $songVariant->id,
                 'favoritable_type' => SongVariant::class,
             ]);
+
             return redirect()->back()->with('success', 'Theme added to favorites');
         }
     }
@@ -490,28 +495,19 @@ class SongVariantController extends Controller
         return view('public.ranking');
     }
 
-    public function paginate($collection, $perPage = 18, $page = null, $options = [])
-    {
-        $page = Paginator::resolveCurrentPage();
-        $options = ['path' => Paginator::resolveCurrentPath()];
-        $items = $collection instanceof Collection ? $collection : Collection::make($collection);
-        $collection = new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
-        return $collection;
-    }
-
     protected function formatScoreString($score, $format, $denominator)
     {
         switch ($format) {
             case 'POINT_100':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_10_DECIMAL':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             case 'POINT_10':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_5':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             default:
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
         }
     }
 }

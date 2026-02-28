@@ -200,7 +200,7 @@ class AnimeController extends Controller
             'format_in' => $request->type,
         ];
 
-        $response = $this->httpClient()->post('https://graphql.anilist.co', [
+        $response = $this->httpClient()->post(config('services.anilist.graphql_url', 'https://graphql.anilist.co'), [
             'json' => [
                 'query' => $this->buildGraphQLQuerySearch(),
                 'variables' => $variables,
@@ -228,17 +228,20 @@ class AnimeController extends Controller
         $animes = Anime::whereNotNull('anilist_id')->get();
 
         foreach ($animes as $anime) {
-            try {
-                $json = $this->fetchAnilistById($anime->anilist_id);
-                $this->updateAnimeFromAnilistData($anime, $json->data->Media);
-            } catch (\Throwable $th) {
-                Log::error("SyncAll failed for anime {$anime->id} ({$anime->title}): ".$th->getMessage());
-
-                continue;
-            }
+            \App\Jobs\SyncAnimeAnilistJob::dispatch($anime->id);
         }
 
-        return redirect(route('admin.animes.index'))->with('success', 'All animes synchronized with AniList');
+        return redirect(route('admin.animes.index'))->with('success', 'All animes synchronization queued to run in the background');
+    }
+
+    public function forceUpdateSilently(Anime $anime)
+    {
+        try {
+            $json = $this->fetchAnilistById($anime->anilist_id);
+            $this->updateAnimeFromAnilistData($anime, $json->data->Media);
+        } catch (\Throwable $th) {
+            Log::error("Sync failed for anime {$anime->id} ({$anime->title}): ".$th->getMessage());
+        }
     }
 
     public function forceUpdate(Anime $anime)
@@ -263,7 +266,7 @@ class AnimeController extends Controller
             'format_in' => $request->type ?? ['TV', 'TV_SHORT', 'ONA'],
         ];
 
-        $response = $this->httpClient()->post('https://graphql.anilist.co', [
+        $response = $this->httpClient()->post(config('services.anilist.graphql_url', 'https://graphql.anilist.co'), [
             'json' => [
                 'query' => $this->buildGraphQLQuerySeasonal(),
                 'variables' => $variables,
@@ -369,7 +372,7 @@ class AnimeController extends Controller
      */
     private function fetchAnilistById(int $anilistId): object
     {
-        $response = $this->httpClient()->post('https://graphql.anilist.co', [
+        $response = $this->httpClient()->post(config('services.anilist.graphql_url', 'https://graphql.anilist.co'), [
             'json' => [
                 'query' => $this->buildGraphQLQueryId(),
                 'variables' => ['id' => $anilistId],

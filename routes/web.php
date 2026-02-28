@@ -1,41 +1,33 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AnimeController as AdminAnimeController;
+use App\Http\Controllers\Admin\ArtistController as AdminArtistController;
+use App\Http\Controllers\Admin\BadgeController as AdminBadgeController;
+use App\Http\Controllers\Admin\CommentController as AdminCommentController;
+use App\Http\Controllers\Admin\ProducerController as AdminProducerController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\RoleController as AdminRoleController;
+use App\Http\Controllers\Admin\SeasonController as AdminSeasonController;
+use App\Http\Controllers\Admin\SongController as AdminSongController;
+use App\Http\Controllers\Admin\SongVariantController as AdminSongVariantController;
+use App\Http\Controllers\Admin\StudioController as AdminStudioController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\UserRequestController as AdminUserRequestController;
+use App\Http\Controllers\Admin\VideoController as AdminVideoController;
+use App\Http\Controllers\Admin\YearController as AdminYearController;
+use App\Http\Controllers\AnimeController;
+use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\PlaylistController;
+use App\Http\Controllers\ProducerController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SongController;
+use App\Http\Controllers\SongVariantController;
+use App\Http\Controllers\StudioController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserRequestController;
 use Illuminate\Support\Facades\Auth;
-
-use App\Http\Controllers\{
-    AnimeController,
-    ArtistController,
-    UserController,
-    ReportController,
-    CommentController,
-    SongController,
-    SongVariantController,
-    SeasonController,
-    YearController,
-    StudioController,
-    ProducerController,
-    UserRequestController,
-    PlaylistController
-};
-
-use App\Http\Controllers\Admin\{
-    AnimeController as AdminAnimeController,
-    ArtistController as AdminArtistController,
-    UserController as AdminUserController,
-    ReportController as AdminReportController,
-    UserRequestController as AdminUserRequestController,
-    SongController as AdminSongController,
-    VideoController as AdminVideoController,
-    SongVariantController as AdminSongVariantController,
-    YearController as AdminYearController,
-    SeasonController as AdminSeasonController,
-    CommentController as AdminCommentController,
-    StudioController as AdminStudioController,
-    ProducerController as AdminProducerController,
-    RoleController as AdminRoleController,
-    BadgeController as AdminBadgeController
-};
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,8 +67,6 @@ Route::controller(ProducerController::class)->group(function () {
     Route::get('/producers/{producer:slug}', 'show')->name('producers.show');
     Route::get('/producers', 'index')->name('producers.index');
 });
-
-
 
 // Resources
 // Only write methods — index/show are handled by the manual slug routes above
@@ -129,17 +119,17 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
     });
     Route::resource('animes', AdminAnimeController::class);
 
-    //Artists
+    // Artists
     Route::resource('artists', AdminArtistController::class);
 
-    //Users
+    // Users
     Route::resource('users', AdminUserController::class);
 
-    //Years
+    // Years
     Route::patch('years/{year}/set-current', [AdminYearController::class, 'setCurrent'])->name('years.set.current');
     Route::resource('years', AdminYearController::class);
 
-    //Seasons
+    // Seasons
     Route::patch('seasons/{season}/set-current', [AdminSeasonController::class, 'setCurrent'])->name('seasons.set.current');
     Route::resource('seasons', AdminSeasonController::class);
 

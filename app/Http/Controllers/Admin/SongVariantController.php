@@ -70,13 +70,15 @@ class SongVariantController extends Controller
         }
     }
 
-    public function show(SongVariant $songVariant)
+    public function show(SongVariant $variant)
     {
+        $songVariant = $variant;
         return $songVariant;
     }
 
-    public function edit(SongVariant $songVariant)
+    public function edit(SongVariant $variant)
     {
+        $songVariant = $variant;
         $song = $songVariant->song;
         $anime = $song->anime;
 
@@ -102,8 +104,9 @@ class SongVariantController extends Controller
         return view('admin.variants.edit', compact('songVariant', 'breadcrumb'));
     }
 
-    public function update(Request $request, SongVariant $songVariant)
+    public function update(Request $request, SongVariant $variant)
     {
+        $songVariant = $variant;
         $song = $songVariant->song;
 
         $latestVersion = SongVariant::where('song_id', $song->id)
@@ -127,8 +130,9 @@ class SongVariantController extends Controller
         }
     }
 
-    public function destroy(SongVariant $songVariant)
+    public function destroy(SongVariant $variant)
     {
+        $songVariant = $variant;
         if ($songVariant->delete()) {
             return redirect(route('admin.variants.index', ['song_id' => $songVariant->song_id]))->with('success', 'Song variant deleted successfully');
         } else {

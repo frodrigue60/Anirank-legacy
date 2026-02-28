@@ -9,14 +9,14 @@
             <div>
                 <div>
                     <h1 class="text-3xl font-bold text-white tracking-tight">
-                        @if ($currentPost)
+                        @if (isset($currentPost))
                             Songs: {{ $currentPost->title }}
                         @else
                             Song Catalog
                         @endif
                     </h1>
                     <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">
-                        @if ($currentPost)
+                        @if (isset($currentPost))
                             Theme Music Registry for this entry
                         @else
                             Global Theme Management & Registry
@@ -89,7 +89,7 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        @if ($song->post)
+                                        @if ($song->anime)
                                             <a href="{{ route('admin.animes.show', $song->anime->id) }}"
                                                 class="text-sm text-zinc-300 hover:text-white transition-colors line-clamp-1">
                                                 {{ $song->anime->title }}

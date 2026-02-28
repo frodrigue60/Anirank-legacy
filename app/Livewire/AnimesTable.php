@@ -35,6 +35,9 @@ class AnimesTable extends Component
 
     #[Url(except: 'grid_small')]
     public $viewMode = 'grid_small';
+
+    #[Url(except: 'title_asc')]
+    public $sort_by = 'title_asc';
     
     public $perPage = 15;
     public $hasMorePages = false;
@@ -78,6 +81,12 @@ class AnimesTable extends Component
         $this->perPage = 15;
     }
 
+    public function updatedSortBy()
+    {
+        $this->resetPage();
+        $this->perPage = 15;
+    }
+
     public function setViewMode($mode)
     {
         $this->viewMode = $mode;
@@ -114,6 +123,17 @@ class AnimesTable extends Component
         return Genre::orderBy('name')->get(['id', 'name']);
     }
 
+    #[Computed]
+    public function sort_bys()
+    {
+        return [
+            'title_asc' => 'Title (A-Z)',
+            'title_desc' => 'Title (Z-A)',
+            'songs_count_desc' => 'Most Themes',
+            'songs_count_asc' => 'Least Themes',
+        ];
+    }
+
     public function render()
     {
         $query = Anime::where('status', true);
@@ -136,10 +156,28 @@ class AnimesTable extends Component
             });
         }
 
-        $results = $query->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name'])
-            ->withCount('songs')
-            ->orderBy('title')
-            ->orderBy('id', 'asc')
+        $query->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name'])
+            ->withCount('songs');
+
+        switch ($this->sort_by) {
+            case 'title_asc':
+                $query->orderBy('title', 'asc');
+                break;
+            case 'title_desc':
+                $query->orderBy('title', 'desc');
+                break;
+            case 'songs_count_desc':
+                $query->orderBy('songs_count', 'desc');
+                break;
+            case 'songs_count_asc':
+                $query->orderBy('songs_count', 'asc');
+                break;
+            default:
+                $query->orderBy('title', 'asc');
+                break;
+        }
+
+        $results = $query->orderBy('id', 'asc')
             ->take($this->perPage + 1)
             ->get();
 

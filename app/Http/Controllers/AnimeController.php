@@ -2,19 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Anime;
 use App\Models\Artist;
 use App\Models\Format;
-use Illuminate\Http\Request;
-use App\Models\Anime;
 use App\Models\Season;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Song;
+use App\Models\Year;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Models\Year;
-use App\Models\Song;
-use App\Models\User;
 
 class AnimeController extends Controller
 {
@@ -115,7 +111,7 @@ class AnimeController extends Controller
 
         $user = Auth::user();
 
-        if (!$anime->status) {
+        if (! $anime->status) {
             if ($user && $user->isAdmin()) {
                 // Admin can view
             } else {
@@ -145,7 +141,6 @@ class AnimeController extends Controller
 
         return view('public.animes.index', compact('seasons', 'years', 'formats'));
     }
-
 
     public function setScoreOnlyVariants($variants, $user = null)
     {
@@ -204,39 +199,30 @@ class AnimeController extends Controller
         $format = $user?->score_format ?? 'POINT_100';
 
         $denominatorMap = [
-            'POINT_100'        => 100,
+            'POINT_100' => 100,
             'POINT_10_DECIMAL' => 10,
-            'POINT_10'         => 10,
-            'POINT_5'          => 5,
+            'POINT_10' => 10,
+            'POINT_5' => 5,
         ];
         $denominator = $denominatorMap[$format] ?? 100;
 
         $songs->each(function ($song) use ($user, $format, $denominator) {
-            $song->rawScore        = round($song->averageRating, 1);
-            $song->formattedScore  = $song->formattedAvgScore($format);
-            $song->scoreString     = $this->formatScoreString($song->formattedScore, $format, $denominator);
+            $song->rawScore = round($song->averageRating, 1);
+            $song->formattedScore = $song->formattedAvgScore($format);
+            $song->scoreString = $this->formatScoreString($song->formattedScore, $format, $denominator);
 
             $song->formattedUserScore = null;
-            $song->rawUserScore       = null;
+            $song->rawUserScore = null;
 
             if ($user) {
                 $userRating = $this->getUserRating($song->id, $user->id);
                 if ($userRating) {
                     $song->userFormattedScore = $song->formattedUserScore($format, $user->id);
-                    $song->rawUserScore       = round($userRating->rating);
+                    $song->rawUserScore = round($userRating->rating);
                 }
             }
         });
 
-        return $songs;
-    }
-
-    public function paginate($songs, $perPage = 18, $page = null, $options = [])
-    {
-        $page = Paginator::resolveCurrentPage();
-        $options = ['path' => Paginator::resolveCurrentPath()];
-        $items = $songs instanceof Collection ? $songs : Collection::make($songs);
-        $songs = new LengthAwarePaginator($items->forPage($page, $perPage), $items->count(), $perPage, $page, $options);
         return $songs;
     }
 
@@ -248,21 +234,26 @@ class AnimeController extends Controller
                 $songs = $songs->sortBy(function ($song) {
                     return $song->anime->title;
                 });
+
                 return $songs;
                 break;
             case 'averageRating':
                 $songs = $songs->sortByDesc('averageRating');
+
                 return $songs;
             case 'view_count':
                 $songs = $songs->sortByDesc('view_count');
+
                 return $songs;
 
             case 'likeCount':
                 $songs = $songs->sortByDesc('likeCount');
+
                 return $songs;
                 break;
             case 'recent':
                 $songs = $songs->sortByDesc('created_at');
+
                 return $songs;
                 break;
 
@@ -270,38 +261,45 @@ class AnimeController extends Controller
                 $songs = $songs->sortBy(function ($song) {
                     return $song->anime->title;
                 });
+
                 return $songs;
                 break;
         }
     }
+
     public function sortVariants($sort, $song_variants)
     {
-        //dd($song_variants);
+        // dd($song_variants);
         switch ($sort) {
             case 'title':
                 $song_variants = $song_variants->sortBy(function ($song_variant) {
                     return $song_variant->song->anime->title;
                 });
+
                 return $song_variants;
                 break;
 
             case 'averageRating':
                 $song_variants = $song_variants->sortByDesc('averageRating');
+
                 return $song_variants;
                 break;
 
             case 'view_count':
                 $song_variants = $song_variants->sortByDesc('views');
+
                 return $song_variants;
                 break;
 
             case 'likeCount':
                 $song_variants = $song_variants->sortByDesc('likeCount');
+
                 return $song_variants;
                 break;
 
             case 'recent':
                 $song_variants = $song_variants->sortByDesc('created_at');
+
                 return $song_variants;
                 break;
 
@@ -309,6 +307,7 @@ class AnimeController extends Controller
                 $song_variants = $song_variants->sortBy(function ($song_variant) {
                     return $song_variant->song->anime->title;
                 });
+
                 return $song_variants;
                 break;
         }
@@ -327,15 +326,15 @@ class AnimeController extends Controller
     {
         switch ($format) {
             case 'POINT_100':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_10_DECIMAL':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             case 'POINT_10':
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
             case 'POINT_5':
-                return number_format($score, 1) . '/' . $denominator;
+                return number_format($score, 1).'/'.$denominator;
             default:
-                return $score . '/' . $denominator;
+                return $score.'/'.$denominator;
         }
     }
 }
