@@ -48,9 +48,15 @@
                         class="group flex flex-col items-center gap-4 cursor-pointer">
                         <div
                             class="relative w-full aspect-square rounded-full overflow-hidden card-shadow ring-4 ring-transparent group-hover:ring-primary/50 transition-all duration-300">
-                            <x-ui.image src="{{ $artist->thumbnail_url }}" alt="{{ $artist->name }}"
-                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                fallback="default-artist.webp" />
+                            @if ($artist->avatar_url)
+                                <img src="{{ $artist->avatar_url }}" alt="{{ $artist->name }}"
+                                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                            @else
+                                <div
+                                    class="w-full h-full bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700">
+                                    <span class="material-symbols-outlined text-5xl">person</span>
+                                </div>
+                            @endif
                             <div
                                 class="absolute inset-0 bg-linear-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                             </div>

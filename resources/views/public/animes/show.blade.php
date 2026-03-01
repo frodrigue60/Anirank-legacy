@@ -6,267 +6,280 @@
 @section('og_type', 'article')
 
 @section('content')
-    {{-- Hero Section --}}
-    <div class="relative w-full h-[320px] md:h-[500px] overflow-hidden group">
-        {{-- Banner Background --}}
-        <div class="absolute inset-0 transition-transform duration-1000 group-hover:scale-110">
-            <img src="{{ $banner_url }}" alt="{{ $anime->title }}"
-                class="w-full h-full object-cover saturate-[0.8] brightness-[0.6]">
+    <style type="text/css">
+        .sidebar-item {
+            border-left: 2px solid transparent;
+            padding-left: 0.75rem;
+            transition: all 0.2s;
+        }
 
-            {{-- Scrims & Gradients --}}
-            <div class="absolute inset-0 bg-linear-to-t from-background via-background/90 to-transparent opacity-90">
-            </div>
-            <div class="absolute inset-0 bg-linear-to-b from-background/80 via-transparent to-transparent h-1/3"></div>
-            {{-- Top scrim for Navbar --}}
-            <div class="absolute inset-0 bg-linear-to-r from-background via-transparent to-background/40"></div>
-        </div>
+        .sidebar-item:hover {
+            border-left-color: #7f13ec;
+        }
 
-        <div class="relative max-w-[1440px] mx-auto h-full flex flex-col justify-end px-4 md:px-8 pb-12">
-            <div class="flex flex-col md:flex-row items-end gap-8 md:gap-12">
-                {{-- Cover Image in Sidebar position --}}
-                <div class="hidden md:block w-56 h-auto aspect-2/3 -mb-24 z-20 shrink-0 relative group/poster">
+        .table-row-hover:hover {
+            background: rgba(127, 19, 236, 0.05);
+        }
+    </style>
+
+    <div class="max-w-[1440px] mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            {{-- Sidebar --}}
+            <aside class="lg:col-span-3 space-y-8">
+                <div class="relative rounded-xl overflow-hidden shadow-2xl shadow-primary/10 border border-white/5 group">
+                    <img src="{{ $anime->thumbnail_url }}" alt="{{ $anime->title }}"
+                        class="w-full h-auto aspect-2/3 object-cover transition-transform duration-700 group-hover:scale-105">
                     <div
-                        class="absolute -inset-1 bg-primary/20 rounded-[22px] blur-xl opacity-0 group-hover/poster:opacity-100 transition-opacity duration-500">
+                        class="absolute top-0 left-0 w-full h-full bg-linear-to-t from-background-dark/80 via-transparent to-transparent opacity-60">
                     </div>
-                    <img src="{{ $thumbnail_url }}" alt="{{ $anime->title }}"
-                        class="relative w-full h-full object-cover rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.9)] border border-white/20 ring-1 ring-white/10">
                 </div>
 
-                {{-- Basic Info --}}
-                <div class="flex-1 mb-0 md:mb-4">
-                    <div class="flex flex-wrap items-center gap-3 mb-6">
-                        <div
-                            class="flex items-center gap-1 bg-white/5 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-lg">
-                            <span class="text-primary text-[10px] font-black uppercase tracking-widest">
-                                {{ $anime->format->name ?? 'TV' }}
+                <div class="space-y-6">
+                    <div class="border-b border-primary/20 pb-2">
+                        <h3 class="text-xs font-bold text-primary uppercase tracking-widest mb-1">Information</h3>
+                    </div>
+                    <div class="space-y-5 text-sm">
+                        @isset($anime->format)
+                            <div class="sidebar-item">
+                                <span class="block text-xs text-white/40 mb-0.5">Format</span>
+                                <span class="font-medium text-white">{{ $anime->format->name }}</span>
+                            </div>
+                        @endisset
+
+                        <div class="sidebar-item">
+                            <span class="block text-xs text-white/40 mb-0.5">Release</span>
+                            <span class="font-medium text-white">
+                                {{ $anime->season->name ?? '' }} {{ $anime->year->name ?? '' }}
                             </span>
                         </div>
-                        <div class="w-1 h-1 bg-white/20 rounded-full"></div>
-                        <div class="flex items-center gap-1.5 text-white/50 text-sm font-bold tracking-wide">
-                            <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                            {{ $anime->season->name ?? '' }} {{ $anime->year->name ?? '' }}
+
+                        @if ($anime->studios->count() > 0)
+                            <div class="sidebar-item">
+                                <span class="block text-xs text-white/40 mb-0.5">Studios</span>
+                                <div class="flex flex-col gap-1">
+                                    @foreach ($anime->studios as $item)
+                                        <a href="{{ route('studios.show', $item) }}"
+                                            class="font-medium text-primary hover:underline">
+                                            {{ $item->name }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($anime->producers->count() > 0)
+                            <div class="sidebar-item">
+                                <span class="block text-xs text-white/40 mb-0.5">Producers</span>
+                                <div class="flex flex-col gap-1">
+                                    @foreach ($anime->producers as $item)
+                                        <a href="{{ route('producers.show', $item) }}"
+                                            class="font-medium text-primary hover:underline">
+                                            {{ $item->name }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                @if ($anime->externalLinks->count() > 0)
+                    <div class="space-y-4 pt-6 border-t border-white/5">
+                        <h3 class="text-xs font-black text-primary uppercase tracking-[0.2em]">External Links</h3>
+                        <div class="flex flex-wrap gap-2.5">
+                            @foreach ($anime->externalLinks as $item)
+                                @php
+                                    $linkName = strtolower($item->name);
+                                    $colorClass = match (true) {
+                                        str_contains($linkName, 'official')
+                                            => 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/50',
+                                        str_contains($linkName, 'crunchy')
+                                            => 'text-orange-400 border-orange-500/20 bg-orange-500/5 hover:border-orange-500/50',
+                                        str_contains($linkName, 'mal')
+                                            => 'text-blue-400 border-blue-500/20 bg-blue-500/5 hover:border-blue-500/50',
+                                        str_contains($linkName, 'twitter') || str_contains($linkName, ' x ')
+                                            => 'text-sky-400 border-sky-500/20 bg-sky-500/5 hover:border-sky-500/50',
+                                        str_contains($linkName, 'netflix')
+                                            => 'text-red-500 border-red-500/20 bg-red-500/5 hover:border-red-500/50',
+                                        str_contains($linkName, 'hidive')
+                                            => 'text-blue-300 border-blue-400/20 bg-blue-400/5 hover:border-blue-400/50',
+                                        default
+                                            => 'text-white/60 border-white/10 bg-white/5 hover:border-primary/50 hover:text-white',
+                                    };
+                                @endphp
+                                <a href="{{ $item->url }}" target="_blank"
+                                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border {{ $colorClass }} transition-all text-[11px] font-bold group/link">
+                                    <span
+                                        class="material-symbols-outlined text-base opacity-60 group-hover/link:opacity-100">link</span>
+                                    {{ $item->name }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </aside>
+
+            {{-- Main Content --}}
+            <section class="lg:col-span-9 space-y-10">
+                <div class="flex flex-col gap-6 border-b border-primary/20 pb-8">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                        <div>
+                            @auth
+                                @if (Auth::User()->isStaff())
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <a href="{{ route('admin.animes.edit', $anime->id) }}"
+                                            class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs font-bold hover:bg-emerald-500/20 transition-all">EDIT</a>
+                                        <a href="{{ route('admin.songs.index', ['anime_id' => $anime->id]) }}"
+                                            class="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded text-xs font-bold hover:bg-primary/20 transition-all">SONGS</a>
+                                    </div>
+                                @endif
+                            @endauth
+                            <h1 class="text-4xl md:text-6xl font-black tracking-tight text-white mb-2">
+                                {{ $anime->title }}
+                            </h1>
+                            <h2 class="text-lg md:text-xl text-white/40 font-medium">
+                                {{ $anime->native_title ?? '' }}
+                            </h2>
                         </div>
                     </div>
 
-                    {{-- Genres --}}
                     @if ($anime->genres->isNotEmpty())
-                        <div class="flex flex-wrap gap-2 mb-6">
+                        <div class="flex flex-wrap gap-2">
                             @foreach ($anime->genres as $genre)
                                 <span
-                                    class="px-3 py-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-primary hover:border-primary/30 transition-all cursor-default">
+                                    class="px-3 py-1 rounded border border-white/10 text-white/60 text-xs font-medium bg-surface-dark hover:border-primary/30 hover:text-primary transition-all cursor-default">
                                     {{ $genre->name }}
                                 </span>
                             @endforeach
                         </div>
                     @endif
-                    <h1
-                        class="text-4xl md:text-7xl font-black text-white leading-[1.1] md:leading-[1.05] tracking-tight mb-4 drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
-                        <span class="bg-linear-to-b from-white to-white/70 bg-clip-text text-transparent">
-                            {{ $anime->title }}
-                        </span>
-                    </h1>
                 </div>
-            </div>
 
-            {{-- Staff Actions (Fixed for Tailwind) --}}
-            @auth
-                @if (Auth::User()->isStaff())
-                    <div
-                        class="flex items-center gap-2 mb-4 md:mb-6 backdrop-blur-xl bg-white/5 border border-white/10 p-2 rounded-2xl h-fit">
-                        <a href="{{ route('admin.animes.edit', $anime->id) }}" title="Edit"
-                            class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-emerald-500/20 text-emerald-400 rounded-xl transition-all border border-white/5">
-                            <span class="material-symbols-outlined text-[20px]">edit</span>
-                        </a>
-                        <a href="{{ route('admin.songs.index', ['anime_id' => $anime->id]) }}" title="Manage Songs"
-                            class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-primary/20 text-primary rounded-xl transition-all border border-white/5">
-                            <span class="material-symbols-outlined text-[20px]">list</span>
-                        </a>
-                        <a href="{{ route('admin.animes.force.update', $anime->id) }}" title="Force Update"
-                            class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-amber-500/20 text-amber-500 rounded-xl transition-all border border-white/5">
-                            <span class="material-symbols-outlined text-[20px]">sync</span>
-                        </a>
-                        <form action="{{ route('admin.animes.destroy', $anime->id) }}" method="post" class="m-0">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" title="Delete"
-                                class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-red-500/20 text-red-500 rounded-xl transition-all border border-white/5">
-                                <span class="material-symbols-outlined text-[20px]">delete</span>
-                            </button>
-                        </form>
-                    </div>
-                @endif
-            @endauth
-        </div>
-    </div>
-    </div>
-
-    {{-- Content Layout --}}
-    <div class="max-w-[1440px] mx-auto px-4 md:px-8 py-10 md:py-20 mt-4 md:mt-0">
-        <div class="flex flex-col lg:flex-row gap-12">
-
-            {{-- Sidebar --}}
-            <aside class="w-full lg:w-[300px] shrink-0">
-                <div class="flex flex-col gap-8 sticky top-32">
-                    {{-- Mobile Thumbnail Only --}}
-                    <div class="md:hidden w-full flex justify-center mb-6">
-                        <img src="{{ $thumbnail_url }}" alt="{{ $anime->title }}"
-                            class="w-48 aspect-2/3 object-cover rounded-2xl shadow-2xl border border-white/10">
-                    </div>
-
-                    {{-- Metadata Cards --}}
-                    <div class="bg-surface-dark/30 rounded-3xl border border-white/5 p-6 backdrop-blur-sm">
-                        <h4
-                            class="text-[11px] uppercase font-black text-white/30 tracking-[0.2em] mb-6 flex items-center gap-2">
-                            <div class="w-1 h-3 bg-primary rounded-full"></div>
-                            Anime Details
-                        </h4>
-
-                        <div class="flex flex-col gap-6">
-                            @isset($anime->format)
-                                <div class="flex flex-col gap-1.5">
-                                    <span class="text-xs font-black text-white/20 uppercase tracking-widest">Format</span>
-                                    <p class="text-sm text-white font-bold">{{ $anime->format->name }}</p>
-                                </div>
-                            @endisset
-
-                            <div class="flex flex-col gap-1.5">
-                                <span class="text-xs font-black text-white/20 uppercase tracking-widest">Release</span>
-                                <p class="text-sm text-white font-bold">
-                                    {{ $anime->season->name ?? 'N/A' }} {{ $anime->year->name ?? '' }}
-                                </p>
-                            </div>
-
-                            @if ($anime->producers->count() > 0)
-                                <div class="flex flex-col gap-3">
-                                    <span
-                                        class="text-xs font-black text-white/20 uppercase tracking-widest">Producers</span>
-                                    <div class="flex flex-col gap-2">
-                                        @foreach ($anime->producers as $item)
-                                            <a href="{{ route('producers.show', $item) }}"
-                                                class="flex items-center gap-2 text-sm text-white hover:text-primary transition-colors font-bold group/studio">
-                                                <span
-                                                    class="material-symbols-outlined text-[16px] text-white/20 group-hover/studio:text-primary">business</span>
-                                                {{ $item->name }}
-                                            </a>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if ($anime->studios->count() > 0)
-                                <div class="flex flex-col gap-3">
-                                    <span class="text-xs font-black text-white/20 uppercase tracking-widest">Studios</span>
-                                    <div class="flex flex-col gap-2">
-                                        @foreach ($anime->studios as $item)
-                                            <a href="{{ route('studios.show', $item) }}"
-                                                class="flex items-center gap-2 text-sm text-white hover:text-primary transition-colors font-bold group/studio">
-                                                <span
-                                                    class="material-symbols-outlined text-[16px] text-white/20 group-hover/studio:text-primary">business</span>
-                                                {{ $item->name }}
-                                            </a>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if ($anime->externalLinks->count() > 0)
-                                <div class="flex flex-col gap-3">
-                                    <span class="text-xs font-black text-white/20 uppercase tracking-widest">External
-                                        Links</span>
-                                    <div class="flex flex-wrap gap-2">
-                                        @foreach ($anime->externalLinks as $item)
-                                            <a href="{{ $item->url }}" target="_blank"
-                                                class="h-9 px-4 flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs text-white/80 hover:text-white font-bold transition-all">
-                                                <span class="material-symbols-outlined text-[16px]">link</span>
-                                                {{ $item->name }}
-                                            </a>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
+                {{-- Synopsis --}}
+                <div class="space-y-4">
+                    <h2 class="text-xl font-bold flex items-center gap-3 text-white">
+                        <span class="w-1.5 h-6 bg-primary rounded-full"></span>
+                        Synopsis
+                    </h2>
+                    <div class="glass-panel p-8 rounded-2xl" x-data="{ expanded: false }">
+                        <div class="text-white/80 leading-relaxed text-lg font-body prose prose-invert max-w-none transition-all duration-300"
+                            :class="expanded ? '' : 'line-clamp-4'">
+                            {!! $anime->description !!}
                         </div>
+                        <button @click="expanded = !expanded"
+                            class="mt-4 text-primary font-bold text-sm hover:text-white transition-colors flex items-center gap-1 group">
+                            <span x-text="expanded ? 'Read Less' : 'Read More'"></span>
+                            <span class="material-symbols-outlined text-sm transition-transform duration-300"
+                                :class="expanded ? 'rotate-180' : ''">expand_more</span>
+                        </button>
                     </div>
                 </div>
-            </aside>
 
-            {{-- Main Content --}}
-            <main class="flex-1 min-w-0">
-                <div class="flex flex-col gap-14">
-
-                    {{-- Synopsis Section --}}
-                    <section>
-                        <h2 class="text-2xl font-black text-white mb-6 flex items-center gap-4">
-                            Synopsis
-                            <div class="flex-1 h-px bg-white/5"></div>
+                {{-- Music Themes --}}
+                <div class="space-y-6 pt-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold flex items-center gap-3 text-white">
+                            <span class="w-1.5 h-6 bg-primary rounded-full"></span>
+                            Music Themes
                         </h2>
-                        <div class="relative group">
-                            <div
-                                class="absolute -inset-4 bg-primary/5 rounded-4xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                            </div>
-                            <div
-                                class="relative prose prose-invert prose-p:text-white/60 prose-p:leading-relaxed prose-p:text-lg max-w-none">
-                                {!! $anime->description !!}
-                            </div>
-                        </div>
-                    </section>
+                    </div>
 
-                    {{-- Openings Section --}}
-                    <section>
-                        <div class="flex justify-between items-center mb-8">
-                            <h2 class="text-2xl font-black text-white flex items-center gap-4">
-                                Openings
-                                <div class="flex-1 h-px bg-white/5 hidden sm:block w-20"></div>
-                            </h2>
-                            <span
-                                class="text-[10px] uppercase font-black px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full tracking-widest leading-none">
-                                {{ $openings->count() ?? 0 }} Themes
-                            </span>
-                        </div>
+                    <div class="glass-panel rounded-2xl overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-white/5 text-xs uppercase tracking-widest text-white/30">
+                                    <th class="p-5 font-bold w-24">Type</th>
+                                    <th class="p-5 font-bold">Song Title</th>
+                                    <th class="p-5 font-bold">Artist</th>
+                                    <th class="p-5 font-bold text-right">Avg Rating</th>
+                                    <th class="p-5 font-bold w-16"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                {{-- Openings --}}
+                                @foreach ($openings->sortBy('theme_num') as $song)
+                                    <tr class="table-row-hover border-b border-white/5 group transition-colors">
+                                        <td class="p-5">
+                                            <span
+                                                class="inline-flex items-center justify-center px-2.5 py-1 rounded bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] font-bold uppercase">
+                                                OP {{ $song->theme_num }}
+                                            </span>
+                                        </td>
+                                        <td class="p-5">
+                                            <div class="font-bold text-white text-base">{{ $song->name }}</div>
 
-                        <div class="grid grid-cols-1 gap-4">
-                            @forelse ($openings->sortBy('theme_num') as $song)
-                                @include('partials.animes.show.song-card-premium')
-                            @empty
-                                <div
-                                    class="flex flex-col items-center justify-center py-12 bg-surface-dark/20 rounded-3xl border border-white/5">
-                                    <span class="material-symbols-outlined text-4xl text-white/10 mb-2">music_off</span>
-                                    <p class="text-white/20 font-bold uppercase tracking-widest text-xs">No openings
-                                        recorded
-                                    </p>
-                                </div>
-                            @endforelse
-                        </div>
-                    </section>
+                                        </td>
+                                        <td class="p-5 text-white/70">
+                                            @foreach ($song->artists as $artist)
+                                                <a href="{{ route('artists.show', $artist) }}"
+                                                    class="hover:text-primary transition-colors">
+                                                    {{ $artist->name }}@if (!$loop->last)
+                                                        ,
+                                                    @endif
+                                                </a>
+                                            @endforeach
+                                        </td>
+                                        <td class="p-5 text-right">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                <span class="material-symbols-outlined text-yellow-400 text-sm"
+                                                    style="font-variation-settings: 'FILL' 1;">star</span>
+                                                <span
+                                                    class="font-bold text-white text-lg">{{ number_format($song->avg_rating, 1) }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="p-5 text-right">
+                                            <a href="{{ route('songs.show.nested', [$anime, $song]) }}"
+                                                class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:bg-primary hover:text-white transition-colors">
+                                                <span class="material-symbols-outlined text-lg">play_arrow</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
 
-                    {{-- Endings Section --}}
-                    <section>
-                        <div class="flex justify-between items-center mb-8">
-                            <h2 class="text-2xl font-black text-white flex items-center gap-4">
-                                Endings
-                                <div class="flex-1 h-px bg-white/5 hidden sm:block w-20"></div>
-                            </h2>
-                            <span
-                                class="text-[10px] uppercase font-black px-3 py-1 bg-secondary/10 text-secondary border border-secondary/20 rounded-full tracking-widest leading-none">
-                                {{ $endings->count() ?? 0 }} Themes
-                            </span>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-4">
-                            @forelse ($endings->sortBy('theme_num') as $song)
-                                @include('partials.animes.show.song-card-premium')
-                            @empty
-                                <div
-                                    class="flex flex-col items-center justify-center py-12 bg-surface-dark/20 rounded-3xl border border-white/5">
-                                    <span class="material-symbols-outlined text-4xl text-white/10 mb-2">music_off</span>
-                                    <p class="text-white/20 font-bold uppercase tracking-widest text-xs">No endings
-                                        recorded</p>
-                                </div>
-                            @endforelse
-                        </div>
-                    </section>
+                                {{-- Endings --}}
+                                @foreach ($endings->sortBy('theme_num') as $song)
+                                    <tr
+                                        class="table-row-hover @if (!$loop->last) border-b border-white/5 @endif group transition-colors">
+                                        <td class="p-5">
+                                            <span
+                                                class="inline-flex items-center justify-center px-2.5 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold uppercase">
+                                                ED {{ $song->theme_num }}
+                                            </span>
+                                        </td>
+                                        <td class="p-5">
+                                            <div class="font-bold text-white text-base">{{ $song->name }}</div>
+                                        </td>
+                                        <td class="p-5 text-white/70">
+                                            @foreach ($song->artists as $artist)
+                                                <a href="{{ route('artists.show', $artist) }}"
+                                                    class="hover:text-primary transition-colors">
+                                                    {{ $artist->name }}@if (!$loop->last)
+                                                        ,
+                                                    @endif
+                                                </a>
+                                            @endforeach
+                                        </td>
+                                        <td class="p-5 text-right">
+                                            <div class="flex items-center justify-end gap-1.5">
+                                                <span class="material-symbols-outlined text-yellow-400 text-sm"
+                                                    style="font-variation-settings: 'FILL' 1;">star</span>
+                                                <span
+                                                    class="font-bold text-white text-lg">{{ number_format($song->avg_rating, 1) }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="p-5 text-right">
+                                            <a href="{{ route('songs.show.nested', [$anime, $song]) }}"
+                                                class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:bg-primary hover:text-white transition-colors">
+                                                <span class="material-symbols-outlined text-lg">play_arrow</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </main>
-
+            </section>
         </div>
     </div>
 @endsection

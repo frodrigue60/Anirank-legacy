@@ -1680,3 +1680,13 @@ The following features are identified as standard/premium upgrades for the Anira
 7.  **Social Login**: Integration with Discord, Google, or Twitter via Laravel Socialite.
 8.  **Internal API**: Full REST/GraphQL API to power potential mobile apps or third-party integrations.
 9.  **Gamification**: Achievement system and badges for active contributors and highly-rated theme discoverers.
+10. **Refined User Engagement**:
+    - **Themes Quiz**: Interactive guessing games with score tracking.
+    - **Seasonal Predictions**: Community voting on upcoming top-rated themes.
+    - **User Milestones**: Automated trackable achievements (e.g., "100 Endings Listened").
+11. **Social & Community**:
+    - **Thematic Battles**: "Bracket-style" or "1v1" song duels to generate dynamic popularity rankings.
+    - **Activity Feed**: Real-time social wall for user interactions (likes, rates, follows).
+12. **Advanced Personalization & UX**:
+    - **Non-Stop Player**: Radio-mode continuous playback based on user taste and genres.
+    - **AniList Profile Sync**: Import "Watching/Completed" lists to customize theme recommendations and avoid spoilers.

@@ -120,6 +120,7 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
     Route::resource('animes', AdminAnimeController::class);
 
     // Artists
+    Route::post('artists/generate-thumbnails', [AdminArtistController::class, 'generateAllThumbnails'])->name('artists.generate_thumbnails');
     Route::resource('artists', AdminArtistController::class);
 
     // Users

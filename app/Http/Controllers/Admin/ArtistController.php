@@ -91,22 +91,7 @@ class ArtistController extends Controller
 
         if ($artist->save()) {
             // Automate avatar generation for new artists
-            try {
-                $name = urlencode($artist->name);
-                $url = "https://ui-avatars.com/api/?name={$name}&color=fff&background=random&size=512";
-
-                $response = Http::timeout(5)->get($url);
-
-                if ($response->successful()) {
-                    $file_name = $artist->slug.'-avatar-'.time().'.png';
-                    $path = 'artists/'.$file_name;
-
-                    Storage::disk(config('filesystems.default'))->put($path, $response->body());
-                    $artist->updateOrCreateImage($path, 'thumbnail');
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning("Could not fetch avatar for artist {$artist->id}: ".$e->getMessage());
-            }
+            $this->generateThumbnail($artist);
 
             return redirect(route('admin.artists.index'))->with('success', 'Data has been inserted successfully');
         }
@@ -174,6 +159,58 @@ class ArtistController extends Controller
         $artist->delete();
 
         return redirect(route('admin.artists.index'))->with('success', 'Data deleted');
+    }
+
+    /**
+     * Generate a thumbnail for a single artist.
+     */
+    public function generateThumbnail(Artist $artist)
+    {
+        try {
+            $name = urlencode($artist->name);
+            // Generate a random vibrant background color
+            $background = str_pad(dechex(mt_rand(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
+            $url = "https://ui-avatars.com/api/?name={$name}&color=fff&background={$background}&size=512";
+
+            $response = Http::timeout(5)->get($url);
+
+            if ($response->successful()) {
+                $file_name = $artist->slug.'-avatar-'.time().'.png';
+                $path = 'artists/'.$file_name;
+
+                Storage::disk(config('filesystems.default'))->put($path, $response->body());
+                
+                // Save as both types to ensure consistency across views
+                $artist->updateOrCreateImage($path, 'thumbnail');
+                $artist->updateOrCreateImage($path, 'avatar');
+
+                return true;
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning("Could not fetch avatar for artist {$artist->id}: ".$e->getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Generate thumbnails for all artists that don't have one.
+     */
+    public function generateAllThumbnails()
+    {
+        // Get artists that don't have a thumbnail image
+        $artists = Artist::whereDoesntHave('images', function ($query) {
+            $query->where('type', 'thumbnail');
+        })->get();
+
+        $count = 0;
+        foreach ($artists as $artist) {
+            if ($this->generateThumbnail($artist)) {
+                $count++;
+            }
+        }
+
+        return redirect(route('admin.artists.index'))->with('success', "Generated {$count} thumbnails successfully.");
     }
 
     private function generateUniqueSlug($name)

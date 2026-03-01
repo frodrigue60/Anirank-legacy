@@ -12,6 +12,14 @@
             </div>
 
             <div class="flex flex-wrap gap-3">
+                <form action="{{ route('admin.artists.generate_thumbnails') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit"
+                        class="inline-flex items-center px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg border border-zinc-700 hover:scale-105 active:scale-95">
+                        <span class="material-symbols-outlined mr-2">image_aspect_ratio</span>
+                        GENERATE AVATARS
+                    </button>
+                </form>
                 <a href="{{ route('admin.artists.create') }}"
                     class="inline-flex items-center px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-primary/20 hover:scale-105 active:scale-95">
                     <span class="material-symbols-outlined mr-2">person_add</span>
@@ -64,8 +72,8 @@
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700 overflow-hidden">
-                                                @if ($artist->image)
-                                                    <img src="{{ $artist->image }}" alt=""
+                                                @if ($artist->avatar_url)
+                                                    <img src="{{ $artist->avatar_url }}" alt=""
                                                         class="w-full h-full object-cover">
                                                 @else
                                                     <span class="material-symbols-outlined text-zinc-500">person</span>

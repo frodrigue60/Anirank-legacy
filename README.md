@@ -110,6 +110,14 @@ The project uses **Alpine.js** for reactivity in the admin panel and **Livewire 
 
 For styling, we use **Tailwind CSS** with a custom high-end glassmorphic theme. See `tailwind.config.js` and `resources/css/app.css` for design tokens.
 
+## Future Roadmap
+
+The following features are planned to enhance user engagement and social interaction:
+
+- **🎮 Gamification**: Theme guessing quizzes, seasonal predictions, and automated user milestones/achievements.
+- **🤝 Social Features**: Song battles (1v1 brackets) for dynamic rankings and a real-time activity feed of community interactions.
+- **🎧 Advanced UX**: A "Non-Stop" radio-style player and automated AniList profile synchronization for personalized recommendations.
+
 ---
 
 _Built with ❤️ for the anime community._
