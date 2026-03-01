@@ -530,6 +530,64 @@ Represents a **reward or achievement** awarded to users.
 
 ---
 
+### `Tournament`
+
+Represents an **elimination bracket** event or theme voting tournament.
+
+| Field           | Type    | Description                          |
+| --------------- | ------- | ------------------------------------ |
+| `name`          | string  | Internal name.                       |
+| `title`         | string  | Public display title.                |
+| `slug`          | string  | URL-friendly slug.                   |
+| `description`   | text    | Rules or event description.          |
+| `status`        | enum    | `draft`, `active`, `completed`.      |
+| `current_round` | integer | The active voting round (1, 2, 3...) |
+
+**Relationships:**
+
+- `hasMany` → `TournamentMatchup`
+
+**Events:** Deleting a tournament cascades down and deletes all matchups and votes securely.
+
+---
+
+### `TournamentMatchup`
+
+Represents a single head-to-head duel between two songs in a specific tournament round.
+
+| Field           | Type    | Description                                           |
+| --------------- | ------- | ----------------------------------------------------- |
+| `tournament_id` | FK      | References `tournaments.id`.                          |
+| `round`         | integer | The round number (e.g. 1=Round of 32, 2=Round of 16). |
+| `matchup_order` | integer | Position within the bracket tree.                     |
+| `song_a_id`     | FK      | References `songs.id`.                                |
+| `song_b_id`     | FK      | References `songs.id` (nullable for byes/TBD).        |
+| `winner_id`     | FK      | References `songs.id` (nullable).                     |
+| `status`        | enum    | `pending`, `active`, `completed`.                     |
+
+**Relationships:**
+
+- `belongsTo` → `Tournament`, `Song` (A, B, Winner)
+- `hasMany` → `TournamentVote`
+
+---
+
+### `TournamentVote`
+
+Records a user's vote in a specific matchup.
+
+| Field                   | Type | Description                              |
+| ----------------------- | ---- | ---------------------------------------- |
+| `tournament_matchup_id` | FK   | References `tournament_matchups.id`.     |
+| `user_id`               | FK   | References `users.id`.                   |
+| `song_id`               | FK   | References `songs.id` (The chosen song). |
+
+**Relationships:**
+
+- `belongsTo` → `TournamentMatchup`, `User`, `Song`
+
+---
+
 | `Format` | Anime format (TV, Movie, OVA). Has many Posts. |
 | `ExternalLink` | External links (MAL, AniList). Many-to-many with Post. |
 | `Report` | User-submitted reports for SongVariants. |
@@ -1015,6 +1073,21 @@ Manages system roles and permissions.
 
 ---
 
+### `Admin\TournamentController`
+
+Manages brackets, matchups, and voting rounds.
+
+| Method                 | Route                             | Description                        |
+| ---------------------- | --------------------------------- | ---------------------------------- |
+| `index()`              | `GET admin/tournaments`           | List all tournaments.              |
+| `create()`             | `GET admin/tournaments/create`    | Create tournament form.            |
+| `store(Request)`       | `POST admin/tournaments`          | Create new tournament.             |
+| `edit($id)`            | `GET admin/tournaments/{id}/edit` | Edit tournament and bracket.       |
+| `update(Request, $id)` | `PUT admin/tournaments/{id}`      | Update tournament details.         |
+| `destroy($id)`         | `DELETE admin/tournaments/{id}`   | Delete tournament (cascades down). |
+
+---
+
 ### Other Admin Controllers
 
 | Controller        | Purpose                                               |
@@ -1354,6 +1427,53 @@ User-created playlists.
 | `user_id`     | `FK → users`        | Playlist owner                     |
 | `is_public`   | `boolean`           | Public visibility (default: false) |
 | `timestamps`  | `datetime`          | Created/updated at                 |
+
+---
+
+### Tournament Tables
+
+#### `tournaments`
+
+Theme voting bracket events.
+
+| Column          | Type                                 | Description              |
+| --------------- | ------------------------------------ | ------------------------ |
+| `id`            | `bigint` (PK)                        | Primary key              |
+| `name`          | `string`                             | Internal name            |
+| `title`         | `string`                             | Public display name      |
+| `slug`          | `string` (unique)                    | URL identifier           |
+| `description`   | `text` (nullable)                    | Event description        |
+| `status`        | `enum('draft','active','completed')` | Event state              |
+| `current_round` | `integer`                            | The current active round |
+| `timestamps`    | `datetime`                           | Created/updated at       |
+
+#### `tournament_matchups`
+
+Head-to-head duels within a bracket.
+
+| Column          | Type                                   | Description               |
+| --------------- | -------------------------------------- | ------------------------- |
+| `id`            | `bigint` (PK)                          | Primary key               |
+| `tournament_id` | `FK → tournaments`                     | Parent tournament         |
+| `round`         | `integer`                              | Bracket round             |
+| `matchup_order` | `integer`                              | Position within the round |
+| `song_a_id`     | `FK → songs`                           | First competitor          |
+| `song_b_id`     | `FK → songs` (nullable)                | Second competitor         |
+| `winner_id`     | `FK → songs` (nullable)                | Matchup winner            |
+| `status`        | `enum('pending','active','completed')` | Matchup state             |
+| `timestamps`    | `datetime`                             | Created/updated at        |
+
+#### `tournament_votes`
+
+User votes for specific matchups.
+
+| Column                  | Type                       | Description        |
+| ----------------------- | -------------------------- | ------------------ |
+| `id`                    | `bigint` (PK)              | Primary key        |
+| `tournament_matchup_id` | `FK → tournament_matchups` | Parent matchup     |
+| `user_id`               | `FK → users`               | Voter              |
+| `song_id`               | `FK → songs`               | Chosen song        |
+| `timestamps`            | `datetime`                 | Created/updated at |
 
 ---
 

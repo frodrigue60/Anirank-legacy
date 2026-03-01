@@ -16,6 +16,17 @@ class TournamentMatchup extends Model
         'is_active' => 'boolean',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($matchup) {
+            foreach ($matchup->votes as $vote) {
+                $vote->delete();
+            }
+        });
+    }
+
     public function tournament()
     {
         return $this->belongsTo(Tournament::class);

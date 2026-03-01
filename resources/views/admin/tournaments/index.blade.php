@@ -72,15 +72,11 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-end gap-2">
                                         @if ($tournament->status === 'draft')
-                                            <form action="{{ route('admin.tournaments.seed', $tournament->id) }}"
-                                                method="post" class="inline">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="p-2 bg-zinc-800 hover:bg-green-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-green-500"
-                                                    title="Seed & Start">
-                                                    <span class="material-symbols-outlined text-sm">play_arrow</span>
-                                                </button>
-                                            </form>
+                                            <a href="{{ route('admin.tournaments.show', $tournament->id) }}"
+                                                class="p-2 bg-zinc-800 hover:bg-green-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-green-500"
+                                                title="Start Drafting Roster">
+                                                <span class="material-symbols-outlined text-sm">play_arrow</span>
+                                            </a>
                                         @elseif($tournament->status === 'active')
                                             <form action="{{ route('admin.tournaments.force.round', $tournament->id) }}"
                                                 method="post" class="inline">

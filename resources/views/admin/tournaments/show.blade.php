@@ -37,10 +37,8 @@
                 <livewire:tournament-bracket :tournament="$tournament" />
             </div>
         @else
-            <div class="bg-zinc-900/50 border border-zinc-800 border-dashed rounded-3xl p-12 text-center">
-                <span class="material-symbols-outlined text-6xl text-zinc-700 mb-4 block">account_tree</span>
-                <p class="text-zinc-500 font-bold tracking-widest uppercase text-sm">Bracket will be generated when seeded
-                </p>
+            <div>
+                <livewire:admin.tournament-song-selector :tournament="$tournament" />
             </div>
         @endif
 

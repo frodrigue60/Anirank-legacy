@@ -16,6 +16,17 @@ class Tournament extends Model
         'completed_at' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($tournament) {
+            foreach ($tournament->matchups as $matchup) {
+                $matchup->delete();
+            }
+        });
+    }
+
     public function matchups()
     {
         return $this->hasMany(TournamentMatchup::class);
