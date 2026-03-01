@@ -43,6 +43,11 @@
                             class="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-[18px]">token</span> Producers
                         </a>
+                        <div class="h-px bg-white/10 my-1 mx-2"></div>
+                        <a href="{{ route('tournaments.index') }}"
+                            class="flex items-center gap-3 px-4 py-2 text-sm text-amber-500/90 hover:bg-amber-500/10 hover:text-amber-400 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">emoji_events</span> Tournaments
+                        </a>
                     </div>
                 </div>
             </nav>
@@ -216,6 +221,12 @@
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 transition-all">
                 <span class="material-symbols-outlined">token</span>
                 <span class="font-medium text-sm">Producers</span>
+            </a>
+            <div class="h-px bg-white/5 my-2"></div>
+            <a href="{{ route('tournaments.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-amber-500/80 hover:text-amber-400 hover:bg-amber-500/10 transition-all">
+                <span class="material-symbols-outlined">emoji_events</span>
+                <span class="font-medium text-sm">Tournaments</span>
             </a>
         </nav>
 

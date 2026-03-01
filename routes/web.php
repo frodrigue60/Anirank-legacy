@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\SeasonController as AdminSeasonController;
 use App\Http\Controllers\Admin\SongController as AdminSongController;
 use App\Http\Controllers\Admin\SongVariantController as AdminSongVariantController;
 use App\Http\Controllers\Admin\StudioController as AdminStudioController;
+use App\Http\Controllers\Admin\TournamentController as AdminTournamentController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\UserRequestController as AdminUserRequestController;
 use App\Http\Controllers\Admin\VideoController as AdminVideoController;
@@ -56,6 +57,11 @@ Route::controller(UserController::class)->group(function () {
 Route::controller(ArtistController::class)->group(function () {
     Route::get('/artists/{artist:slug}', 'show')->name('artists.show');
     Route::get('/artists', 'index')->name('artists.index');
+});
+
+Route::controller(App\Http\Controllers\TournamentController::class)->group(function () {
+    Route::get('/tournaments', 'index')->name('tournaments.index');
+    Route::get('/tournaments/{tournament:slug}', 'show')->name('tournaments.show');
 });
 
 Route::controller(StudioController::class)->group(function () {
@@ -118,6 +124,11 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
         Route::post('/track-seasonal-ranking', 'trackSeasonalRanking')->name('track.seasonal.ranking');
     });
     Route::resource('animes', AdminAnimeController::class);
+
+    // Tournaments
+    Route::post('tournaments/{tournament}/seed', [AdminTournamentController::class, 'seed'])->name('tournaments.seed');
+    Route::post('tournaments/{tournament}/force-round', [AdminTournamentController::class, 'forceRound'])->name('tournaments.force.round');
+    Route::resource('tournaments', AdminTournamentController::class);
 
     // Artists
     Route::post('artists/generate-thumbnails', [AdminArtistController::class, 'generateAllThumbnails'])->name('artists.generate_thumbnails');
