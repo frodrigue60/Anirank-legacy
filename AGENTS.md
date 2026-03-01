@@ -136,6 +136,14 @@ To ensure maximum perceived performance and minimal server load, all discovery t
 
 **Skeleton Implementation Rule:** Skeletons should now manage the **entire** content area, including titles and filter bars, to provide a seamless shimmering experience from the moment the user hits the route.
 
+### Livewire Advanced Patterns (Activity Feed)
+
+The Homepage `ActivityFeed` (combining favorites, ratings, and comments) demonstrates advanced Eloquent and Livewire performance optimization:
+
+1. **Unified Timelines**: Uses raw `DB::table()->unionAll()` instead of processing multiple independent collections in PHP to establish chronological truth at the database level.
+2. **Selective Hydration**: Maps over the raw UNION rows to gather unique `user_id` and polymorphic `target_id`s, generating bulk constraints (`whereIn`) to eagerly load the exact relations (`User`, `Song`, `SongVariant`) required without any N+1 overhead.
+3. **Non-blocking Execution**: The component strictly uses `#[Lazy]`. The computationally heavy global UNION query is only dispatched asynchronously _after_ the initial `home.blade.php` DOM paints, guaranteeing zero impact on Time-to-First-Byte (TTFB).
+
 ---
 
 ### Dynamic Storage System
@@ -1791,22 +1799,21 @@ The application heavily utilizes **Livewire** for reactive UI components, especi
 
 The following features are identified as standard/premium upgrades for the Anirank CMS to enhance security, user engagement, and scalability:
 
-1.  **Audit Trails**: Implement an activity logging system to track administrative changes (who edited what and when).
-2.  **Real-time Notifications**: Centralized notification system using Laravel Reverb/Pusher for replies, solved reports, and new seasonal releases.
-3.  **Real-time Notifications**: Centralized notification system using Laravel Reverb/Pusher for replies, solved reports, and new seasonal releases.
-4.  **Media Library**: A centralized manager for image/video assets with automatic WebP conversion and lazy-loading optimizations.
-5.  **SEO Suite**: Enhanced meta-tag management (Title, Description, OpenGraph) per post and song.
-6.  **Intelligent Caching**: Use Redis to store complex ranking calculations, improving performance under high traffic.
-7.  **Social Login**: Integration with Discord, Google, or Twitter via Laravel Socialite.
-8.  **Internal API**: Full REST/GraphQL API to power potential mobile apps or third-party integrations.
-9.  **Gamification**: Achievement system and badges for active contributors and highly-rated theme discoverers.
-10. **Refined User Engagement**:
-    - **Themes Quiz**: Interactive guessing games with score tracking.
-    - **Seasonal Predictions**: Community voting on upcoming top-rated themes.
-    - **User Milestones**: Automated trackable achievements (e.g., "100 Endings Listened").
-11. **Social & Community**:
-    - **Thematic Battles**: "Bracket-style" or "1v1" song duels to generate dynamic popularity rankings.
-    - **Activity Feed**: Real-time social wall for user interactions (likes, rates, follows).
-12. **Advanced Personalization & UX**:
-    - **Non-Stop Player**: Radio-mode continuous playback based on user taste and genres.
-    - **AniList Profile Sync**: Import "Watching/Completed" lists to customize theme recommendations and avoid spoilers.
+- [ ] **Audit Trails**: Implement an activity logging system to track administrative changes (who edited what and when).
+- [ ] **Real-time Notifications**: Centralized notification system using Laravel Reverb/Pusher for replies, solved reports, and new seasonal releases.
+- [x] **Media Library**: A centralized manager for image/video assets with automatic WebP conversion and lazy-loading optimizations.
+- [x] **SEO Suite**: Enhanced meta-tag management (Title, Description, OpenGraph) per post and song.
+- [ ] **Intelligent Caching**: Use Redis to store complex ranking calculations, improving performance under high traffic.
+- [ ] **Social Login**: Integration with Discord, Google, or Twitter via Laravel Socialite.
+- [ ] **Internal API**: Full REST/GraphQL API to power potential mobile apps or third-party integrations.
+- [ ] **Gamification**: Achievement system and badges for active contributors and highly-rated theme discoverers.
+- [ ] **Refined User Engagement**:
+    - [ ] **Themes Quiz**: Interactive guessing games with score tracking.
+    - [ ] **Seasonal Predictions**: Community voting on upcoming top-rated themes.
+    - [ ] **User Milestones**: Automated trackable achievements (e.g., "100 Endings Listened").
+- [x] **Social & Community**:
+    - [x] **Thematic Battles**: "Bracket-style" or "1v1" song duels to generate dynamic popularity rankings.
+    - [x] **Activity Feed**: Real-time social wall for user interactions (likes, rates, follows).
+- [ ] **Advanced Personalization & UX**:
+    - [ ] **Non-Stop Player**: Radio-mode continuous playback based on user taste and genres.
+    - [ ] **AniList Profile Sync**: Import "Watching/Completed" lists to customize theme recommendations and avoid spoilers.

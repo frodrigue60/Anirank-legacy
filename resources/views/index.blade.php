@@ -240,6 +240,8 @@
                     </div>
                 </div>
             </section>
+            {{-- LIVE ACTIVITY FEED --}}
+            <livewire:activity-feed />
         </div>
 
         {{-- SIDEBAR --}}
@@ -307,7 +309,7 @@
             </div>
         </aside>
     </main>
-    </div>
+
 @endsection
 
 @push('scripts')
