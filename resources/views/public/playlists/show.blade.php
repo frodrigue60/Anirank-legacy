@@ -149,7 +149,7 @@
                                 @foreach ($queue->take(4) as $item)
                                 <div
                                     class="w-8 h-8 rounded-full border-2 border-background-dark overflow-hidden bg-surface-darker">
-                                    <img src="{{ $item->banner }}" class="w-full h-full object-cover">
+                                    <img src="{{ $item->banner_url }}" class="w-full h-full object-cover">
                                 </div>
                                 @endforeach
                             </div>
@@ -672,3 +672,4 @@
         document.addEventListener('DOMContentLoaded', () => new PlaylistPlayer());
     </script>
 @endsection
+

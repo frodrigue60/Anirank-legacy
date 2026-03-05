@@ -82,7 +82,7 @@
                         <div class="flex items-center gap-4 sm:gap-6">
                             <div
                                 class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden shrink-0 shadow-lg shadow-black/40 border border-white/10">
-                                <x-ui.image :src="$song->anime->thumbnail_url" :alt="$song->anime->title"
+                                <x-ui.image :src="$song->anime->cover_url" :alt="$song->anime->title"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     fallback="default-anime.webp" />
                             </div>
@@ -158,3 +158,5 @@
         @endif
     </div>
 </div>
+
+

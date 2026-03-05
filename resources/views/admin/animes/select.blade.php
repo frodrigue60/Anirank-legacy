@@ -25,7 +25,7 @@
                     {{-- Cover Image --}}
                     <div class="aspect-3/4 relative overflow-hidden">
                         <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            src="{{ $anime->coverImage->extraLarge }}" alt="{{ $title }}">
+                            src="{{ $anime->cover_urlImage->extraLarge }}" alt="{{ $title }}">
 
                         {{-- Overlay --}}
                         <div
@@ -68,3 +68,4 @@
         </div>
     </div>
 @endsection
+

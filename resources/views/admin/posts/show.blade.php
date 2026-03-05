@@ -38,7 +38,7 @@
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
                     <div class="aspect-3/4 relative">
-                        <img src="{{ $anime->thumbnail_url }}" alt="{{ $anime->title }}" class="w-full h-full object-cover">
+                        <img src="{{ $anime->cover_url }}" alt="{{ $anime->title }}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-linear-to-t from-zinc-950 via-transparent to-transparent"></div>
                         <div class="absolute bottom-4 left-4 right-4">
                             <span
@@ -90,3 +90,5 @@
         </div>
     </div>
 @endsection
+
+

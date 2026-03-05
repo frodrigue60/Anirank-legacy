@@ -2,10 +2,10 @@
     @php
         $thumbnailUrl = '';
 
-        if ($studio->thumbnail != null && Storage::disk('public')->exists($studio->thumbnail)) {
-            $thumbnailUrl = Storage::url($studio->thumbnail);
-        } elseif ($studio->thumbnail_src != null) {
-            $thumbnailUrl = $studio->thumbnail_src;
+        if ($studio->cover_url != null && Storage::disk('public')->exists($studio->cover_url)) {
+            $thumbnailUrl = Storage::url($studio->cover_url);
+        } elseif ($studio->cover_url_src != null) {
+            $thumbnailUrl = $studio->cover_url_src;
         } else {
             $thumbnailUrl = asset('resources/images/default-thumbnail.jpg');
         }
@@ -23,3 +23,5 @@
         </div>
     </div>
 @endforeach
+
+

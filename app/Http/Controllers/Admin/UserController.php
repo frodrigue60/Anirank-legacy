@@ -61,6 +61,10 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:4'],
+            'avatar' => ['nullable', 'image', 'max:2048'],
+            'avatar_src' => ['nullable', 'url', 'max:255'],
+            'banner' => ['nullable', 'image', 'max:4096'],
+            'banner_src' => ['nullable', 'url', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -82,19 +86,37 @@ class UserController extends Controller
                 }
             }
 
-            // Automate avatar generation for manually created users
-            try {
-                $name = urlencode($user->name);
-                $url = "https://ui-avatars.com/api/?name={$name}&color=fff&background=random&size=512";
-                $response = Http::timeout(5)->get($url);
-                if ($response->successful()) {
-                    $file_name = $user->slug.'-avatar-'.time().'.png';
-                    $path = 'profile/'.$file_name;
-                    Storage::disk(config('filesystems.default'))->put($path, $response->body());
-                    $user->updateOrCreateImage($path, 'avatar');
+            // Handle Avatar & Banner
+            if ($request->hasFile('avatar')) {
+                $user->avatar = $request->file('avatar')->store('profile', config('filesystems.default'));
+            } elseif ($request->filled('avatar_src')) {
+                $user->avatar = $request->avatar_src;
+            }
+
+            if ($request->hasFile('banner')) {
+                $user->banner = $request->file('banner')->store('banners', config('filesystems.default'));
+            } elseif ($request->filled('banner_src')) {
+                $user->banner = $request->banner_src;
+            }
+
+            $user->save();
+
+            // Automate avatar generation for manually created users ONLY if none was provided
+            if (!$user->avatar) {
+                try {
+                    $name = urlencode($user->name);
+                    $url = "https://ui-avatars.com/api/?name={$name}&color=fff&background=random&size=512";
+                    $response = Http::timeout(5)->get($url);
+                    if ($response->successful()) {
+                        $file_name = $user->slug . '-avatar-' . time() . '.png';
+                        $path = 'profile/' . $file_name;
+                        Storage::disk(config('filesystems.default'))->put($path, $response->body());
+                        $user->avatar = $path;
+                        $user->save();
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning("Admin could not fetch avatar for user {$user->id}: " . $e->getMessage());
                 }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning("Admin could not fetch avatar for user {$user->id}: ".$e->getMessage());
             }
 
             return Redirect::route('admin.users.index')->with('success', 'User Created Successfully');
@@ -123,8 +145,11 @@ class UserController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
-            /* 'password' => ['required', 'string', 'min:4'], */
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'avatar' => ['nullable', 'image', 'max:2048'],
+            'avatar_src' => ['nullable', 'url', 'max:255'],
+            'banner' => ['nullable', 'image', 'max:4096'],
+            'banner_src' => ['nullable', 'url', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -135,6 +160,32 @@ class UserController extends Controller
 
             if ($request->filled('password')) {
                 $user->password = Hash::make($request->password);
+            }
+
+            // Handle Avatar Update
+            if ($request->hasFile('avatar')) {
+                if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+                    Storage::disk(config('filesystems.default'))->delete($user->avatar);
+                }
+                $user->avatar = $request->file('avatar')->store('profile', config('filesystems.default'));
+            } elseif ($request->filled('avatar_src')) {
+                if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+                    Storage::disk(config('filesystems.default'))->delete($user->avatar);
+                }
+                $user->avatar = $request->avatar_src;
+            }
+
+            // Handle Banner Update
+            if ($request->hasFile('banner')) {
+                if ($user->banner && !filter_var($user->banner, FILTER_VALIDATE_URL)) {
+                    Storage::disk(config('filesystems.default'))->delete($user->banner);
+                }
+                $user->banner = $request->file('banner')->store('banners', config('filesystems.default'));
+            } elseif ($request->filled('banner_src')) {
+                if ($user->banner && !filter_var($user->banner, FILTER_VALIDATE_URL)) {
+                    Storage::disk(config('filesystems.default'))->delete($user->banner);
+                }
+                $user->banner = $request->banner_src;
             }
 
             if ($user->save()) {

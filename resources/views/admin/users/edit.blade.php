@@ -13,7 +13,8 @@
 
         {{-- Form Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8">
-            <form method="POST" action="{{ route('admin.users.update', $user->id) }}" class="space-y-8">
+            <form method="POST" action="{{ route('admin.users.update', $user->id) }}" enctype="multipart/form-data"
+                class="space-y-8">
                 @csrf
                 @method('PUT')
 
@@ -78,10 +79,74 @@
                             </div>
                         </div>
 
+                        {{-- Profile Appearance Section --}}
+                        <div class="space-y-8 col-span-2 pt-8 border-t border-zinc-800/50">
+                            <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center">
+                                <span class="material-symbols-outlined mr-2 text-blue-500">image</span> PROFILE APPEARANCE
+                            </h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                {{-- Avatar --}}
+                                <div class="space-y-4">
+                                    <label class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">User
+                                        Avatar</label>
+                                    <div class="flex items-center gap-6">
+                                        <div class="relative group">
+                                            <div
+                                                class="w-20 h-20 rounded-2xl bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden">
+                                                @if ($user->avatar_url)
+                                                    <img src="{{ $user->avatar_url }}" alt="Avatar"
+                                                        class="w-full h-full object-cover">
+                                                @else
+                                                    <span
+                                                        class="material-symbols-outlined text-zinc-800 text-3xl">account_circle</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 space-y-3">
+                                            <input type="file" name="avatar" id="avatar" accept="image/*"
+                                                class="block w-full text-xs text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer">
+                                            <input type="url" name="avatar_src" id="avatar_src"
+                                                value="{{ old('avatar_src', filter_var($user->avatar, FILTER_VALIDATE_URL) ? $user->avatar : '') }}"
+                                                class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-xs h-10"
+                                                placeholder="External Avatar URL">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Banner --}}
+                                <div class="space-y-4">
+                                    <label class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Profile
+                                        Banner</label>
+                                    <div class="flex flex-col gap-4">
+                                        <div
+                                            class="w-full h-24 rounded-2xl bg-zinc-950 border border-zinc-800 overflow-hidden relative">
+                                            @if ($user->banner_url)
+                                                <img src="{{ $user->banner_url }}" alt="Banner"
+                                                    class="w-full h-full object-cover">
+                                            @else
+                                                <div class="w-full h-full flex items-center justify-center bg-zinc-900/50">
+                                                    <span
+                                                        class="material-symbols-outlined text-zinc-800 text-3xl">image</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="grid grid-cols-1 gap-3">
+                                            <input type="file" name="banner" id="banner" accept="image/*"
+                                                class="block w-full text-xs text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 cursor-pointer">
+                                            <input type="url" name="banner_src" id="banner_src"
+                                                value="{{ old('banner_src', filter_var($user->banner, FILTER_VALIDATE_URL) ? $user->banner : '') }}"
+                                                class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-xs h-10"
+                                                placeholder="External Banner URL">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- User Badges --}}
-                        <div class="space-y-4 col-span-2 pt-6 border-t border-zinc-800/50">
-                            <label
-                                class="block text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center">
+                        <div class="space-y-4 col-span-2 pt-8 border-t border-zinc-800/50">
+                            <label class="text-sm font-bold text-zinc-400 uppercase tracking-widest flex items-center">
                                 <span class="material-symbols-outlined mr-2 text-yellow-500">workspace_premium</span> USER
                                 BADGES
                             </label>

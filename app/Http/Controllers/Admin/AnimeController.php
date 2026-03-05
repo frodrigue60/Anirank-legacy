@@ -150,13 +150,6 @@ class AnimeController extends Controller
         $this->storeAnimeImages($anime, $request);
 
         if ($anime->update()) {
-            if ($old_thumbnail && $old_thumbnail !== $anime->thumbnail) {
-                Storage::disk()->delete($old_thumbnail);
-            }
-            if ($old_banner && $old_banner !== $anime->banner) {
-                Storage::disk()->delete($old_banner);
-            }
-
             return redirect(route('admin.animes.index'))->with('success', 'Anime Updated Successfully');
         }
 
@@ -443,7 +436,7 @@ class AnimeController extends Controller
 
             // Images (require saved anime for imageable_id)
             $this->downloadAndStoreAnilistImage($item->bannerImage, $anime, 'anime_banner', 'banner');
-            $this->downloadAndStoreAnilistImage($item->coverImage->extraLarge ?? null, $anime, 'thumbnails', 'thumbnail');
+            $this->downloadAndStoreAnilistImage($item->coverImage->extraLarge ?? null, $anime, 'thumbnails', 'cover');
 
             // Genres
             if (! empty($item->genres)) {
@@ -503,7 +496,16 @@ class AnimeController extends Controller
 
         $path = $directory.'/'.$file_name;
         Storage::disk()->put($path, $imageContent);
-        $anime->updateOrCreateImage($path, $type);
+
+        if ($type === 'cover') {
+            if ($anime->cover && Storage::disk()->exists($anime->cover)) Storage::disk()->delete($anime->cover);
+            $anime->cover = $path;
+            $anime->save();
+        } elseif ($type === 'banner') {
+            if ($anime->banner && Storage::disk()->exists($anime->banner)) Storage::disk()->delete($anime->banner);
+            $anime->banner = $path;
+            $anime->save();
+        }
     }
 
     /**
@@ -512,7 +514,7 @@ class AnimeController extends Controller
     private function storeAnimeImages(Anime $anime, Request $request): void
     {
         // Thumbnail
-        $this->processImageUpload($anime, $request, 'file', 'thumbnail_src', 'thumbnails', 'thumbnail');
+        $this->processImageUpload($anime, $request, 'file', 'thumbnail_src', 'thumbnails', 'cover');
 
         // Banner
         $this->processImageUpload($anime, $request, 'banner', 'banner_src', 'anime_banner', 'banner');
@@ -523,6 +525,8 @@ class AnimeController extends Controller
      */
     private function processImageUpload(Anime $anime, Request $request, string $fileField, string $urlField, string $directory, string $imageType): void
     {
+        $disk = env('FILESYSTEM_DISK', 'public');
+
         if ($request->hasFile($fileField)) {
             // Validate
             $validator = Validator::make($request->all(), [
@@ -546,25 +550,38 @@ class AnimeController extends Controller
             }
 
             $path = $directory.'/'.$file_name;
-            Storage::disk()->put($path, $imageContent);
-            $anime->updateOrCreateImage($path, $imageType);
-
-        } elseif ($request->filled($urlField)) {
-            $response = $this->httpClient()->get($request->input($urlField));
-            $imageContent = $response->getBody()->getContents();
-
-            if (extension_loaded('gd')) {
-                $file_name = Str::slug($request->title).'-'.time().'.webp';
-                $imageContent = Image::make($imageContent)->encode('webp', 100);
-            } else {
-                $contentType = $response->getHeaders()['Content-Type'][0] ?? 'image/jpeg';
-                $extension = $this->mimeToExtension($contentType);
-                $file_name = Str::slug($request->title).'-'.time().'.'.$extension;
+            Storage::disk($disk)->put($path, $imageContent);
+            
+            if ($imageType === 'cover') {
+                if ($anime->cover && !filter_var($anime->cover, FILTER_VALIDATE_URL)) {
+                    Storage::disk($disk)->delete($anime->cover);
+                }
+                $anime->cover = $path;
+                $anime->save();
+            } elseif ($imageType === 'banner') {
+                if ($anime->banner && !filter_var($anime->banner, FILTER_VALIDATE_URL)) {
+                    Storage::disk($disk)->delete($anime->banner);
+                }
+                $anime->banner = $path;
+                $anime->save();
             }
 
-            $path = $directory.'/'.$file_name;
-            Storage::disk()->put($path, $imageContent);
-            $anime->updateOrCreateImage($path, $imageType);
+        } elseif ($request->filled($urlField)) {
+            $url = $request->input($urlField);
+            
+            if ($imageType === 'cover') {
+                if ($anime->cover && !filter_var($anime->cover, FILTER_VALIDATE_URL)) {
+                    Storage::disk($disk)->delete($anime->cover);
+                }
+                $anime->cover = $url;
+                $anime->save();
+            } elseif ($imageType === 'banner') {
+                if ($anime->banner && !filter_var($anime->banner, FILTER_VALIDATE_URL)) {
+                    Storage::disk($disk)->delete($anime->banner);
+                }
+                $anime->banner = $url;
+                $anime->save();
+            }
         }
     }
 

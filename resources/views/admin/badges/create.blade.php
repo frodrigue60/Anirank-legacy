@@ -53,20 +53,33 @@
                             placeholder="Describe how users can earn this badge...">{{ old('description') }}</textarea>
                     </div>
 
-                    {{-- Icon Upload --}}
+                    {{-- Icon Upload & URL --}}
                     <div class="space-y-4">
                         <label class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Badge Icon</label>
-                        <div class="flex items-center gap-6">
-                            <div
-                                class="w-24 h-24 rounded-2xl bg-zinc-950 border-2 border-dashed border-zinc-800 flex items-center justify-center overflow-hidden group hover:border-blue-500 transition-colors">
-                                <span
-                                    class="material-symbols-outlined text-zinc-600 group-hover:text-blue-500 transition-colors text-3xl">image</span>
+
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <label for="icon_src"
+                                    class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Icon URL
+                                    (Alternative to upload)</label>
+                                <input type="url" name="icon_src" id="icon_src" value="{{ old('icon_src') }}"
+                                    class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12"
+                                    placeholder="https://example.com/badge.png">
                             </div>
-                            <div class="flex-1">
-                                <input type="file" name="icon" id="icon" accept="image/*"
-                                    class="block w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 file:transition-all cursor-pointer">
-                                <p class="mt-2 text-[10px] text-zinc-500 uppercase font-bold tracking-tighter">Recommended:
-                                    Square image (256x256), PNG or WebP</p>
+
+                            <div class="flex items-center gap-6">
+                                <div
+                                    class="w-24 h-24 rounded-2xl bg-zinc-950 border-2 border-dashed border-zinc-800 flex items-center justify-center overflow-hidden group hover:border-blue-500 transition-colors">
+                                    <span
+                                        class="material-symbols-outlined text-zinc-600 group-hover:text-blue-500 transition-colors text-3xl">image</span>
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" name="icon" id="icon" accept="image/*"
+                                        class="block w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 file:transition-all cursor-pointer">
+                                    <p class="mt-2 text-[10px] text-zinc-500 uppercase font-bold tracking-tighter">
+                                        Recommended:
+                                        Square image (256x256), PNG or WebP</p>
+                                </div>
                             </div>
                         </div>
                     </div>

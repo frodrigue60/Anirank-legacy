@@ -1,9 +1,9 @@
 @foreach ($animes as $anime)
     @php
-        $thumbnailUrl = $anime->thumbnail_src;
+        $thumbnailUrl = $anime->cover_url_src;
 
-        if ($anime->thumbnail && Storage::disk('public')->exists($anime->thumbnail)) {
-            $thumbnailUrl = Storage::url($anime->thumbnail);
+        if ($anime->cover_url && Storage::disk('public')->exists($anime->cover_url)) {
+            $thumbnailUrl = Storage::url($anime->cover_url);
         }
     @endphp
     {{-- <article class="tarjeta">
@@ -53,3 +53,5 @@
         </div>
     </div>
 @endforeach
+
+

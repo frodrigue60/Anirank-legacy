@@ -34,7 +34,7 @@ class ActivityFeed extends Component
 
         // 2. Hydrate Models (Users)
         $userIds = $rawActivities->pluck('user_id')->unique()->toArray();
-        $users = User::with('images')->whereIn('id', $userIds)->get()->keyBy('id');
+        $users = User::whereIn('id', $userIds)->get()->keyBy('id');
 
         // 3. Hydrate Targets (Polymorphic: Songs, SongVariants)
         $targetMap = [];

@@ -11,7 +11,8 @@ class Producer extends Model
 
     protected $fillable = [
         'name',
-        'slug'
+        'slug',
+        'logo'
     ];
 
     protected static function boot()
@@ -23,6 +24,19 @@ class Producer extends Model
                 $producer->slug = \Illuminate\Support\Str::slug($producer->name);
             }
         });
+
+        static::deleting(function ($producer) {
+            if ($producer->logo && !filter_var($producer->logo, FILTER_VALIDATE_URL)) {
+                \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->delete($producer->logo);
+            }
+        });
+    }
+
+    public function getLogoUrlAttribute()
+    {
+        if (!$this->logo) return null;
+        if (filter_var($this->logo, FILTER_VALIDATE_URL)) return $this->logo;
+        return \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->logo);
     }
 
     public function animes()

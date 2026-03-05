@@ -28,7 +28,7 @@
 
         @if ($matchup->song1)
             <div class="relative">
-                <img src="{{ $matchup->song1->anime->thumbnail_url ?? asset('images/default-anime.jpg') }}"
+                <img src="{{ $matchup->song1->anime->cover_url ?? asset('images/default-anime.jpg') }}"
                     class="w-12 h-12 object-cover rounded-lg bg-zinc-800 shadow-sm transition-all {{ $isSong1Loser ? 'opacity-40 grayscale' : '' }}"
                     alt="Cover">
                 @if ($isSong1Winner)
@@ -100,7 +100,7 @@
 
         @if ($matchup->song2)
             <div class="relative">
-                <img src="{{ $matchup->song2->anime->thumbnail_url ?? asset('images/default-anime.jpg') }}"
+                <img src="{{ $matchup->song2->anime->cover_url ?? asset('images/default-anime.jpg') }}"
                     class="w-12 h-12 object-cover rounded-lg bg-zinc-800 shadow-sm transition-all {{ $isSong2Loser ? 'opacity-40 grayscale' : '' }}"
                     alt="Cover">
                 @if ($isSong2Winner)
@@ -153,3 +153,5 @@
     </div>
 
 </div>
+
+

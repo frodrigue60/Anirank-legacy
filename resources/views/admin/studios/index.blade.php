@@ -50,8 +50,8 @@
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700 overflow-hidden">
-                                                @if ($studio->image)
-                                                    <img src="{{ $studio->image }}" alt=""
+                                                @if ($studio->logo_url)
+                                                    <img src="{{ $studio->logo_url }}" alt=""
                                                         class="w-full h-full object-cover">
                                                 @else
                                                     <span class="material-symbols-outlined text-xs">palette</span>

@@ -29,7 +29,7 @@ class StudioController extends Controller
 
         // Load animes to get a banner image (taking the latest one)
         $query->with(['animes' => function ($q) {
-            $q->where('status', true)->latest()->with('images');
+            $q->where('status', true)->latest();
         }]);
 
         if ($name) {
@@ -154,7 +154,7 @@ class StudioController extends Controller
             ->whereHas('studios', function ($query) use ($studio) {
                 $query->where('studios.id', $studio->id);
             })
-            ->with(['format:id,name', 'season:id,name', 'year:id,name', 'images'])
+            ->with(['format:id,name', 'season:id,name', 'year:id,name'])
             ->addSelect(['average_rating' => \App\Models\Rating::selectRaw('avg(rating)')
                 ->join('songs', 'songs.id', '=', 'ratings.rateable_id')
                 ->where('ratings.rateable_type', \App\Models\Song::class)
@@ -190,7 +190,7 @@ class StudioController extends Controller
         $animes = $query->paginate(18);
 
         $animes->getCollection()->each(function ($anime) {
-            $anime->append('thumbnail_url');
+            $anime->append('cover_url');
             $anime->average_rating = (float) ($anime->average_rating ?? 0);
         });
 
@@ -243,25 +243,25 @@ class StudioController extends Controller
             case 'view_count':
                 $animes = $animes->sortByDesc('view_count');
 
-                return $songs;
+                return $animes;
 
             case 'likeCount':
-                $songs = $songs->sortByDesc('likeCount');
+                $animes = $animes->sortByDesc('likeCount');
 
-                return $songs;
+                return $animes;
                 break;
             case 'recent':
-                $songs = $songs->sortByDesc('created_at');
+                $animes = $animes->sortByDesc('created_at');
 
-                return $songs;
+                return $animes;
                 break;
 
             default:
-                $songs = $songs->sortBy(function ($song) {
-                    return $song->anime->title;
+                $animes = $animes->sortBy(function ($anime) {
+                    return $anime->title;
                 });
 
-                return $songs;
+                return $animes;
                 break;
         }
     }

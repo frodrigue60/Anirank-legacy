@@ -19,7 +19,7 @@ class AnimeController extends Controller
 
         // Weakly Ranking (3 OP + 3 ED)
         $openings = Song::withUserInteractions()
-            ->with(['anime:id,title,slug', 'anime.images', 'artists:id,name,slug', 'artists.images'])
+            ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'OP')
             ->whereHas('anime', function ($q) use ($status) {
@@ -30,7 +30,7 @@ class AnimeController extends Controller
             ->get();
 
         $endings = Song::withUserInteractions()
-            ->with(['anime:id,title,slug', 'anime.images', 'artists:id,name,slug', 'artists.images'])
+            ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'ED')
             ->whereHas('anime', function ($q) use ($status) {
@@ -44,7 +44,7 @@ class AnimeController extends Controller
 
         // Recently Added Songs
         $recently = Song::withUserInteractions()
-            ->with(['anime:id,title,slug', 'anime.images'])
+            ->with(['anime:id,title,slug,cover,banner'])
             ->withAvg('ratings', 'rating')
             ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
@@ -55,7 +55,7 @@ class AnimeController extends Controller
 
         // Popular Songs (Likes)
         $popular = Song::withUserInteractions()
-            ->with(['anime:id,title,slug', 'anime.images'])
+            ->with(['anime:id,title,slug,cover,banner'])
             ->withAvg('ratings', 'rating')
             ->withCount('likes')
             ->whereHas('anime', function ($query) use ($status) {
@@ -67,7 +67,7 @@ class AnimeController extends Controller
 
         // Most Viewed Songs
         $viewed = Song::withUserInteractions()
-            ->with(['anime:id,title,slug', 'anime.images'])
+            ->with(['anime:id,title,slug,cover,banner'])
             ->withAvg('ratings', 'rating')
             ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
@@ -77,11 +77,11 @@ class AnimeController extends Controller
             ->get();
 
         // Featured Artists
-        $featured_artists = Artist::select('id', 'name', 'slug')->with('images')->latest()->take(6)->get();
+        $featured_artists = Artist::select('id', 'name', 'slug', 'avatar')->latest()->take(6)->get();
 
         // Featured Song (Random)
         $featured_song = Song::withUserInteractions()
-            ->with(['anime:id,title,slug', 'anime.images', 'artists:id,name,slug', 'artists.images'])
+            ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->whereHas('anime', function ($q) use ($status) {
                 $q->where('status', $status);
@@ -92,7 +92,7 @@ class AnimeController extends Controller
         if ($featured_song) {
             $featured_song->append('average_rating');
             if ($featured_song->anime) {
-                $featured_song->anime->append(['thumbnail_url', 'banner_url']);
+                $featured_song->anime->append(['cover_url', 'banner_url']);
             }
             if ($featured_song->artists) {
                 $featured_song->artists->each->append('avatar_url');
@@ -105,7 +105,7 @@ class AnimeController extends Controller
             $collection->each(function ($item) {
                 $item->append('average_rating');
                 if ($item->anime) {
-                    $item->anime->append(['thumbnail_url', 'banner_url']);
+                    $item->anime->append(['cover_url', 'banner_url']);
                 }
                 if ($item->artists) {
                     $item->artists->each->append('avatar_url');
@@ -162,7 +162,7 @@ class AnimeController extends Controller
                     $q->where('genres.id', $genre_id);
                 });
             })
-            ->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name', 'images'])
+            ->with(['format:id,name', 'season:id,name', 'year:id,name', 'studios:id,name,slug', 'genres:id,name'])
             ->addSelect(['average_rating' => \App\Models\Rating::selectRaw('avg(rating)')
                 ->join('songs', 'songs.id', '=', 'ratings.rateable_id')
                 ->where('ratings.rateable_type', \App\Models\Song::class)
@@ -176,7 +176,7 @@ class AnimeController extends Controller
             ->paginate($request->input('per_page', 18));
 
         $animes->getCollection()->each(function ($anime) {
-            $anime->append('thumbnail_url');
+            $anime->append('cover_url');
             $anime->average_rating = (float) ($anime->average_rating ?? 0);
         });
 
@@ -201,7 +201,7 @@ class AnimeController extends Controller
             },
         ]);
 
-        $anime->append(['thumbnail_url', 'banner_url']);
+        $anime->append(['cover_url', 'banner_url']);
 
         $anime->songs->each(function ($song) {
             $song->append('average_rating');

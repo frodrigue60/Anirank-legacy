@@ -49,7 +49,7 @@
                         {{-- Thumbnail & Preview Play --}}
                         <div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 group cursor-pointer"
                             wire:click="previewSong({{ $song->id }})">
-                            <img src="{{ $song->anime->thumbnail_url }}"
+                            <img src="{{ $song->anime->cover_url }}"
                                 class="w-full h-full object-cover transition-transform group-hover:scale-110"
                                 alt="Cover">
 
@@ -240,7 +240,7 @@
                         <div
                             class="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800 group hover:border-red-500/50 transition-colors">
                             <div class="flex items-center gap-3 min-w-0">
-                                <img src="{{ $song->anime->thumbnail_url }}"
+                                <img src="{{ $song->anime->cover_url }}"
                                     class="w-10 h-10 rounded-md object-cover opacity-80" alt="Cover">
                                 <div class="min-w-0">
                                     <h5 class="text-white text-sm font-bold truncate">{{ $song->name }}</h5>
@@ -286,3 +286,5 @@
         </div>
     </div>
 </div>
+
+

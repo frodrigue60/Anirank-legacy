@@ -5,9 +5,9 @@
     @isset($song->post)
         @php
             $img_url = null;
-            if ($song->anime->banner != null) {
-                if (Storage::disk('public')->exists($song->anime->banner)) {
-                    $img_url = Storage::url($song->anime->banner);
+            if ($song->anime->banner_url != null) {
+                if (Storage::disk('public')->exists($song->anime->banner_url)) {
+                    $img_url = Storage::url($song->anime->banner_url);
                 }
             } else {
                 $img_url =
@@ -61,3 +61,4 @@
         </div>
     @endisset
 @endforeach
+

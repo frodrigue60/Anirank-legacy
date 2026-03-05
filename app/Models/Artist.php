@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Artist extends Model
 {
-    use HasFactory, \App\Traits\HasImages;
+    use HasFactory;
     protected $appends = ['avatar_url'];
 
     protected $fillable = [
         'name',
         'name_jp',
         'slug',
+        'avatar',
     ];
 
     protected static function boot()
@@ -30,14 +31,20 @@ class Artist extends Model
             // Desvincula todas las canciones asociadas
             $artist->songs()->detach();
 
-            // Delete polymorphic images
-            foreach ($artist->images as $image) {
-                if (\Illuminate\Support\Facades\Storage::disk($image->disk)->exists($image->path)) {
-                    \Illuminate\Support\Facades\Storage::disk($image->disk)->delete($image->path);
-                }
-                $image->delete();
+            $disk = env('FILESYSTEM_DISK', 'public');
+            if ($artist->avatar && \Illuminate\Support\Facades\Storage::disk($disk)->exists($artist->avatar)) {
+                \Illuminate\Support\Facades\Storage::disk($disk)->delete($artist->avatar);
             }
         });
+    }
+
+    public function getAvatarUrlAttribute()
+    {
+        if ($this->avatar) {
+            return \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->avatar);
+        }
+
+        return null;
     }
 
     public function songs()

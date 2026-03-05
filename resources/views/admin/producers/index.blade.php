@@ -46,7 +46,12 @@
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-500 border border-zinc-700 overflow-hidden">
-                                                <span class="material-symbols-outlined text-sm">corporate_fare</span>
+                                                @if ($producer->logo_url)
+                                                    <img src="{{ $producer->logo_url }}" alt=""
+                                                        class="w-full h-full object-cover">
+                                                @else
+                                                    <span class="material-symbols-outlined text-sm">corporate_fare</span>
+                                                @endif
                                             </div>
                                             <div class="flex flex-col">
                                                 <span class="text-sm font-bold text-white">

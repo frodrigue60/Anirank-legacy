@@ -118,7 +118,7 @@ class ArtistThemesTable extends Component
     {
 
         $query = Song::query()
-            ->with(['anime:id,title,slug', 'artists:id,name,slug'])
+            ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->whereHas('artists', function ($q) {
                 $q->where('artists.id', $this->artist->id);

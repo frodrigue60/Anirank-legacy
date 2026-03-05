@@ -26,7 +26,6 @@ class ArtistController extends Controller
             ->when($sort === 'most_themes', fn ($q) => $q->orderByDesc('songs_count'))
             ->when($sort === 'least_themes', fn ($q) => $q->orderBy('songs_count'))
             ->when(!$sort, fn ($q) => $q->orderBy('name'))
-            ->with(['images'])
             ->paginate(18);
 
         $artists->getCollection()->each(function ($artist) {
@@ -86,7 +85,7 @@ class ArtistController extends Controller
             $query->where('type', $type);
         }
 
-        $query->with(['artists:id,name,slug', 'artists.images', 'anime', 'anime.images'])
+        $query->with(['artists:id,name,slug,avatar', 'anime:id,title,slug,cover,banner'])
             ->withUserInteractions()
             ->withAvg('ratings', 'rating')
             ->withCount('songVariants as view_count')
@@ -113,7 +112,7 @@ class ArtistController extends Controller
 
         $songs->getCollection()->each(function ($song) {
             if ($song->anime) {
-                $song->anime->append('thumbnail_url');
+                $song->anime->append('cover_url');
                 $song->anime->append('banner_url');
             }
         });

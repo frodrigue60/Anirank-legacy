@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, \App\Traits\HasImages;
+    use HasApiTokens, HasFactory, Notifiable;
     protected $appends = ['avatar_url', 'banner_url'];
 
     /**
@@ -26,9 +26,10 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
         'score_format',
-        'slug'
+        'slug',
+        'avatar',
+        'banner',
     ];
 
     public function getRouteKeyName()
@@ -190,13 +191,29 @@ class User extends Authenticatable
         parent::boot();
 
         static::deleting(function ($user) {
-            foreach ($user->images as $image) {
-                if ($image->disk && \Illuminate\Support\Facades\Storage::disk($image->disk)->exists($image->path)) {
-                    \Illuminate\Support\Facades\Storage::disk($image->disk)->delete($image->path);
-                }
-                $image->delete();
+            $disk = env('FILESYSTEM_DISK', 'public');
+            if ($user->avatar && \Illuminate\Support\Facades\Storage::disk($disk)->exists($user->avatar)) {
+                \Illuminate\Support\Facades\Storage::disk($disk)->delete($user->avatar);
+            }
+            if ($user->banner && \Illuminate\Support\Facades\Storage::disk($disk)->exists($user->banner)) {
+                \Illuminate\Support\Facades\Storage::disk($disk)->delete($user->banner);
             }
         });
+    }
+
+    public function getAvatarUrlAttribute()
+    {
+        if ($this->avatar) {
+            return \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->avatar);
+        }
+
+        $name = isset($this->name) ? urlencode($this->name) : 'User';
+        return "https://ui-avatars.com/api/?name={$name}&color=fff&background=random";
+    }
+
+    public function getBannerUrlAttribute()
+    {
+        return $this->banner ? \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->banner) : null;
     }
 
     /**

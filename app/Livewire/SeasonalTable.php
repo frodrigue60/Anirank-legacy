@@ -76,7 +76,7 @@ class SeasonalTable extends Component
         $perPage = $this->perPage * $this->page;
 
         $query = Song::query()
-            ->with(['anime:id,title,slug', 'artists:id,name,slug', 'previousRanking'])
+            ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar', 'previousRanking'])
             ->withAvg('ratings', 'rating')
             ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status)

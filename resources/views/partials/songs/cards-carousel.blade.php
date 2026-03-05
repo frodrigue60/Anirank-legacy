@@ -3,10 +3,16 @@
         class="group relative w-80 h-40 rounded-xl overflow-hidden border border-white/5 shrink-0 cursor-pointer
                 hover:border-primary/30 transition-all duration-300">
         {{-- Background --}}
-        <x-ui.image :src="$song->anime->thumbnail_url" :alt="$song->name"
-            class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105
-                   transition-transform duration-500"
-            style="filter: brightness(0.4);" />
+        @if ($song->anime->cover_url)
+            <x-ui.image :src="$song->anime->cover_url" :alt="$song->name"
+                class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-105
+                       transition-transform duration-500"
+                style="filter: brightness(0.4);" />
+        @else
+            <div
+                class="absolute inset-0 w-full h-full bg-linear-to-br from-primary/10 to-background-dark/80 opacity-50 group-hover:scale-105 transition-transform duration-500">
+            </div>
+        @endif
 
         {{-- Gradient overlay --}}
         <div class="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/80 to-transparent"></div>

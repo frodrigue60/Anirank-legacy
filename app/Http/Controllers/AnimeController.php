@@ -24,9 +24,7 @@ class AnimeController extends Controller
         $user = Auth::check() ? Auth::User() : null;
         $status = true;
 
-        $recently = Song::with(['anime' => function ($q) {
-            $q->select('id', 'title', 'slug');
-        }])
+        $recently = Song::with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             })
@@ -34,9 +32,7 @@ class AnimeController extends Controller
             ->take(25)
             ->get();
 
-        $popular = Song::with(['anime' => function ($q) {
-            $q->select('id', 'title', 'slug');
-        }])
+        $popular = Song::with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withCount('likes')
             ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
@@ -45,9 +41,7 @@ class AnimeController extends Controller
             ->take(25)
             ->get();
 
-        $viewed = Song::with(['anime' => function ($q) {
-            $q->select('id', 'title', 'slug');
-        }])
+        $viewed = Song::with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             })
@@ -56,8 +50,8 @@ class AnimeController extends Controller
             ->get();
 
         $openings = Song::with(['anime' => function ($q) {
-            $q->select('id', 'title', 'slug');
-        }, 'artists:id,name,slug'])
+            $q->select('id', 'title', 'slug', 'cover', 'banner');
+        }, 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'OP')
             ->whereHas('anime', function ($q) use ($status) {
@@ -68,8 +62,8 @@ class AnimeController extends Controller
             ->get();
 
         $endings = Song::with(['anime' => function ($q) {
-            $q->select('id', 'title', 'slug');
-        }, 'artists:id,name,slug'])
+            $q->select('id', 'title', 'slug', 'cover', 'banner');
+        }, 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'ED')
             ->whereHas('anime', function ($q) use ($status) {
@@ -82,11 +76,15 @@ class AnimeController extends Controller
         $weaklyRanking = $openings->concat($endings);
         $weaklyRanking = $this->setScoreSongs($weaklyRanking, $user);
 
-        $artists = Artist::select('id', 'name', 'slug')->latest()->take(20)->get();
+        $artists = Artist::select('id', 'name', 'slug', 'avatar')
+            ->withCount('songs')
+            ->latest()
+            ->take(20)
+            ->get();
 
         $featuredSong = Song::with(['anime' => function ($q) {
-            $q->select('id', 'title', 'slug');
-        }, 'artists:id,name,slug'])
+            $q->select('id', 'title', 'slug', 'cover', 'banner');
+        }, 'artists:id,name,slug,avatar'])
             ->whereHas('anime', function ($q) use ($status) {
                 $q->where('status', $status);
             })

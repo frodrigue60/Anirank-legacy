@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Anime extends Model
 {
-    use HasFactory, \App\Traits\HasImages;
-    protected $appends = ['thumbnail_url', 'banner_url'];
+    use HasFactory;
+
+    protected $appends = ['cover_url', 'banner_url'];
 
     protected $fillable = [
         'title',
@@ -21,6 +21,8 @@ class Anime extends Model
         'year_id',
         'season_id',
         'format_id',
+        'cover',
+        'banner',
     ];
 
     protected static function boot()
@@ -28,19 +30,35 @@ class Anime extends Model
         parent::boot();
 
         static::deleting(function ($anime) {
-            foreach ($anime->images as $image) {
-                if (Storage::disk($image->disk)->exists($image->path)) {
-                    Storage::disk($image->disk)->delete($image->path);
-                }
-                $image->delete();
+            $disk = env('FILESYSTEM_DISK', 'public');
+            if ($anime->cover && Storage::disk($disk)->exists($anime->cover)) {
+                Storage::disk($disk)->delete($anime->cover);
+            }
+            if ($anime->banner && Storage::disk($disk)->exists($anime->banner)) {
+                Storage::disk($disk)->delete($anime->banner);
             }
         });
+    }
+
+    public function getCoverUrlAttribute()
+    {
+        if (!$this->cover) return null;
+        if (filter_var($this->cover, FILTER_VALIDATE_URL)) return $this->cover;
+        return Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->cover);
+    }
+
+    public function getBannerUrlAttribute()
+    {
+        if (!$this->banner) return null;
+        if (filter_var($this->banner, FILTER_VALIDATE_URL)) return $this->banner;
+        return Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->banner);
     }
 
     public function songs()
     {
         return $this->hasMany(Song::class);
     }
+
     public function reports()
     {
         return $this->hasMany(Report::class);
@@ -93,7 +111,8 @@ class Anime extends Model
 
     public function toggleStatus()
     {
-        $this->status = !$this->status;
+        $this->status = ! $this->status;
+
         return $this->save();
     }
 }

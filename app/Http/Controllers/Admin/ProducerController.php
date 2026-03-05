@@ -33,12 +33,22 @@ class ProducerController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:producers,name',
+            'logo' => 'nullable|image|max:2048',
+            'logo_src' => 'nullable|url|max:255'
         ]);
 
-        Producer::create([
+        $producer = Producer::create([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
         ]);
+
+        if ($request->hasFile('logo')) {
+            $producer->logo = $request->file('logo')->store('producers', config('filesystems.default'));
+            $producer->save();
+        } elseif ($request->filled('logo_src')) {
+            $producer->logo = $request->logo_src;
+            $producer->save();
+        }
 
         return redirect()->route('admin.producers.index')->with('success', 'Producer created successfully.');
     }
@@ -56,13 +66,29 @@ class ProducerController extends Controller
     public function update(Request $request, Producer $producer)
     {
         $request->validate([
-            'name' => 'required|unique:producers,name,'.$producer->id, // skip current producer
+            'name' => 'required|unique:producers,name,'.$producer->id,
+            'logo' => 'nullable|image|max:2048',
+            'logo_src' => 'nullable|url|max:255'
         ]);
 
         $producer->update([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
         ]);
+
+        if ($request->hasFile('logo')) {
+            if ($producer->logo && !\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($producer->logo)) {
+                \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($producer->logo);
+            }
+            $producer->logo = $request->file('logo')->store('producers', config('filesystems.default'));
+            $producer->save();
+        } elseif ($request->filled('logo_src')) {
+            if ($producer->logo && !filter_var($producer->logo, FILTER_VALIDATE_URL)) {
+                \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($producer->logo);
+            }
+            $producer->logo = $request->logo_src;
+            $producer->save();
+        }
 
         return redirect()->route('admin.producers.index')->with('success', 'Producer updated successfully.');
     }

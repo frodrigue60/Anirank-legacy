@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Badge extends Model
 {
-    use HasFactory, \App\Traits\HasImages;
+    use HasFactory;
 
     protected $fillable = [
         'name',
         'description',
-        'is_active'
+        'is_active',
+        'icon',
     ];
 
     /**
@@ -30,7 +31,8 @@ class Badge extends Model
      */
     public function getIconUrlAttribute()
     {
-        $image = $this->images->where('type', 'icon')->first();
-        return $image ? \Illuminate\Support\Facades\Storage::disk($image->disk)->url($image->path) : asset('img/placeholders/default-badge.webp');
+        if (!$this->icon) return null;
+        if (filter_var($this->icon, FILTER_VALIDATE_URL)) return $this->icon;
+        return \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->icon);
     }
 }

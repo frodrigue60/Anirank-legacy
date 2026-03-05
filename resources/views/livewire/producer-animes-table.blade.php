@@ -126,7 +126,7 @@
                 @foreach ($animes as $anime)
                     <div wire:key="anime-grid-{{ $anime->id }}" class="group relative">
                         <div class="aspect-2/3 rounded-lg overflow-hidden bg-surface-darker shadow-lg relative">
-                            <x-ui.image :src="$anime->thumbnail_url" :alt="$anime->title" loading="lazy"
+                            <x-ui.image :src="$anime->cover_url" :alt="$anime->title" loading="lazy"
                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 fallback="default-anime.webp" />
                             <div
@@ -150,7 +150,7 @@
                         {{-- COVER (Left) --}}
                         <div class="w-[120px] md:w-[180px] shrink-0 relative aspect-2/3">
                             <a href="{{ route('animes.show', $anime) }}" class="block w-full h-full">
-                                <x-ui.image :src="$anime->thumbnail_url" :alt="$anime->title" loading="lazy"
+                                <x-ui.image :src="$anime->cover_url" :alt="$anime->title" loading="lazy"
                                     class="w-full h-full object-cover" fallback="default-anime.webp" />
                             </a>
 
@@ -222,7 +222,7 @@
                         class="flex items-center gap-4 bg-surface-dark/30 border border-white/5 p-3 rounded-lg hover:bg-white/5 transition-colors group">
                         {{-- Cover --}}
                         <div class="w-16 h-16 rounded overflow-hidden shrink-0">
-                            <x-ui.image :src="$anime->thumbnail_url" :alt="$anime->title" loading="lazy"
+                            <x-ui.image :src="$anime->cover_url" :alt="$anime->title" loading="lazy"
                                 class="w-full h-full object-cover" fallback="default-anime.webp" />
                         </div>
 
@@ -286,3 +286,5 @@
         @endif
     </div>
 </div>
+
+

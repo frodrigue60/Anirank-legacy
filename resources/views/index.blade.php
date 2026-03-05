@@ -14,8 +14,10 @@
                 </div>
                 <div class="absolute inset-0 bg-linear-to-r from-background-dark/80 via-transparent to-background-dark/80 z-10">
                 </div>
-                <img class="w-full h-full object-cover scale-105" data-alt="Cinematic wide shot of anime cityscape at night"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4NKMsiVFSxKoMy0QJq1bdQInEoybDwBon5RstY0kyN604vExTI9pu8NcCmoEH1v6KITdZ4av_LtDghv2w-_XaKXQElk4leiUH9GVq1u0IyulYjmeCIqspuNtkNr8PCg2bZhyubZmFlVu3i7A2-Ug2FVNBcK4uF7HEtkwYOOHS-swOGUyTo14YgLkUPJsdetP6SpSqK0fw-RR74Zhd-zOxh-7r1ruGpFQDSftrvuYB_oXOcfl7wzCHPUY-joO8Cn9Nr-6SuEVYS6A" />
+                <x-ui.image
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4NKMsiVFSxKoMy0QJq1bdQInEoybDwBon5RstY0kyN604vExTI9pu8NcCmoEH1v6KITdZ4av_LtDghv2w-_XaKXQElk4leiUH9GVq1u0IyulYjmeCIqspuNtkNr8PCg2bZhyubZmFlVu3i7A2-Ug2FVNBcK4uF7HEtkwYOOHS-swOGUyTo14YgLkUPJsdetP6SpSqK0fw-RR74Zhd-zOxh-7r1ruGpFQDSftrvuYB_oXOcfl7wzCHPUY-joO8Cn9Nr-6SuEVYS6A"
+                    alt="Cinematic wide shot of anime cityscape at night" class="w-full h-full object-cover scale-105"
+                    :lazy="false" />
             </div>
             <div class="relative z-20 container mx-auto px-6 text-center max-w-4xl">
                 <h1
@@ -56,17 +58,25 @@
                     $format = $user?->score_format ?? 'POINT_100';
                     $score = $featuredSong->formattedAvgScore($format);
                 @endphp
-                <section class="relative w-full rounded-2xl overflow-hidden bg-surface-dark group">
-                    <div class="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-overlay transition-transform duration-700 group-hover:scale-105"
-                        style="background-image: url('{{ $featuredSong->anime->banner_url }}');">
-                    </div>
+                <section
+                    class="relative w-full min-h-[350px] flex flex-col justify-end rounded-2xl overflow-hidden bg-surface-dark group">
+                    @if ($featuredSong->anime->banner_url)
+                        <div class="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-overlay transition-transform duration-700 group-hover:scale-105"
+                            style="background-image: url('{{ $featuredSong->anime->banner_url }}');">
+                        </div>
+                    @else
+                        <div
+                            class="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-overlay transition-transform duration-700 group-hover:scale-105 bg-linear-to-br from-primary/20 to-background-dark/80">
+                        </div>
+                    @endif
                     <div class="absolute inset-0 bg-linear-to-r from-background-dark via-background-dark/80 to-transparent">
                     </div>
                     <div class="relative z-10 p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center md:items-end">
                         <div class="relative shrink-0 hero-glow">
                             <div
                                 class="w-48 h-48 md:w-64 md:h-64 rounded-xl shadow-2xl overflow-hidden relative border-2 border-white/10">
-                                <x-ui.image :src="$featuredSong->anime->thumbnail_url" :alt="$featuredSong->name" class="w-full h-full object-cover" />
+                                <x-ui.image :src="$featuredSong->anime->cover_url" :alt="$featuredSong->name" class="w-full h-full object-cover"
+                                    :lazy="false" />
                                 <div class="absolute bottom-0 inset-x-0 bg-linear-to-t from-black/80 to-transparent p-4 pt-10">
                                     <div class="flex items-center gap-1 text-yellow-400 font-bold text-lg">
                                         <span class="material-symbols-outlined filled">star</span>
@@ -88,11 +98,19 @@
                                 <div
                                     class="flex flex-col md:flex-col items-center md:items-start gap-1 md:gap-3 text-md md:text-lg text-white/80">
                                     <span class="font-bold text-primary truncate">{{ $featuredSong->anime->title }}</span>
-                                    <span class="font-medium text-white truncate">
-                                        @foreach ($featuredSong->artists as $artist)
-                                            {{ $artist->name }}{{ !$loop->last ? ', ' : '' }}
-                                        @endforeach
-                                    </span>
+                                    <div class="flex items-center gap-2 truncate">
+                                        @if ($featuredSong->artists->isNotEmpty() && $featuredSong->artists->first()->avatar_url)
+                                            <div class="w-6 h-6 rounded-full overflow-hidden border border-white/20 shrink-0">
+                                                <x-ui.image :src="$featuredSong->artists->first()->avatar_url" :alt="$featuredSong->artists->first()->name"
+                                                    class="w-full h-full object-cover" />
+                                            </div>
+                                        @endif
+                                        <span class="font-medium text-white truncate text-sm md:text-md">
+                                            @foreach ($featuredSong->artists as $artist)
+                                                {{ $artist->name }}{{ !$loop->last ? ', ' : '' }}
+                                            @endforeach
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="flex items-center gap-4 mt-2 justify-center md:justify-start">
@@ -155,8 +173,14 @@
                                 <div
                                     class="group relative p-3 rounded-xl hover:bg-surface-dark transition-colors border flex gap-4 items-center {{ $cardClass }}">
                                     <div class="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
-                                        <x-ui.image :src="$song->anime->thumbnail_url" :alt="$song->name"
-                                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        @if ($song->anime->cover_url)
+                                            <x-ui.image :src="$song->anime->cover_url" :alt="$song->name"
+                                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        @else
+                                            <div
+                                                class="w-full h-full bg-linear-to-br from-primary/10 to-background-dark/80 group-hover:scale-110 transition-transform duration-500">
+                                            </div>
+                                        @endif
                                         <div
                                             class="absolute top-1 left-1 {{ $badgeClass }} text-xs font-bold px-1.5 py-0.5 rounded shadow">
                                             #{{ $rankNum }}</div>
@@ -258,13 +282,13 @@
                             <a href="{{ route('artists.show', $artist->slug) }}" class="flex items-center gap-3 min-w-0">
                                 <div
                                     class="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent group-hover:border-primary transition-colors shrink-0">
-                                    @if ($artist->images()->where('type', 'thumbnail')->exists())
-                                        <x-ui.image :src="$artist->thumbnail_url" :alt="$artist->name"
+                                    @if ($artist->avatar_url)
+                                        <x-ui.image :src="$artist->avatar_url" :alt="$artist->name"
                                             class="w-full h-full object-cover" />
                                     @else
                                         <div
-                                            class="w-full h-full bg-primary/20 flex items-center justify-center text-primary">
-                                            <span class="material-symbols-outlined">person</span>
+                                            class="w-full h-full bg-linear-to-br from-primary/20 to-surface-darker flex items-center justify-center text-primary/40">
+                                            <span class="material-symbols-outlined text-3xl">person</span>
                                         </div>
                                     @endif
                                 </div>

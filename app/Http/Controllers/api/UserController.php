@@ -34,7 +34,11 @@ class UserController extends Controller
                 $disk
             );
 
-            $user->updateOrCreateImage($storedPath, 'avatar', $disk);
+            if ($user->avatar && \Illuminate\Support\Facades\Storage::disk($disk)->exists($user->avatar)) {
+                \Illuminate\Support\Facades\Storage::disk($disk)->delete($user->avatar);
+            }
+            $user->avatar = $storedPath;
+            $user->save();
 
             return response()->json([
                 'success' => true,
@@ -70,7 +74,11 @@ class UserController extends Controller
                 $disk
             );
 
-            $user->updateOrCreateImage($storedPath, 'banner', $disk);
+            if ($user->banner && \Illuminate\Support\Facades\Storage::disk($disk)->exists($user->banner)) {
+                \Illuminate\Support\Facades\Storage::disk($disk)->delete($user->banner);
+            }
+            $user->banner = $storedPath;
+            $user->save();
 
             return response()->json([
                 'success' => true,

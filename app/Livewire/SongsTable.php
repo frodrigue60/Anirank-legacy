@@ -112,7 +112,7 @@ class SongsTable extends Component
     public function render()
     {
         $query = Song::query()
-            ->with(['anime:id,title,slug', 'artists:id,name,slug'])
+            ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->withCount('likes')
             ->whereHas('anime', function ($q) {

@@ -33,12 +33,22 @@ class StudioController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:studios,name',
+            'logo' => 'nullable|image|max:2048',
+            'logo_src' => 'nullable|url|max:255'
         ]);
 
-        Studio::create([
+        $studio = Studio::create([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
         ]);
+
+        if ($request->hasFile('logo')) {
+            $studio->logo = $request->file('logo')->store('studios', config('filesystems.default'));
+            $studio->save();
+        } elseif ($request->filled('logo_src')) {
+            $studio->logo = $request->logo_src;
+            $studio->save();
+        }
 
         return redirect()->route('admin.studios.index')->with('success', 'Studio created successfully.');
     }
@@ -57,12 +67,28 @@ class StudioController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:studios,name,'.$studio->id,
+            'logo' => 'nullable|image|max:2048',
+            'logo_src' => 'nullable|url|max:255'
         ]);
 
         $studio->update([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
         ]);
+
+        if ($request->hasFile('logo')) {
+            if ($studio->logo && !\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($studio->logo)) {
+                \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($studio->logo);
+            }
+            $studio->logo = $request->file('logo')->store('studios', config('filesystems.default'));
+            $studio->save();
+        } elseif ($request->filled('logo_src')) {
+            if ($studio->logo && !filter_var($studio->logo, FILTER_VALIDATE_URL)) {
+                \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($studio->logo);
+            }
+            $studio->logo = $request->logo_src;
+            $studio->save();
+        }
 
         return redirect()->route('admin.studios.index')->with('success', 'Studio updated successfully.');
     }

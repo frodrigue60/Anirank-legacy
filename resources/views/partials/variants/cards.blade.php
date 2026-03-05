@@ -8,10 +8,10 @@
         $title = $anime->title;
         $thumbnail_url = '';
 
-        if (Storage::disk('public')->exists($anime->thumbnail)) {
-            $thumbnail_url = Storage::url($anime->thumbnail);
+        if (Storage::disk('public')->exists($anime->cover_url)) {
+            $thumbnail_url = Storage::url($anime->cover_url);
         } else {
-            $thumbnail_url = $anime->thumbnail_src;
+            $thumbnail_url = $anime->cover_url_src;
         }
 
     @endphp
@@ -42,3 +42,5 @@
         </a>
     </article>
 @endforeach
+
+

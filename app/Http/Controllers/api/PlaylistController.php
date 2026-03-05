@@ -15,7 +15,7 @@ class PlaylistController extends Controller
         $songId = $request->query('song_id') ?? $request->input('song_id');
         $user = auth('sanctum')->user();
 
-        $query = Playlist::with(['user', 'user.images', 'songs.anime', 'songs.anime.images'])->withCount('songs');
+        $query = Playlist::with(['user:id,name,email,avatar', 'songs.anime:id,title,slug,cover,banner'])->withCount('songs');
 
         if ($request->has('mine') && $user) {
             $query->where('user_id', $user->id);
@@ -103,13 +103,13 @@ class PlaylistController extends Controller
         $playlist->load([
             'songs' => function ($q) {
                 $q->withUserInteractions()
-                  ->with(['anime', 'anime.images', 'artists', 'artists.images', 'songVariants.video']);
+                  ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar', 'songVariants.video']);
             },
         ]);
 
         $playlist->songs->each(function ($song) {
             if ($song->anime) {
-                $song->anime->append(['thumbnail_url', 'banner_url']);
+                $song->anime->append(['cover_url', 'banner_url']);
             }
             if ($song->artists) {
                 $song->artists->each->append('avatar_url');
@@ -180,7 +180,7 @@ class PlaylistController extends Controller
 
     public function userPlaylists(Request $request, \App\Models\User $user)
     {
-        $query = $user->playlists()->with(['songs.anime', 'songs.anime.images'])->withCount('songs');
+        $query = $user->playlists()->with(['songs.anime:id,title,slug,cover,banner'])->withCount('songs');
 
         // Solo mostrar privadas si es el propio usuario autenticado
         $currentUser = auth('sanctum')->user();

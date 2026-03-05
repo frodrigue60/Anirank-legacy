@@ -60,24 +60,38 @@
                     {{-- Icon Upload & Preview --}}
                     <div class="space-y-4">
                         <label class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Badge Icon</label>
-                        <div class="flex items-center gap-6">
-                            <div class="relative group">
-                                <div
-                                    class="w-24 h-24 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-center overflow-hidden group-hover:border-blue-500 transition-colors shadow-inner">
-                                    <img src="{{ $badge->icon_url }}" alt="{{ $badge->name }}"
-                                        class="w-full h-full object-cover">
-                                </div>
-                                <div
-                                    class="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full border-2 border-zinc-900 flex items-center justify-center shadow-lg">
-                                    <span
-                                        class="material-symbols-outlined text-white text-[14px]">published_with_changes</span>
-                                </div>
+
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <label for="icon_src"
+                                    class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Icon URL
+                                    (Alternative to upload)</label>
+                                <input type="url" name="icon_src" id="icon_src"
+                                    value="{{ old('icon_src', filter_var($badge->icon, FILTER_VALIDATE_URL) ? $badge->icon : '') }}"
+                                    class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12"
+                                    placeholder="https://example.com/badge.png">
                             </div>
-                            <div class="flex-1">
-                                <input type="file" name="icon" id="icon" accept="image/*"
-                                    class="block w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 file:transition-all cursor-pointer">
-                                <p class="mt-2 text-[10px] text-zinc-500 uppercase font-bold tracking-tighter">Uploading a
-                                    new icon will replace the current one.</p>
+
+                            <div class="flex items-center gap-6">
+                                <div class="relative group">
+                                    <div
+                                        class="w-24 h-24 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-center overflow-hidden group-hover:border-blue-500 transition-colors shadow-inner">
+                                        <img src="{{ $badge->icon_url }}" alt="{{ $badge->name }}"
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                    <div
+                                        class="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full border-2 border-zinc-900 flex items-center justify-center shadow-lg">
+                                        <span
+                                            class="material-symbols-outlined text-white text-[14px]">published_with_changes</span>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" name="icon" id="icon" accept="image/*"
+                                        class="block w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 file:transition-all cursor-pointer">
+                                    <p class="mt-2 text-[10px] text-zinc-500 uppercase font-bold tracking-tighter">Uploading
+                                        a
+                                        new icon will replace the current one.</p>
+                                </div>
                             </div>
                         </div>
                     </div>

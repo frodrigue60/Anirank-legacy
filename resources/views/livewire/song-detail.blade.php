@@ -235,7 +235,7 @@
                         <a href="{{ $related->url }}"
                             class="flex gap-4 p-3 rounded-2xl bg-surface-dark hover:bg-surface-darker border border-white/5 hover:border-primary/30 transition-all group">
                             <div class="w-24 aspect-video rounded-lg overflow-hidden relative shrink-0">
-                                <x-ui.image src="{{ $related->anime->thumbnail_url }}"
+                                <x-ui.image src="{{ $related->anime->cover_url }}"
                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     alt="{{ $related->name }}" />
                                 <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors">
@@ -414,3 +414,5 @@
         });
     </script>
 </div>
+
+

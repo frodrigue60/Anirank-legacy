@@ -13,7 +13,7 @@
 
         {{-- Form Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8">
-            <form method="post" action="{{ route('admin.producers.store') }}" class="space-y-8">
+            <form method="post" action="{{ route('admin.producers.store') }}" class="space-y-8" enctype="multipart/form-data">
                 @csrf
 
                 <div class="space-y-6">
@@ -30,6 +30,30 @@
                         @error('name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label for="logo"
+                                class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Logo File</label>
+                            <input type="file" name="logo" id="logo"
+                                class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm @error('logo') border-red-500 @enderror">
+                            @error('logo')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <label for="logo_src"
+                                class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Logo URL
+                                (External)</label>
+                            <input type="url" name="logo_src" id="logo_src" value="{{ old('logo_src') }}"
+                                class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12 @error('logo_src') border-red-500 @enderror"
+                                placeholder="https://example.com/logo.png">
+                            @error('logo_src')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </div>
 

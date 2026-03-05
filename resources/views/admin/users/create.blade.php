@@ -13,7 +13,7 @@
 
         {{-- Form Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8">
-            <form method="POST" action="{{ route('admin.users.store') }}" class="space-y-8">
+            <form method="POST" action="{{ route('admin.users.store') }}" enctype="multipart/form-data" class="space-y-8">
                 @csrf
 
                 {{-- User Credentials --}}
@@ -69,6 +69,41 @@
                                         </div>
                                     </label>
                                 @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Profile Images Section --}}
+                    <div class="space-y-6 pt-4 border-t border-zinc-800/50">
+                        <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center">
+                            <span class="material-symbols-outlined mr-2 text-blue-500">image</span> PROFILE APPEARANCE
+                        </h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                            {{-- Avatar --}}
+                            <div class="space-y-4">
+                                <label class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">User
+                                    Avatar</label>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <input type="file" name="avatar" id="avatar" accept="image/*"
+                                        class="block w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 file:transition-all cursor-pointer">
+                                    <input type="url" name="avatar_src" id="avatar_src" value="{{ old('avatar_src') }}"
+                                        class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-xs"
+                                        placeholder="External Avatar URL">
+                                </div>
+                            </div>
+
+                            {{-- Banner --}}
+                            <div class="space-y-4">
+                                <label class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Profile
+                                    Banner</label>
+                                <div class="grid grid-cols-1 gap-4">
+                                    <input type="file" name="banner" id="banner" accept="image/*"
+                                        class="block w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 file:transition-all cursor-pointer">
+                                    <input type="url" name="banner_src" id="banner_src" value="{{ old('banner_src') }}"
+                                        class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-xs"
+                                        placeholder="External Banner URL">
+                                </div>
                             </div>
                         </div>
                     </div>

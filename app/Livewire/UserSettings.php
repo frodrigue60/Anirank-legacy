@@ -49,8 +49,8 @@ class UserSettings extends Component
             $storedPath = $this->image->storeAs('profile', $file_name);
 
             if ($storedPath) {
-                $this->user->updateOrCreateImage($storedPath, 'avatar');
-                $this->user->load('images');
+                $this->user->avatar = $storedPath;
+                $this->user->save();
 
                 $this->dispatch('avatarUpdated', url: $this->user->avatar_url);
                 session()->flash('avatar_success', 'Avatar updated successfully!');
@@ -73,8 +73,8 @@ class UserSettings extends Component
             $storedPath = $this->banner->storeAs('banner', $file_name);
 
             if ($storedPath) {
-                $this->user->updateOrCreateImage($storedPath, 'banner');
-                $this->user->load('images');
+                $this->user->banner = $storedPath;
+                $this->user->save();
 
                 $this->dispatch('bannerUpdated', url: $this->user->banner_url);
                 session()->flash('banner_success', 'Banner updated successfully!');

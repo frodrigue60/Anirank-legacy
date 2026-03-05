@@ -13,18 +13,9 @@
         <div class="flex flex-col gap-8">
             {{-- Header --}}
             <div class="flex items-center gap-6">
-                @php
-                    $thumbnailUrl = null;
-                    if ($artist->thumbnail != null && Storage::disk('public')->exists($artist->thumbnail)) {
-                        $thumbnailUrl = Storage::url($artist->thumbnail);
-                    } elseif ($artist->thumbnail_src != null) {
-                        $thumbnailUrl = $artist->thumbnail_src;
-                    }
-                @endphp
-
-                @if ($thumbnailUrl)
+                @if ($artist->avatar_url)
                     <div class="w-24 h-24 rounded-full overflow-hidden ring-4 ring-primary/20 shadow-xl shrink-0">
-                        <img src="{{ $thumbnailUrl }}" alt="{{ $artist->name }}" class="w-full h-full object-cover">
+                        <img src="{{ $artist->avatar_url }}" alt="{{ $artist->name }}" class="w-full h-full object-cover">
                     </div>
                 @else
                     <div

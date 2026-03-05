@@ -2,9 +2,9 @@
     @isset($song->post)
         @php
             $img_url = null;
-            if ($song->anime->thumbnail != null) {
-                if (Storage::disk('public')->exists($song->anime->thumbnail)) {
-                    $img_url = Storage::url($song->anime->thumbnail);
+            if ($song->anime->cover_url != null) {
+                if (Storage::disk('public')->exists($song->anime->cover_url)) {
+                    $img_url = Storage::url($song->anime->cover_url);
                 }
             } else {
                 $img_url =
@@ -74,3 +74,5 @@
         </div>
     @endisset
 @endforeach
+
+

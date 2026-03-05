@@ -2,7 +2,7 @@
 
 @section('title', $anime->title . ' - Themes List')
 @section('description', 'Explore and listen to the openings and endings of ' . $anime->title . '.')
-@section('og_image', $anime->thumbnail_url)
+@section('og_image', $anime->cover_url)
 @section('og_type', 'article')
 
 @section('content')
@@ -27,7 +27,7 @@
             {{-- Sidebar --}}
             <aside class="lg:col-span-3 space-y-8">
                 <div class="relative rounded-xl overflow-hidden shadow-2xl shadow-primary/10 border border-white/5 group">
-                    <img src="{{ $anime->thumbnail_url }}" alt="{{ $anime->title }}"
+                    <img src="{{ $anime->cover_url }}" alt="{{ $anime->title }}"
                         class="w-full h-auto aspect-2/3 object-cover transition-transform duration-700 group-hover:scale-105">
                     <div
                         class="absolute top-0 left-0 w-full h-full bg-linear-to-t from-background-dark/80 via-transparent to-transparent opacity-60">
@@ -283,3 +283,5 @@
         </div>
     </div>
 @endsection
+
+

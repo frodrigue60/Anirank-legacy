@@ -84,7 +84,8 @@ class RegisterController extends Controller
                 $path = 'profile/' . $file_name;
 
                 Storage::disk()->put($path, $response->body());
-                $user->updateOrCreateImage($path, 'avatar');
+                $user->avatar = $path;
+                $user->save();
             }
         } catch (\Exception $e) {
             // Log error if needed or just silent fail to allow registration to complete

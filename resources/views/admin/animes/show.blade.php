@@ -38,7 +38,7 @@
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl overflow-hidden shadow-xl">
                     <div class="aspect-3/4 relative">
-                        <img src="{{ $anime->thumbnail_url }}" alt="{{ $anime->title }}" class="w-full h-full object-cover">
+                        <img src="{{ $anime->cover_url }}" alt="{{ $anime->title }}" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-linear-to-t from-zinc-950 via-transparent to-transparent"></div>
                         <div class="absolute bottom-4 left-4 right-4">
                             <span
@@ -76,7 +76,7 @@
                     </div>
                 </div>
 
-                @if ($anime->images()->where('type', 'banner')->exists())
+                @if ($anime->banner)
                     <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-4 shadow-xl">
                         <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 px-4 flex items-center">
                             <span class="material-symbols-outlined mr-2 text-blue-500">landscape</span> BANNER ASSET

@@ -49,7 +49,8 @@ class BadgeController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
-            'icon' => 'nullable|image|max:2048'
+            'icon' => 'nullable|image|max:2048',
+            'icon_src' => 'nullable|url|max:255'
         ]);
 
         $badge = Badge::create($request->only(['name', 'description', 'is_active']));
@@ -57,8 +58,12 @@ class BadgeController extends Controller
         if ($request->hasFile('icon')) {
             $extension = $request->file('icon')->extension();
             $file_name = \Illuminate\Support\Str::slug($badge->name) . '-' . time() . '.' . $extension;
-            $path = $request->file('icon')->storeAs('badges', $file_name);
-            $badge->updateOrCreateImage($path, 'icon');
+            $path = $request->file('icon')->storeAs('badges', $file_name, config('filesystems.default'));
+            $badge->icon = $path;
+            $badge->save();
+        } elseif ($request->filled('icon_src')) {
+            $badge->icon = $request->icon_src;
+            $badge->save();
         }
 
         return redirect()->route('admin.badges.index')->with('success', 'Badge created successfully.');
@@ -85,7 +90,8 @@ class BadgeController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
-            'icon' => 'nullable|image|max:2048'
+            'icon' => 'nullable|image|max:2048',
+            'icon_src' => 'nullable|url|max:255'
         ]);
 
         $badge->update($request->only(['name', 'description', 'is_active']));
@@ -93,8 +99,18 @@ class BadgeController extends Controller
         if ($request->hasFile('icon')) {
             $extension = $request->file('icon')->extension();
             $file_name = \Illuminate\Support\Str::slug($badge->name) . '-' . time() . '.' . $extension;
-            $path = $request->file('icon')->storeAs('badges', $file_name);
-            $badge->updateOrCreateImage($path, 'icon');
+            $path = $request->file('icon')->storeAs('badges', $file_name, config('filesystems.default'));
+            if ($badge->icon && !\Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->exists($badge->icon)) {
+                \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($badge->icon);
+            }
+            $badge->icon = $path;
+            $badge->save();
+        } elseif ($request->filled('icon_src')) {
+            if ($badge->icon && !filter_var($badge->icon, FILTER_VALIDATE_URL)) {
+                \Illuminate\Support\Facades\Storage::disk(config('filesystems.default'))->delete($badge->icon);
+            }
+            $badge->icon = $request->icon_src;
+            $badge->save();
         }
 
         return redirect()->route('admin.badges.index')->with('success', 'Badge updated successfully.');

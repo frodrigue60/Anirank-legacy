@@ -31,15 +31,13 @@ class SearchController extends Controller
         // Search Animes
         $animes = Anime::where('title', 'LIKE', "%{$query}%")
             ->select('id', 'title', 'slug')
-            ->with('images')
             ->limit($limit)
             ->get()
-            ->append('thumbnail_url');
+            ->append('cover_url');
 
         // Search Artists
         $artists = Artist::where('name', 'LIKE', "%{$query}%")
             ->select('id', 'name', 'slug')
-            ->with('images')
             ->limit($limit)
             ->get()
             ->append('avatar_url');
@@ -47,7 +45,6 @@ class SearchController extends Controller
         // Search Users
         $users = User::where('name', 'LIKE', "%{$query}%")
             ->select('id', 'name', 'slug')
-            ->with('images')
             ->limit($limit)
             ->get()
             ->append('avatar_url');

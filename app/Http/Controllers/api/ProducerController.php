@@ -86,7 +86,7 @@ class ProducerController extends Controller
             ->whereHas('producers', function ($query) use ($producer) {
                 $query->where('producers.id', $producer->id);
             })
-            ->with(['format:id,name', 'season:id,name', 'year:id,name', 'images'])
+            ->with(['format:id,name', 'season:id,name', 'year:id,name'])
             ->addSelect(['average_rating' => \App\Models\Rating::selectRaw('avg(rating)')
                 ->join('songs', 'songs.id', '=', 'ratings.rateable_id')
                 ->where('ratings.rateable_type', \App\Models\Song::class)
@@ -121,7 +121,7 @@ class ProducerController extends Controller
         $animes = $query->paginate(18);
 
         $animes->getCollection()->each(function ($anime) {
-            $anime->append('thumbnail_url');
+            $anime->append('cover_url');
             $anime->average_rating = (float) ($anime->average_rating ?? 0);
         });
 

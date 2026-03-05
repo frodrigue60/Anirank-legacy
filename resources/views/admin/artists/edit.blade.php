@@ -43,6 +43,53 @@
                                 placeholder="e.g. 織部 里沙">
                         </div>
                     </div>
+
+                    {{-- Avatar Section --}}
+                    <div class="space-y-6 pt-4">
+                        <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center">
+                            <span class="material-symbols-outlined mr-2 text-blue-500">image</span> ARTIST AVATAR
+                        </h3>
+
+                        <div class="flex flex-col md:flex-row gap-8 items-start">
+                            {{-- Preview --}}
+                            <div class="relative group">
+                                <div
+                                    class="w-24 h-24 rounded-2xl bg-zinc-950 border-2 border-zinc-800 flex items-center justify-center overflow-hidden group-hover:border-blue-500 transition-colors shadow-inner">
+                                    @if ($artist->avatar_url)
+                                        <img src="{{ $artist->avatar_url }}" alt="{{ $artist->name }}"
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <span class="material-symbols-outlined text-zinc-700 text-4xl">person</span>
+                                    @endif
+                                </div>
+                                <div
+                                    class="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full border-2 border-zinc-900 flex items-center justify-center shadow-lg">
+                                    <span
+                                        class="material-symbols-outlined text-white text-[14px]">published_with_changes</span>
+                                </div>
+                            </div>
+
+                            <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label for="avatar"
+                                        class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Upload New
+                                        File</label>
+                                    <input type="file" name="avatar" id="avatar" accept="image/*"
+                                        class="block w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:tracking-widest file:bg-zinc-800 file:text-zinc-300 hover:file:bg-zinc-700 file:transition-all cursor-pointer">
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label for="avatar_src"
+                                        class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Update
+                                        URL</label>
+                                    <input type="url" name="avatar_src" id="avatar_src"
+                                        value="{{ old('avatar_src', filter_var($artist->avatar, FILTER_VALIDATE_URL) ? $artist->avatar : '') }}"
+                                        class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12"
+                                        placeholder="https://example.com/image.jpg">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- Action --}}

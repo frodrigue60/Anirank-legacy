@@ -1,5 +1,5 @@
 <video:video>
-    <video:thumbnail_loc>{{ $video->thumbnailLoc }}</video:thumbnail_loc>
+    <video:thumbnail_loc>{{ $video->cover_urlLoc }}</video:thumbnail_loc>
     <video:title>{{ $video->title }}</video:title>
     <video:description>{{ $video->description }}</video:description>
 @if ($video->contentLoc)
@@ -21,3 +21,5 @@
     <video:tag>{{ $tag }}</video:tag>
 @endforeach
 </video:video>
+
+

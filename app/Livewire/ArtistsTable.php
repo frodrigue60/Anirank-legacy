@@ -63,7 +63,7 @@ class ArtistsTable extends Component
     {
 
         $query = Artist::query()
-            ->select(['id', 'name', 'slug'])
+            ->select(['id', 'name', 'slug', 'avatar'])
             ->withCount('songs');
 
         if ($this->name) {

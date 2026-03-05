@@ -66,13 +66,16 @@ class ArtistController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:50',
+            'name' => 'required|string|max:100', // Increased length just in case
+            'name_jp' => 'nullable|string|max:100',
+            'avatar' => 'nullable|image|max:2048',
+            'avatar_src' => 'nullable|url|max:255',
         ]);
 
         if ($validator->fails()) {
             return redirect()
                 ->back()
-                ->withInput($request->only(['name', 'name_jp']))
+                ->withInput()
                 ->withErrors($validator);
         }
 
@@ -89,9 +92,18 @@ class ArtistController extends Controller
 
         $artist->slug = $this->generateUniqueSlug($request->name);
 
+        if ($request->hasFile('avatar')) {
+            $path = $request->file('avatar')->store('artists', config('filesystems.default'));
+            $artist->avatar = $path;
+        } elseif ($request->filled('avatar_src')) {
+            $artist->avatar = $request->avatar_src;
+        }
+
         if ($artist->save()) {
-            // Automate avatar generation for new artists
-            $this->generateThumbnail($artist);
+            // Automate avatar generation for new artists ONLY if none was provided
+            if (!$artist->avatar) {
+                $this->generateThumbnail($artist);
+            }
 
             return redirect(route('admin.artists.index'))->with('success', 'Data has been inserted successfully');
         }
@@ -130,13 +142,16 @@ class ArtistController extends Controller
     public function update(Request $request, Artist $artist)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:50',
+            'name' => 'required|string|max:100',
+            'name_jp' => 'nullable|string|max:100',
+            'avatar' => 'nullable|image|max:2048',
+            'avatar_src' => 'nullable|url|max:255',
         ]);
 
         if ($validator->fails()) {
             return redirect()
                 ->back()
-                ->withInput($request->only(['name', 'name_jp']))
+                ->withInput()
                 ->withErrors($validator);
         }
 
@@ -146,6 +161,22 @@ class ArtistController extends Controller
         $artist->slug = $this->generateUniqueSlug($request->name);
 
         $artist->name_jp = $request->filled('name_jp') ? trim(preg_replace('/\s+/', ' ', $request->name_jp)) : null;
+
+        // Handle Avatar Update
+        if ($request->hasFile('avatar')) {
+            // Delete old file if it exists and is not a URL
+            if ($artist->avatar && !filter_var($artist->avatar, FILTER_VALIDATE_URL)) {
+                Storage::disk(config('filesystems.default'))->delete($artist->avatar);
+            }
+            $path = $request->file('avatar')->store('artists', config('filesystems.default'));
+            $artist->avatar = $path;
+        } elseif ($request->filled('avatar_src')) {
+            // Delete old file if it's not a URL
+            if ($artist->avatar && !filter_var($artist->avatar, FILTER_VALIDATE_URL)) {
+                Storage::disk(config('filesystems.default'))->delete($artist->avatar);
+            }
+            $artist->avatar = $request->avatar_src;
+        }
 
         if ($artist->save()) {
             return redirect(route('admin.artists.index'))->with('success', 'Data has been updated successfully');
@@ -180,9 +211,11 @@ class ArtistController extends Controller
 
                 Storage::disk(config('filesystems.default'))->put($path, $response->body());
                 
-                // Save as both types to ensure consistency across views
-                $artist->updateOrCreateImage($path, 'thumbnail');
-                $artist->updateOrCreateImage($path, 'avatar');
+                if ($artist->avatar && Storage::disk(config('filesystems.default'))->exists($artist->avatar)) {
+                    Storage::disk(config('filesystems.default'))->delete($artist->avatar);
+                }
+                $artist->avatar = $path;
+                $artist->save();
 
                 return true;
             }
@@ -199,9 +232,7 @@ class ArtistController extends Controller
     public function generateAllThumbnails()
     {
         // Get artists that don't have a thumbnail image
-        $artists = Artist::whereDoesntHave('images', function ($query) {
-            $query->where('type', 'thumbnail');
-        })->get();
+        $artists = Artist::whereNull('avatar')->get();
 
         $count = 0;
         foreach ($artists as $artist) {

@@ -156,7 +156,7 @@
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-10 h-14 bg-zinc-800 rounded-md overflow-hidden shrink-0 border border-zinc-700">
-                                                <img src="{{ $anime->thumbnail_url }}" alt=""
+                                                <img src="{{ $anime->cover_url }}" alt=""
                                                     class="w-full h-full object-cover">
                                             </div>
                                             <a href="{{ route('admin.animes.show', $anime->id) }}"
@@ -324,3 +324,5 @@
         }
     </style>
 @endpush
+
+

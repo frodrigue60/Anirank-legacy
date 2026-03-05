@@ -64,7 +64,7 @@ class StudiosTable extends Component
                 if (!Auth::check() || !Auth::user()->isStaff()) {
                     $query->where('status', true);
                 }
-                $query->select(['animes.id']);
+                $query->select(['animes.id', 'animes.banner', 'animes.cover']);
             }])
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%');

@@ -43,12 +43,12 @@
                 if (class_basename($act->target_type) === 'Song') {
                     $targetName = $target->name;
                     $animeTitle = $target->anime->title ?? '';
-                    $thumbnailUrl = $target->anime->thumbnail_url ?? null;
+                    $thumbnailUrl = $target->anime->cover_url ?? null;
                     $targetUrl = route('songs.show.nested', ['anime' => $target->anime->slug, 'song' => $target->slug]);
                 } elseif (class_basename($act->target_type) === 'SongVariant') {
                     $targetName = $target->song->name . ' (' . strtoupper($target->slug) . ')';
                     $animeTitle = $target->song->anime->title ?? '';
-                    $thumbnailUrl = $target->song->anime->thumbnail_url ?? null;
+                    $thumbnailUrl = $target->song->anime->cover_url ?? null;
                     $targetUrl = route('variants.show', [
                         'anime' => $target->song->anime->slug,
                         'song' => $target->song->slug,
@@ -147,3 +147,5 @@
         border-radius: 20px;
     }
 </style>
+
+

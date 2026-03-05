@@ -12,7 +12,8 @@
 
         {{-- Form Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8">
-            <form method="post" action="{{ route('admin.producers.update', $producer->id) }}" class="space-y-8">
+            <form method="post" action="{{ route('admin.producers.update', $producer->id) }}" class="space-y-8"
+                enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -31,6 +32,57 @@
                         @error('name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <label for="logo"
+                                    class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Logo
+                                    File</label>
+                                <input type="file" name="logo" id="logo"
+                                    class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm @error('logo') border-red-500 @enderror">
+                                @error('logo')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="logo_src"
+                                    class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Logo URL
+                                    (External)</label>
+                                <input type="url" name="logo_src" id="logo_src"
+                                    value="{{ old('logo_src', filter_var($producer->logo, FILTER_VALIDATE_URL) ? $producer->logo : '') }}"
+                                    class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12 @error('logo_src') border-red-500 @enderror"
+                                    placeholder="https://example.com/logo.png">
+                                @error('logo_src')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label
+                                class="block text-sm font-bold text-zinc-400 uppercase tracking-widest text-center">Current
+                                Logo</label>
+                            <div
+                                class="flex flex-col items-center justify-center p-4 bg-zinc-950/30 border border-zinc-800 rounded-3xl min-h-[150px]">
+                                @if ($producer->logo_url)
+                                    <img src="{{ $producer->logo_url }}"
+                                        class="max-w-[120px] max-h-[120px] rounded-xl object-contain shadow-lg"
+                                        alt="Current Logo">
+                                    <span
+                                        class="text-[10px] text-zinc-500 mt-2 font-mono break-all">{{ $producer->logo }}</span>
+                                @else
+                                    <div
+                                        class="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-600 border border-zinc-700">
+                                        <span class="material-symbols-outlined text-4xl">corporate_fare</span>
+                                    </div>
+                                    <span class="text-[10px] text-zinc-500 mt-2 uppercase font-black tracking-widest">No
+                                        logo assigned</span>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
 

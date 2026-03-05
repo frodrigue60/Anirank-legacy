@@ -51,7 +51,7 @@ class SongController extends Controller
                     'favorites as is_favorited' => fn ($q) => $q->where('user_id', $userId),
                 ]);
             })
-            ->with(['anime', 'anime.images', 'artists', 'artists.images', 'year', 'season'])
+            ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar', 'year', 'season'])
             ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
             ->when($sort === 'title', fn ($q) => $q->orderBy('song_romaji'))
@@ -61,7 +61,7 @@ class SongController extends Controller
 
         $songs->getCollection()->each(function ($song) {
             if ($song->anime) {
-                $song->anime->append('thumbnail_url');
+                $song->anime->append('cover_url');
                 $song->anime->append('banner_url');
             }
             if ($song->artists) {
@@ -101,11 +101,10 @@ class SongController extends Controller
     {
         Auth::guard('sanctum')->user(); // Populate user context for guest-accessible route
         $song->load([
-            'artists',
-            'artists.images',
+            'artists:id,name,slug,avatar',
             'year',
             'season',
-            'anime.images',
+            'anime:id,title,slug,cover,banner',
             'songVariants.video',
         ]);
 
@@ -118,7 +117,7 @@ class SongController extends Controller
             ]);
         }
 
-        $song->anime->append(['thumbnail_url', 'banner_url']);
+        $song->anime->append(['cover_url', 'banner_url']);
         $song->artists->each->append('avatar_url');
 
         // Transform videos to have correct URLs
@@ -133,7 +132,7 @@ class SongController extends Controller
         // Get related songs from the same series (YouTube style)
         $relatedSongs = Song::where('anime_id', $anime->id)
             ->where('id', '!=', $song->id)
-            ->with(['artists', 'artists.images'])
+            ->with(['artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->when(Auth::guard('sanctum')->check(), function ($q) {
                 $userId = Auth::guard('sanctum')->id();
@@ -341,7 +340,7 @@ class SongController extends Controller
         $sort = 'title';
         if ($currentSeason && $currentYear) {
 
-            $songs = Song::with(['anime', 'anime.images'])
+            $songs = Song::with(['anime:id,title,slug,cover,banner'])
                 ->where('type', $type)
                 ->when($currentSeason, function ($query, $currentSeason) {
                     $query->where('season_id', $currentSeason->id);
@@ -376,7 +375,7 @@ class SongController extends Controller
 
         $songs = Song::when($type, fn ($q) => $q->where('type', $type))
             ->whereHas('anime', fn ($q) => $q->where('status', $status))
-            ->with(['anime', 'anime.images', 'artists', 'artists.images'])
+            ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withUserInteractions()
             ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
@@ -385,7 +384,7 @@ class SongController extends Controller
 
         $songs->getCollection()->each(function ($item) {
             if (isset($item->anime)) {
-                $item->anime->append('thumbnail_url');
+                $item->anime->append('cover_url');
             }
             if (isset($item->artists)) {
                 $item->artists->each->append('avatar_url');
@@ -417,7 +416,7 @@ class SongController extends Controller
                     ->when($currentSeason, fn ($q) => $q->where('season_id', $currentSeason->id))
                     ->when($currentYear, fn ($q) => $q->where('year_id', $currentYear->id));
             })
-            ->with(['anime', 'anime.images', 'artists', 'artists.images'])
+            ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withUserInteractions()
             ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
@@ -426,7 +425,7 @@ class SongController extends Controller
 
         $songs->getCollection()->each(function ($item) {
             if (isset($item->anime)) {
-                $item->anime->append('thumbnail_url');
+                $item->anime->append('cover_url');
             }
             if (isset($item->artists)) {
                 $item->artists->each->append('avatar_url');

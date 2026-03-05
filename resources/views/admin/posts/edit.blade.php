@@ -107,15 +107,15 @@
                             <div class="space-y-2">
                                 <label for="thumbnail_src" class="block text-sm font-bold text-zinc-400">Thumbnail
                                     URL</label>
-                                @if ($anime->images()->where('type', 'thumbnail')->exists())
+                                @if ($anime->cover)
                                     <div
                                         class="w-20 h-28 bg-zinc-800 rounded-xl overflow-hidden mb-2 border border-zinc-700">
-                                        <img src="{{ $anime->thumbnail_url }}" alt=""
+                                        <img src="{{ $anime->cover_url }}" alt=""
                                             class="w-full h-full object-cover">
                                     </div>
                                 @endif
                                 <input type="text" name="thumbnail_src" id="thumbnail_src"
-                                    value="{{ old('thumbnail_src', $anime->thumbnail_src) }}"
+                                    value="{{ old('thumbnail_src', filter_var($anime->cover, FILTER_VALIDATE_URL) ? $anime->cover : '') }}"
                                     class="block w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
                                     placeholder="https://...">
                             </div>
@@ -131,8 +131,15 @@
                         <div class="space-y-4">
                             <div class="space-y-2">
                                 <label for="banner_src" class="block text-sm font-bold text-zinc-400">Banner URL</label>
+                                @if ($anime->banner)
+                                    <div
+                                        class="w-full h-24 bg-zinc-800 rounded-xl overflow-hidden mb-2 border border-zinc-700">
+                                        <img src="{{ $anime->banner_url }}" alt=""
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                @endif
                                 <input type="text" name="banner_src" id="banner_src"
-                                    value="{{ old('banner_src', $anime->images()->where('type', 'banner')->exists() ? '' : $anime->banner_src) }}"
+                                    value="{{ old('banner_src', filter_var($anime->banner, FILTER_VALIDATE_URL) ? $anime->banner : '') }}"
                                     class="block w-full bg-zinc-900 border border-zinc-800 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm"
                                     placeholder="https://...">
                             </div>
