@@ -17,7 +17,11 @@
                 $iconBg = 'bg-white/5';
                 $actionText = 'interacted with';
 
-                if ($act->action_type === 'favorite') {
+                if (
+                    $act->action_type === 'favorite' ||
+                    $act->action_type === 'favorite_song' ||
+                    $act->action_type === 'favorite_artist'
+                ) {
                     $icon = 'favorite';
                     $iconColor = 'text-red-400';
                     $iconBg = 'bg-red-400/10';
@@ -40,12 +44,14 @@
                 $animeTitle = '';
                 $thumbnailUrl = null;
 
-                if (class_basename($act->target_type) === 'Song') {
-                    $targetName = $target->name;
+                if ($act->target_type === 'song') {
+                    $targetName = $target->name ?? 'Unknown Song';
                     $animeTitle = $target->anime->title ?? '';
                     $thumbnailUrl = $target->anime->cover_url ?? null;
-                    $targetUrl = route('songs.show.nested', ['anime' => $target->anime->slug, 'song' => $target->slug]);
-                } elseif (class_basename($act->target_type) === 'SongVariant') {
+                    $targetUrl = isset($target->anime)
+                        ? route('songs.show.nested', ['anime' => $target->anime->slug, 'song' => $target->slug])
+                        : '#';
+                } elseif ($act->target_type === 'song_variant') {
                     $targetName = $target->song->name . ' (' . strtoupper($target->slug) . ')';
                     $animeTitle = $target->song->anime->title ?? '';
                     $thumbnailUrl = $target->song->anime->cover_url ?? null;
@@ -54,6 +60,11 @@
                         'song' => $target->song->slug,
                         'variant' => $target->slug,
                     ]);
+                } elseif ($act->target_type === 'artist') {
+                    $targetName = $target->name ?? 'Unknown Artist';
+                    $animeTitle = 'Artist';
+                    $thumbnailUrl = $target->avatar_url ?? null;
+                    $targetUrl = route('artists.show', ['artist' => $target->slug ?? $target->id]);
                 }
             @endphp
 
@@ -147,5 +158,3 @@
         border-radius: 20px;
     }
 </style>
-
-

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
-use App\Models\Reaction;
 use App\Models\Song;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,8 +36,7 @@ class CommentController extends Controller
         $comment = Comment::create([
             'content' => $validatedData['content'],
             'user_id' => Auth::id(),
-            'commentable_id' => $validatedData['song_id'],
-            'commentable_type' => Song::class,
+            'song_id' => $validatedData['song_id'],
         ]);
 
         return response()->json($comment->load('user'), 201);
@@ -99,24 +97,20 @@ class CommentController extends Controller
     {
         $user = Auth::user();
 
-        $reaction = Reaction::where('user_id', $user->id)
-            ->where('reactable_id', $comment->id)
-            ->where('reactable_type', Comment::class)
-            ->first();
+        // Usar la relación pivot para manejar la reacción
+        $existing = $comment->reactions()->where('user_id', $user->id)->first();
 
-        if ($reaction) {
-            if ($reaction->type === $type) {
-                $reaction->delete();
+        if ($existing) {
+            if ($existing->pivot->type === $type) {
+                // Toggle off
+                $comment->reactions()->detach($user->id);
             } else {
-                $reaction->update(['type' => $type]);
+                // Update type
+                $comment->reactions()->updateExistingPivot($user->id, ['type' => $type]);
             }
         } else {
-            Reaction::create([
-                'user_id' => $user->id,
-                'reactable_id' => $comment->id,
-                'reactable_type' => Comment::class,
-                'type' => $type,
-            ]);
+            // New reaction
+            $comment->reactions()->attach($user->id, ['type' => $type]);
         }
     }
 
@@ -140,8 +134,7 @@ class CommentController extends Controller
             'content' => $request->content,
             'user_id' => Auth::id(),
             'parent_id' => $comment->id,
-            'commentable_type' => $comment::class,
-            'commentable_id' => $comment->id,
+            'song_id' => $comment->song_id,
         ]);
 
         return response()->json([

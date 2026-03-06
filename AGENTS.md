@@ -8,9 +8,9 @@
 
 1.  **Anime Theme Database**: A comprehensive catalog of anime openings and endings, fetched and synchronized from external APIs (like AniList).
 2.  **Rating System**: Users can rate songs on a 5-star scale. Ratings are stored per-user and an average is calculated for each song variant.
-3.  **Likes/Dislikes & Favorites**: A like/dislike reaction system and favorites list for registered users.
+3.  **Likes/Dislikes & Favorites**: A dedicated reaction system (likes/dislikes) and favorites for songs and artists.
 4.  **Playlists**: Users can create public or private playlists to organize their favorite themes.
-5.  **Comments**: A polymorphic comment system allows users to comment on any song or variant.
+5.  **Comments**: A comment system allows users to comment on any song.
 6.  **Seasonal Browsing**: Browse anime themes by season (e.g., Winter 2024) and year.
 7.  **Rankings**: View top-rated and most-viewed openings and endings.
 
@@ -140,9 +140,10 @@ To ensure maximum perceived performance and minimal server load, all discovery t
 
 The Homepage `ActivityFeed` (combining favorites, ratings, and comments) demonstrates advanced Eloquent and Livewire performance optimization:
 
-1. **Unified Timelines**: Uses raw `DB::table()->unionAll()` instead of processing multiple independent collections in PHP to establish chronological truth at the database level.
-2. **Selective Hydration**: Maps over the raw UNION rows to gather unique `user_id` and polymorphic `target_id`s, generating bulk constraints (`whereIn`) to eagerly load the exact relations (`User`, `Song`, `SongVariant`) required without any N+1 overhead.
-3. **Non-blocking Execution**: The component strictly uses `#[Lazy]`. The computationally heavy global UNION query is only dispatched asynchronously _after_ the initial `home.blade.php` DOM paints, guaranteeing zero impact on Time-to-First-Byte (TTFB).
+1. **Centralized Log Table**: Uses a dedicated `activities` table instead of complex UNION queries. This provides a single source of truth for chronological site activity.
+2. **Agnostic Polymorphism**: To ensure compatibility with non-PHP backends (Go, Node.js), `target_type` uses generic identifiers like `song` or `artist` instead of full PHP class names.
+3. **Automatic Synchronization**: Uses Eloquent model observers (`static::saved`, `static::deleted`) in `Rating`, `Comment`, `Song`, and `Artist` to automatically keep the activity log in sync with business logic actions.
+4. **Non-blocking Execution**: The component uses `#[Lazy]` and `loadMissing()` for nested relations (`anime`), guaranteeing fast initial page loads and efficient data hydration.
 
 ---
 
@@ -191,7 +192,7 @@ This section provides detailed documentation for all Eloquent models in `app/Mod
 
 ---
 
-### `Post`
+### `Anime`
 
 Represents an **anime series**.
 
@@ -229,7 +230,7 @@ Represents an **anime genre** (e.g., Action, Romance, Sci-Fi).
 
 **Relationships:**
 
-- `belongsToMany` → `Post`
+- `belongsToMany` → `Anime`
 
 ---
 
@@ -237,25 +238,27 @@ Represents an **anime genre** (e.g., Action, Romance, Sci-Fi).
 
 Represents a **theme song** (Opening or Ending) associated with a Post.
 
-| Field         | Type   | Description                                |
-| ------------- | ------ | ------------------------------------------ |
-| `song_romaji` | string | Romanized song title (nullable).           |
-| `song_jp`     | string | Japanese song title (nullable).            |
-| `song_en`     | string | English song title (nullable).             |
-| `theme_num`   | string | Theme number (e.g., "1" for OP1).          |
-| `type`        | enum   | `OP`, `ED`, `INS` (Insert), `OTH` (Other). |
-| `slug`        | string | URL-friendly identifier.                   |
-| `views`       | bigint | View counter.                              |
-| `post_id`     | FK     | References `posts.id`.                     |
-| `year_id`     | FK     | References `years.id`.                     |
-| `season_id`   | FK     | References `seasons.id`.                   |
+| Field            | Type   | Description                                |
+| ---------------- | ------ | ------------------------------------------ |
+| `song_romaji`    | string | Romanized song title (nullable).           |
+| `song_jp`        | string | Japanese song title (nullable).            |
+| `song_en`        | string | English song title (nullable).             |
+| `theme_num`      | string | Theme number (e.g., "1" for OP1).          |
+| `type`           | enum   | `OP`, `ED`, `INS` (Insert), `OTH` (Other). |
+| `slug`           | string | URL-friendly identifier.                   |
+| `likes_count`    | bigint | Denormalized likes counter.                |
+| `dislikes_count` | bigint | Denormalized dislikes counter.             |
+| `post_id`        | FK     | References `animes.id`.                    |
+| `year_id`        | FK     | References `years.id`.                     |
+| `season_id`      | FK     | References `seasons.id`.                   |
 
 **Relationships:**
 
-- `belongsTo` → `Post`, `Year`, `Season`
-- `hasMany` → `SongVariant`, `RankingHistory`
+- `belongsTo` → `Anime`, `Year`, `Season`
+- `hasMany` → `SongVariant`, `RankingHistory`, `Comment`, `Rating`
 - `belongsToMany` → `Artist`, `Playlist`
-- Polymorphic: `morphMany` → `Comment`, `Reaction`, `Favorite`
+- `belongsToMany` (Reactions) → `User` via `song_reactions` (pivot includes `type`).
+- `belongsToMany` (Favorites) → `User` via `song_user`.
 
 **Trait:** Uses `Rateable` for star ratings.
 
@@ -290,8 +293,7 @@ Represents a **specific version** of a song (e.g., V1, V2, Creditless, Spoiler).
 
 - `belongsTo` → `Song`, `Year`, `Season`
 - `hasOne` → `Video`
-- Polymorphic: `morphMany` → `Comment`, `Reaction`, `Favorite`, `Report`
-- `morphOne` → `ReactionCounter`
+- `hasMany` → `Report`
 
 **Trait:** Uses `Rateable` for star ratings.
 
@@ -337,6 +339,7 @@ Represents a **musician or band**.
 **Relationships:**
 
 - `belongsToMany` → `Song`
+- `belongsToMany` (Favorites) → `User` via `artist_user`.
 - `morphMany` → `Image` (via `HasImages` trait)
 
 ---
@@ -357,7 +360,7 @@ Polymorphic storage for all media assets (Post covers/banners, Artist thumbnails
 
 **Relationships:**
 
-- `morphTo` → `imageable` (Post, Artist, or User).
+- `morphTo` → `imageable` (Anime, Artist, or User).
 
 ---
 
@@ -365,21 +368,26 @@ Polymorphic storage for all media assets (Post covers/banners, Artist thumbnails
 
 Standard Laravel user model with extensions.
 
-| Field           | Type     | Description                                   |
-| --------------- | -------- | --------------------------------------------- |
-| `name`          | string   | User's display name.                          |
-| `email`         | string   | User's email address.                         |
-| `password`      | string   | Hashed password.                              |
-| `roles`         | M:M      | Many-to-Many relationship with `Role` model.  |
-| `score_format`  | string   | User's preferred rating display format.       |
-| `last_login_at` | datetime | Timestamp of the user's most recent activity. |
-| `slug`          | string   | URL-friendly identifier.                      |
+| Field             | Type     | Description                                   |
+| ----------------- | -------- | --------------------------------------------- |
+| `name`            | string   | User's display name.                          |
+| `email`           | string   | User's email address.                         |
+| `password`        | string   | Hashed password.                              |
+| `roles`           | M:M      | Many-to-Many relationship with `Role` model.  |
+| `score_format_id` | FK       | References `score_formats.id`.                |
+| `last_login_at`   | datetime | Timestamp of the user's most recent activity. |
+| `slug`            | string   | URL-friendly identifier.                      |
 
 **Trait:** Uses `HasImages`.
 
 **Relationships:**
 
-- `hasMany` → `UserRequest`, `Comment`, `Favorite`, `Reaction`, `Playlist`
+- `hasMany` → `UserRequest`, `Comment`, `Playlist`, `Rating`
+- `belongsTo` → `ScoreFormat`
+- `belongsToMany` (Song Reactions) → `Song` via `song_reactions`.
+- `belongsToMany` (Comment Reactions) → `Comment` via `comment_reactions`.
+- `belongsToMany` (Song Favorites) → `Song` via `song_user`.
+- `belongsToMany` (Artist Favorites) → `Artist` via `artist_user`.
 - `morphMany` → `Image` (alias via `images()`)
 
 **Key Methods:**
@@ -446,20 +454,16 @@ Tracks daily ranking positions for both global and seasonal rankings.
 
 Polymorphic comment system with nested replies.
 
-| Field              | Type   | Description                              |
-| ------------------ | ------ | ---------------------------------------- |
-| `content`          | text   | The comment text.                        |
-| `user_id`          | FK     | References `users.id`.                   |
-| `commentable_id`   | bigint | Polymorphic ID (Song or SongVariant).    |
-| `commentable_type` | string | Polymorphic type.                        |
-| `parent_id`        | FK     | Self-referencing for replies (nullable). |
+| Field            | Type   | Description                    |
+| ---------------- | ------ | ------------------------------ |
+| `likes_count`    | bigint | Denormalized likes counter.    |
+| `dislikes_count` | bigint | Denormalized dislikes counter. |
 
 **Relationships:**
 
-- `belongsTo` → `User`
-- `morphTo` → `commentable` (Song or SongVariant)
+- `belongsTo` → `User`, `Song`
 - `hasMany` → `replies` (self-referencing)
-- Polymorphic: `morphMany` → `Reaction`
+- `belongsToMany` (Reactions) → `User` via `comment_reactions`.
 
 ---
 
@@ -481,44 +485,25 @@ User-created playlists.
 
 ---
 
-### Polymorphic Models
+### `Rating` (Agnostic)
 
-#### `Rating` (via `Rateable` Trait)
+Stores user ratings for Songs. Polimorphism removed for DB independence.
 
-Stores user star ratings for Songs and SongVariants.
-
-- `rateable_id`, `rateable_type` → Polymorphic target.
+- `song_id` → FK to songs.
 - `user_id` → The user who rated.
-- `rating` → The numeric score.
-
-#### `Reaction`
-
-Stores likes (`type = 1`) and dislikes (`type = -1`).
-
-- `reactable_id`, `reactable_type` → Polymorphic target (Song, SongVariant, Comment).
-- `user_id` → The user who reacted.
-
-#### `ReactionCounter`
-
-Caches the total `likes_count` and `dislikes_count` for a reactable entity to avoid N+1 queries.
-
-#### `Favorite`
-
-Marks an entity as favorited by a user.
-
-- `favoritable_id`, `favoritable_type` → Polymorphic target (Song, SongVariant).
-- `user_id` → The user who favorited.
+- `rating` → The numeric score (1-100).
+- `created_at`, `updated_at` → Managed by MySQL (Agnostic).
 
 ---
 
 ### Supporting Models
 
-| Model      | Purpose                                                                                    |
-| ---------- | ------------------------------------------------------------------------------------------ |
-| `Year`     | Represents a year (e.g., 2024). Has many Posts, Songs.                                     |
-| `Season`   | Represents a season (Winter, Spring, Summer, Fall).                                        |
-| `Studio`   | Animation studio (creative). Many-to-many with Post. Auto-generates `slug` on `creating`.  |
-| `Producer` | Production company/committee. Many-to-many with Post. Auto-generates `slug` on `creating`. |
+| Model      | Purpose                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------- |
+| `Year`     | Represents a year (e.g., 2024). Has many Posts, Songs.                                      |
+| `Season`   | Represents a season (Winter, Spring, Summer, Fall).                                         |
+| `Studio`   | Animation studio (creative). Many-to-many with Anime. Auto-generates `slug` on `creating`.  |
+| `Producer` | Production company/committee. Many-to-many with Anime. Auto-generates `slug` on `creating`. |
 
 ### `Badge`
 
@@ -618,31 +603,34 @@ User-submitted requests (e.g., "add this anime").
 
 ## Key Relationships Diagram
 
-```
 ┌────────────────────────────────────────────────────────────────────┐
-│                              User                                  │
-│  ├─► Playlist ───► Song (M:M)                                      │
-│  ├─► Favorite ───► Song | SongVariant (Polymorphic)                │
-│  ├─► Reaction ───► Song | SongVariant | Comment (Polymorphic)      │
-│  ├─► Rating   ───► Song | SongVariant (Polymorphic via Rateable)   │
-│  └─► Comment  ───► Song | SongVariant (Polymorphic)                │
+│ User │
+│ ├─► Playlist ───► Song (M:M) │
+│ ├─► song_user ───► Song (M:M Favorites) │
+│ ├─► artist_user ──► Artist (M:M Favorites) │
+│ ├─► song_reactions ──► Song (M:M Likes/Dislikes) │
+│ ├─► comment_reactions ──► Comment (M:M Likes/Dislikes) │
+│ ├─► Rating ───► Song (Direct Relationship) │
+│ ├─► ScoreFormat ◄── User (Reference Table) │
+│ └─► Comment ───► Song (1:N) │
 └────────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────────────────────┐
-│                              Post (Anime)                          │
-│  ├─► Song (1:N)                                                    │
-│  │     └─► SongVariant (1:N)                                       │
-│  │           └─► Video (1:1)                                       │
-│  ├─► Year, Season, Format (N:1)                                    │
-│  └─► Studio, ExternalLink (M:M)                                    │
+│ Anime │
+│ ├─► Song (1:N) │
+│ │ └─► SongVariant (1:N) │
+│ │ └─► Video (1:1) │
+│ ├─► Year, Season, Format (N:1) │
+│ └─► Studio, ExternalLink (M:M) │
 └────────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────────────────────┐
-│                              Song                                  │
-│  ├─► Artist (M:M)                                                  │
-│  └─► Playlist (M:M)                                                │
+│ Song │
+│ ├─► Artist (M:M) │
+│ ├─► Playlist (M:M) │
+│ ├─► Rating (1:N) │
+│ └─► Comment (1:N) │
 └────────────────────────────────────────────────────────────────────┘
-```
 
 ---
 
@@ -656,11 +644,9 @@ This section provides detailed documentation for all public controllers in `app/
 
 Handles the homepage and anime detail pages.
 
-| Method        | Route               | Description                                        |
-| ------------- | ------------------- | -------------------------------------------------- |
-| `index()`     | `GET /`             | Homepage: Top openings, top endings, recent songs. |
-| `show($slug)` | `GET /anime/{slug}` | Anime detail page with openings and endings list.  |
-| `animes()`    | `GET /animes`       | Filter/paginate anime series.                      |
+| `index()` | `GET /` | Homepage: Top openings, top endings, recent songs. |
+| `show($slug)` | `GET /anime/{slug}` | Anime detail page with openings and endings list. |
+| `animes()` | `GET /animes` | Filter/paginate anime series. |
 
 **Key Helper Methods:**
 
@@ -685,6 +671,7 @@ Handles song detail pages and seasonal/ranking views.
 - `setScoreSong($song, $user)` → Attaches rating data to a single song.
 - `getUserRating($song_id, $user_id)` → Gets the user's rating for a song.
 - `formatScoreString($score, $format, $denominator)` → Formats rating for display.
+- `scopeWithUserInteractions($query)` → Eager loads `liked`, `disliked`, and `is_favorited` states.
 
 ---
 
@@ -696,15 +683,15 @@ Handles the video player page and user interactions (rating, likes, favorites).
 | ------------------------------- | -------------------------------------------------- | -------------------------------------------- |
 | `show($anime, $song, $variant)` | `GET /anime/{anime}/song/{song}/variant/{variant}` | Video player page with comments and ratings. |
 | `rate(Request, $variant_id)`    | `POST /variants/{id}/rate`                         | Submit or update a star rating.              |
-| `like($id)`                     | `POST /variants/{id}/like`                         | Toggle like on a variant.                    |
-| `dislike($id)`                  | `POST /variants/{id}/dislike`                      | Toggle dislike on a variant.                 |
-| `toggleFavorite($id)`           | `POST /variants/{id}/favorite`                     | Toggle favorite status.                      |
+| `like(SongVariant)`             | `POST /variants/{id}/like`                         | Toggle like on the parent Song.              |
+| `dislike(SongVariant)`          | `POST /variants/{id}/dislike`                      | Toggle dislike on the parent Song.           |
+| `toggleFavorite(SongVariant)`   | `POST /variants/{id}/favorite`                     | Toggle favorite status on the parent Song.   |
 | `ranking()`                     | `GET /ranking/variants`                            | Top-rated variants.                          |
 | `seasonal(Request)`             | `GET /seasonal/variants`                           | Seasonal variants view.                      |
 
 **Key Helper Methods:**
 
-- `handleReaction($songVariant, $type)` → Manages like/dislike logic (toggle or switch).
+- `handleReaction(Song $song, int $type)` → Manages like/dislike logic using `song_reactions` pivot.
 - `setScoreOnlyOneVariant($variant, $user)` → Attaches full rating data to one variant.
 
 ---
@@ -771,8 +758,8 @@ Handles commenting on songs and variants.
 | `store(Request)`           | `POST /comments`              | Create a new comment on a SongVariant.   |
 | `update(Request, Comment)` | `PUT /comments/{comment}`     | Update an existing comment (owner only). |
 | `destroy(Comment)`         | `DELETE /comments/{comment}`  | Delete a comment (owner or staff).       |
-| `like($id)`                | `POST /comments/{id}/like`    | Toggle like on a comment.                |
-| `dislike($id)`             | `POST /comments/{id}/dislike` | Toggle dislike on a comment.             |
+| `like(Comment)`            | `POST /comments/{id}/like`    | Toggle like on a comment (M:M).          |
+| `dislike(Comment)`         | `POST /comments/{id}/dislike` | Toggle dislike on a comment (M:M).       |
 | `reply(Request, Comment)`  | `POST /comments/{id}/reply`   | Reply to an existing comment (nested).   |
 
 ---
@@ -1320,18 +1307,18 @@ External links (MAL, AniList, YouTube).
 
 ### User Interaction Tables
 
-#### `ratings`
+#### `song_ratings`
 
-User ratings (polymorphic).
+User ratings for songs (Agnostic).
 
-| Column          | Type         | Description             |
-| --------------- | ------------ | ----------------------- |
-| `id`            | `int` (PK)   | Primary key             |
-| `rating`        | `int`        | Rating score (1-100)    |
-| `rateable_id`   | `bigint`     | Polymorphic target ID   |
-| `rateable_type` | `string`     | Polymorphic target type |
-| `user_id`       | `FK → users` | User who rated          |
-| `timestamps`    | `datetime`   | Created/updated at      |
+| Column       | Type          | Description           |
+| ------------ | ------------- | --------------------- |
+| `id`         | `bigint` (PK) | Primary key           |
+| `rating`     | `int`         | Rating score (1-100)  |
+| `song_id`    | `bigint`      | References `songs.id` |
+| `user_id`    | `FK → users`  | User who rated        |
+| `created_at` | `datetime`    | Managed by MySQL      |
+| `updated_at` | `datetime`    | Managed by MySQL      |
 
 **Rateable Types:** `Song`, `SongVariant`
 

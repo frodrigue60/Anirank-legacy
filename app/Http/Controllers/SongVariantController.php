@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anime;
-use App\Models\Favorite;
-use App\Models\Reaction;
-use App\Models\Season;
 use App\Models\Song;
 use App\Models\SongVariant;
-use App\Models\User;
+use App\Models\Season;
 use App\Models\Year;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -177,7 +175,6 @@ class SongVariantController extends Controller
 
         $songVariant = SongVariant::where('slug', $variantSlug)
             ->where('song_id', $song->id)
-            ->with('reactionsCounter')
             ->firstOrFail();
 
         // dd($songVariant);
@@ -277,7 +274,7 @@ class SongVariantController extends Controller
             // Validar el rango del score
             if ($score >= 1 && $score <= 100) {
                 // Utilizar el score ajustado
-                $songVariant->rateOnce($score, Auth::User()->id);
+                $songVariant->song->rate($score, Auth::User()->id);
 
                 return redirect()->back()->with('success', 'Rated Successfully');
             } else {
@@ -288,63 +285,53 @@ class SongVariantController extends Controller
         }
     }
 
-    public function getUserRating(SongVariant $variant, User $user)
+    public function getUserRating($variantId, $userId)
     {
-        $songVariant = $variant;
-        $userRating = DB::table('ratings')
-            ->where('rateable_type', SongVariant::class)
-            ->where('rateable_id', $songVariant->id)
-            ->where('user_id', $user->id)
-            ->first(['rating']);
+        $variant = SongVariant::find($variantId);
+        if (!$variant) return null;
 
-        return $userRating;
+        return DB::table('song_ratings')
+            ->where('song_id', $variant->song_id)
+            ->where('user_id', $userId)
+            ->first(['rating']);
     }
 
     public function like(SongVariant $variant)
     {
-        $songVariant = $variant;
-        $this->handleReaction($songVariant, 1); // 1 para like
-        $songVariant->updateReactionCounters(); // Actualiza los contadores manualmente
+        $song = $variant->song;
+        $this->handleReaction($song, 1); // 1 para like
+        $song->updateReactionCounters();
 
-        return redirect()->back(); // Redirige de vuelta a la página anterior
+        return redirect()->back();
     }
 
     public function dislike(SongVariant $variant)
     {
-        $songVariant = $variant;
-        $this->handleReaction($songVariant, -1); // -1 para dislike
-        $songVariant->updateReactionCounters(); // Actualiza los contadores manualmente
+        $song = $variant->song;
+        $this->handleReaction($song, -1); // -1 para dislike
+        $song->updateReactionCounters();
 
-        return redirect()->back(); // Redirige de vuelta a la página anterior
+        return redirect()->back();
     }
 
-    private function handleReaction(SongVariant $variant, int $type)
+    private function handleReaction(Song $song, int $type)
     {
-        $songVariant = $variant;
         $user = Auth::user();
 
-        // Buscar si ya existe una reacción del usuario para este anime
-        $reaction = Reaction::where('user_id', $user->id)
-            ->where('reactable_id', $songVariant->id)
-            ->where('reactable_type', SongVariant::class)
-            ->first();
+        // Usar la relación pivot para manejar la reacción
+        $existing = $song->reactions()->where('user_id', $user->id)->first();
 
-        if ($reaction) {
-            if ($reaction->type === $type) {
-                // Si la reacción es la misma, eliminarla (toggle)
-                $reaction->delete();
+        if ($existing) {
+            if ($existing->pivot->type === $type) {
+                // Toggle off
+                $song->reactions()->detach($user->id);
             } else {
-                // Si la reacción es diferente, actualizarla
-                $reaction->update(['type' => $type]);
+                // Update type
+                $song->reactions()->updateExistingPivot($user->id, ['type' => $type]);
             }
         } else {
-            // Si no existe una reacción, crear una nueva
-            Reaction::create([
-                'user_id' => $user->id,
-                'reactable_id' => $songVariant->id,
-                'reactable_type' => SongVariant::class,
-                'type' => $type,
-            ]);
+            // New reaction
+            $song->reactions()->attach($user->id, ['type' => $type]);
         }
     }
 
@@ -461,33 +448,16 @@ class SongVariantController extends Controller
 
     public function toggleFavorite(SongVariant $variant)
     {
-        $songVariant = $variant;
-
         if (! Auth::check()) {
             return redirect()->back()->with('warning', 'Please login');
         }
 
         $user = Auth::user();
+        $song = $variant->song;
+        $results = $song->favorites()->toggle($user->id);
+        $isFavorite = count($results['attached']) > 0;
 
-        // Verificar si el tema ya está en favoritos
-        $favorite = Favorite::where('user_id', $user->id)
-            ->where('favoritable_id', $songVariant->id)
-            ->where('favoritable_type', SongVariant::class)
-            ->first();
-
-        if ($favorite) {
-            $favorite->delete();
-
-            return redirect()->back()->with('success', 'Theme removed to favorites');
-        } else {
-            Favorite::create([
-                'user_id' => $user->id,
-                'favoritable_id' => $songVariant->id,
-                'favoritable_type' => SongVariant::class,
-            ]);
-
-            return redirect()->back()->with('success', 'Theme added to favorites');
-        }
+        return redirect()->back()->with('success', $isFavorite ? 'Song added to favorites' : 'Song removed from favorites');
     }
 
     public function ranking()

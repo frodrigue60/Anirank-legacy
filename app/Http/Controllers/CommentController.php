@@ -6,7 +6,6 @@ use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Models\SongVariant;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Reaction;
 
 class CommentController extends Controller
 {
@@ -38,18 +37,16 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-        //dd($request->all());
         $user = Auth::User();
 
         $validatedData = $request->validate([
             'content' => 'required',
+            'song_id' => 'required|exists:songs,id',
         ]);
-
-        $songVariant = SongVariant::findOrFail($request->song_variant_id);
 
         $comment = new Comment($validatedData);
         $comment->user_id = $user->id;
-        $songVariant->comments()->save($comment);
+        $comment->save();
 
         return redirect()->back()->with('status', '¡Comentario añadido con éxito!');
     }
@@ -86,15 +83,14 @@ class CommentController extends Controller
     public function update(Request $request, Comment $comment)
     {
         $user = Auth::User();
-        dd(
-            $request->all(),
-            $comment,
-            $user,
-        );
+        // dd(
+        //     $request->all(),
+        //     $comment,
+        //     $user,
+        // );
 
         $validatedData = $request->validate([
             'content' => 'required',
-            'user_id' => $user->id,
         ]);
 
         $comment->update($validatedData);
@@ -139,28 +135,20 @@ class CommentController extends Controller
     {
         $user = Auth::user();
 
-        // Buscar si ya existe una reacción del usuario para este anime
-        $reaction = Reaction::where('user_id', $user->id)
-            ->where('reactable_id', $comment->id)
-            ->where('reactable_type', Comment::class)
-            ->first();
+        // Usar la relación pivot para manejar la reacción
+        $existing = $comment->reactions()->where('user_id', $user->id)->first();
 
-        if ($reaction) {
-            if ($reaction->type === $type) {
-                // Si la reacción es la misma, eliminarla (toggle)
-                $reaction->delete();
+        if ($existing) {
+            if ($existing->pivot->type === $type) {
+                // Toggle off
+                $comment->reactions()->detach($user->id);
             } else {
-                // Si la reacción es diferente, actualizarla
-                $reaction->update(['type' => $type]);
+                // Update type
+                $comment->reactions()->updateExistingPivot($user->id, ['type' => $type]);
             }
         } else {
-            // Si no existe una reacción, crear una nueva
-            Reaction::create([
-                'user_id' => $user->id,
-                'reactable_id' => $comment->id,
-                'reactable_type' => Comment::class,
-                'type' => $type,
-            ]);
+            // New reaction
+            $comment->reactions()->attach($user->id, ['type' => $type]);
         }
     }
 
@@ -172,8 +160,7 @@ class CommentController extends Controller
             $comment->replies()->create([
                 'content' => $request->content,
                 'user_id' => Auth::id(),
-                'commentable_type' => $comment->commentable_type,
-                'commentable_id' => $comment->commentable_id,
+                'song_id' => $comment->song_id,
             ]);
 
             return back()->with('success', 'Respuesta enviada.');

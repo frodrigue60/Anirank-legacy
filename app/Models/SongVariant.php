@@ -59,15 +59,13 @@ class SongVariant extends Model
         return $this->belongsTo(Season::class);
     }
 
-    public function favorites()
+    public function getAverageRatingAttribute()
     {
-        return $this->morphMany(Favorite::class, 'favoritable');
+        return $this->song->average_rating;
     }
 
-    public function scopeFavoritedBy($query, $userId)
+    public function comments()
     {
-        return $query->whereHas('favorites', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        });
+        return $this->hasMany(Comment::class, 'song_id', 'song_id');
     }
 }

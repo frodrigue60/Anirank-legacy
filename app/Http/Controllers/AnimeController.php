@@ -49,9 +49,7 @@ class AnimeController extends Controller
             ->take(25)
             ->get();
 
-        $openings = Song::with(['anime' => function ($q) {
-            $q->select('id', 'title', 'slug', 'cover', 'banner');
-        }, 'artists:id,name,slug,avatar'])
+        $openings = Song::with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'OP')
             ->whereHas('anime', function ($q) use ($status) {
@@ -61,9 +59,7 @@ class AnimeController extends Controller
             ->take(3)
             ->get();
 
-        $endings = Song::with(['anime' => function ($q) {
-            $q->select('id', 'title', 'slug', 'cover', 'banner');
-        }, 'artists:id,name,slug,avatar'])
+        $endings = Song::with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->where('type', 'ED')
             ->whereHas('anime', function ($q) use ($status) {
@@ -313,9 +309,8 @@ class AnimeController extends Controller
 
     public function getUserRating($songId, $userId)
     {
-        return DB::table('ratings')
-            ->where('rateable_type', Song::class)
-            ->where('rateable_id', $songId)
+        return DB::table('song_ratings')
+            ->where('song_id', $songId)
             ->where('user_id', $userId)
             ->first(['rating']);
     }

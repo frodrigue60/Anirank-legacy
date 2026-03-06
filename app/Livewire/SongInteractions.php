@@ -93,20 +93,14 @@ class SongInteractions extends Component
     {
         if (!Auth::check()) return redirect()->route('login');
 
-        $userId = Auth::id();
-        $existingFavorite = $this->song->favorites()
-            ->where('user_id', $userId)
-            ->first();
+        $results = $this->song->favorites()->toggle(Auth::id());
+        $isAdded = count($results['attached']) > 0;
 
-        if ($existingFavorite) {
-            $existingFavorite->delete();
-            $this->dispatch('toast', type: 'info', message: 'Removed from favorites');
-        } else {
-            $this->song->favorites()->create([
-                'user_id' => $userId
-            ]);
-            $this->dispatch('toast', type: 'success', message: 'Added to favorites!');
-        }
+        $this->dispatch(
+            'toast',
+            type: $isAdded ? 'success' : 'info',
+            message: $isAdded ? 'Added to favorites!' : 'Removed from favorites'
+        );
 
         $this->loadSong();
     }
@@ -128,7 +122,7 @@ class SongInteractions extends Component
                 throw new \Exception('Invalid rating value.');
             }
 
-            $this->song->rateOnce($value, Auth::id());
+            $this->song->rate($value, Auth::id());
             $this->loadSong();
             $this->showRatingModal = false;
 

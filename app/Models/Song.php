@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Session;
 class Song extends Model
 {
     use HasFactory;
-    use Rateable;
 
     protected $appends = [
         'name',
@@ -86,9 +85,19 @@ class Song extends Model
         return $this->hasOne(SongVariant::class)->orderBy('version_number');
     }
 
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function averageRating()
+    {
+        return $this->ratings()->avg('rating');
+    }
+
     public function comments()
     {
-        return $this->morphMany(Comment::class, 'commentable');
+        return $this->hasMany(Comment::class);
     }
 
     public function incrementViews()
@@ -147,7 +156,9 @@ class Song extends Model
 
     public function reactions()
     {
-        return $this->morphMany(Reaction::class, 'reactable');
+        return $this->belongsToMany(User::class, 'song_reactions', 'song_id', 'user_id')
+            ->withPivot('type')
+            ->withTimestamps();
     }
 
     public function likes()
@@ -162,16 +173,21 @@ class Song extends Model
 
     public function getLikesCountAttribute()
     {
-        return array_key_exists('likes_count', $this->attributes) 
-            ? $this->attributes['likes_count'] 
-            : $this->likes()->count();
+        return (int) ($this->attributes['likes_count'] ?? 0);
     }
 
     public function getDislikesCountAttribute()
     {
-        return array_key_exists('dislikes_count', $this->attributes) 
-            ? $this->attributes['dislikes_count'] 
-            : $this->dislikes()->count();
+        return (int) ($this->attributes['dislikes_count'] ?? 0);
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        if (array_key_exists('ratings_avg_rating', $this->attributes)) {
+            return $this->attributes['ratings_avg_rating'];
+        }
+
+        return $this->averageRating();
     }
 
     // Método para verificar si el usuario actual ha dado like
@@ -232,28 +248,19 @@ class Song extends Model
         });
     }
 
-    // Relación con el contador de reacciones (nombre corregido)
-    public function reactionsCounter()
-    {
-        return $this->morphOne(ReactionCounter::class, 'reactable');
-    }
-
     // Método para actualizar los contadores
     public function updateReactionCounters()
     {
-        $likesCount = $this->reactions()->where('type', 1)->count();
-        $dislikesCount = $this->reactions()->where('type', -1)->count();
-
-        $this->reactionsCounter()->updateOrCreate(
-            ['reactable_id' => $this->id, 'reactable_type' => self::class],
-            ['likes_count' => $likesCount, 'dislikes_count' => $dislikesCount]
-        );
+        $this->update([
+            'likes_count' => $this->likes()->count(),
+            'dislikes_count' => $this->dislikes()->count(),
+        ]);
     }
 
-    // Relación polimórfica para favoritos, retorna array con la relacion
+    // Relación para favoritos (Muchos a Muchos con User)
     public function favorites()
     {
-        return $this->morphMany(Favorite::class, 'favoritable');
+        return $this->belongsToMany(User::class, 'song_user')->withTimestamps();
     }
 
     // retorna la cantidad de veces que ha sido marcado como favorito
@@ -265,13 +272,32 @@ class Song extends Model
     public function scopeWithUserInteractions($query)
     {
         $guard = auth('sanctum')->check() ? 'sanctum' : null;
-        if (!$guard) return $query;
+        if (! $guard) {
+            return $query;
+        }
 
         $userId = auth($guard)->id();
+
         return $query->withExists([
-            'reactions as liked' => fn($q) => $q->where('user_id', $userId)->where('type', 1),
-            'reactions as disliked' => fn($q) => $q->where('user_id', $userId)->where('type', -1),
-            'favorites as is_favorited' => fn($q) => $q->where('user_id', $userId)
+            'reactions as liked' => fn ($q) => $q->where('user_id', $userId)->where('type', 1),
+            'reactions as disliked' => fn ($q) => $q->where('user_id', $userId)->where('type', -1),
+            'favorites as is_favorited' => fn ($q) => $q->where('user_id', $userId),
+        ]);
+    }
+
+    public function loadUserInteractions()
+    {
+        $guard = auth('sanctum')->check() ? 'sanctum' : null;
+        if (! $guard) {
+            return $this;
+        }
+
+        $userId = auth($guard)->id();
+
+        return $this->loadExists([
+            'reactions as liked' => fn ($q) => $q->where('user_id', $userId)->where('type', 1),
+            'reactions as disliked' => fn ($q) => $q->where('user_id', $userId)->where('type', -1),
+            'favorites as is_favorited' => fn ($q) => $q->where('user_id', $userId),
         ]);
     }
 
@@ -285,31 +311,31 @@ class Song extends Model
             return (bool) $this->attributes['favorites_exists'];
         }
 
-        if (auth('sanctum')->check()) {
-            return $this->favorites()->where('user_id', auth('sanctum')->id())->exists();
-        }
+        $guard = auth('sanctum')->check() ? 'sanctum' : null;
+        $userId = $guard ? auth($guard)->id() : null;
 
-        return false;
+        return $userId ? $this->favorites()->where('user_id', $userId)->exists() : false;
     }
 
-    public function toggleFavorite()
+    public function toggleFavorite($userId = null)
     {
-        if (! auth('sanctum')->check()) {
-            return false;
-        }
+        $userId ??= Auth::id() ?? auth('sanctum')->id();
+        
+        if (!$userId) return false;
 
-        $userId = auth('sanctum')->id();
-        $favorite = $this->favorites()->where('user_id', $userId)->first();
+        $results = $this->favorites()->toggle($userId);
+        $isAttached = count($results['attached']) > 0;
 
-        if ($favorite) {
-            $favorite->delete();
-
-            return false;
+        if ($isAttached) {
+            \App\Models\Activity::log($userId, 'favorite_song', $this->id, 'song');
         } else {
-            $this->favorites()->create(['user_id' => $userId]);
-
-            return true;
+            \App\Models\Activity::where('user_id', $userId)
+                ->where('action_type', 'favorite_song')
+                ->where('target_id', $this->id)
+                ->delete();
         }
+
+        return $isAttached;
     }
 
     public function playlists()
@@ -430,5 +456,14 @@ class Song extends Model
         }
 
         return $this->convertScore($raw, $format);
+    }
+
+    public function rate($value, $user_id = null)
+    {
+        $user_id ??= Auth::id();
+        return $this->ratings()->updateOrCreate(
+            ['user_id' => $user_id],
+            ['rating' => $value]
+        );
     }
 }

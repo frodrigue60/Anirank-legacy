@@ -11,11 +11,34 @@ class Comment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['content', 'user_id', 'parent_id', 'commentable_id', 'commentable_type'];
+    protected $fillable = ['content', 'user_id', 'parent_id', 'song_id'];
 
-    public function commentable()
+    protected static function boot()
     {
-        return $this->morphTo();
+        parent::boot();
+
+        static::created(function ($comment) {
+            if ($comment->song_id) {
+                \App\Models\Activity::log(
+                    $comment->user_id,
+                    'comment',
+                    $comment->song_id,
+                    'song',
+                    $comment->content
+                );
+            }
+        });
+
+        static::deleted(function ($comment) {
+            // Nota: Podríamos borrar basándonos en el ID de comentario si lo guardamos en action_value como metadato,
+            // pero por ahora borraremos por contenido y tipo si es necesario.
+            // Para comentarios es mejor borrarlos manualmente o dejar que el cascade haga su trabajo si implementamos relaciones.
+        });
+    }
+
+    public function song()
+    {
+        return $this->belongsTo(Song::class);
     }
 
     // Relación para respuestas (hijos)
@@ -37,58 +60,9 @@ class Comment extends Model
 
     public function reactions()
     {
-        return $this->morphMany(Reaction::class, 'reactable');
-    }
-
-    // Relación con el contador de reacciones (nombre corregido)
-    public function reactionsCounter()
-    {
-        return $this->morphOne(ReactionCounter::class, 'reactable');
-    }
-
-    // Método para actualizar los contadores
-    public function updateReactionCounters()
-    {
-        $likesCount = $this->reactions()->where('type', 1)->count();
-        $dislikesCount = $this->reactions()->where('type', -1)->count();
-
-        $this->reactionsCounter()->updateOrCreate(
-            ['reactable_id' => $this->id, 'reactable_type' => self::class],
-            ['likes_count' => $likesCount, 'dislikes_count' => $dislikesCount]
-        );
-    }
-
-    public function liked()
-    {
-        if (Auth::check()) { // Verifica si el usuario está autenticado
-            return $this->reactions()
-                ->where('user_id', Auth::id())
-                ->where('type', 1)
-                ->exists();
-        }
-        return false;
-    }
-
-    // Método para verificar si el usuario actual ha dado dislike
-    public function disliked()
-    {
-        if (Auth::check()) { // Verifica si el usuario está autenticado
-            return $this->reactions()
-                ->where('user_id', Auth::id())
-                ->where('type', -1)
-                ->exists();
-        }
-        return false;
-    }
-
-    public function getLikesCountAttribute()
-    {
-        return $this->likes()->count();
-    }
-
-    public function getDislikesCountAttribute()
-    {
-        return $this->dislikes()->count();
+        return $this->belongsToMany(User::class, 'comment_reactions', 'comment_id', 'user_id')
+            ->withPivot('type')
+            ->withTimestamps();
     }
 
     public function likes()
@@ -99,5 +73,46 @@ class Comment extends Model
     public function dislikes()
     {
         return $this->reactions()->where('type', -1);
+    }
+
+    public function liked()
+    {
+        if (Auth::check()) {
+            return $this->reactions()
+                ->where('user_id', Auth::id())
+                ->where('type', 1)
+                ->exists();
+        }
+        return false;
+    }
+
+    public function disliked()
+    {
+        if (Auth::check()) {
+            return $this->reactions()
+                ->where('user_id', Auth::id())
+                ->where('type', -1)
+                ->exists();
+        }
+        return false;
+    }
+
+    public function getLikesCountAttribute()
+    {
+        return $this->attributes['likes_count'] ?? 0;
+    }
+
+    public function getDislikesCountAttribute()
+    {
+        return $this->attributes['dislikes_count'] ?? 0;
+    }
+
+    // Método para actualizar los contadores (ahora actualiza las columnas directamente)
+    public function updateReactionCounters()
+    {
+        $this->update([
+            'likes_count' => $this->likes()->count(),
+            'dislikes_count' => $this->dislikes()->count(),
+        ]);
     }
 }

@@ -121,7 +121,7 @@ class UserFavoritesTable extends Component
 
     public function render()
     {
-        $query = Song::query()
+        $songs = Song::query()
             ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
             ->favoritedBy($this->userId)
@@ -143,23 +143,23 @@ class UserFavoritesTable extends Component
 
         switch ($this->sort) {
             case 'title':
-                $query->join('animes', 'songs.anime_id', '=', 'animes.id')
+                $songs->join('animes', 'songs.anime_id', '=', 'animes.id')
                     ->orderBy('animes.title', 'asc')
                     ->select('songs.*');
                 break;
             case 'averageRating':
-                $query->orderBy('ratings_avg_rating', 'desc');
+                $songs->orderBy('ratings_avg_rating', 'desc');
                 break;
             case 'view_count':
-                $query->orderBy('views', 'desc');
+                $songs->orderBy('views', 'desc');
                 break;
             case 'recent':
             default:
-                $query->orderBy('songs.created_at', 'desc');
+                $songs->orderBy('songs.created_at', 'desc');
                 break;
         }
 
-        $songs = $query->paginate($this->perPage);
+        $songs = $songs->paginate($this->perPage);
         $this->hasMorePages = $songs->hasMorePages();
 
         $this->setScoreSongs($songs, Auth::user());

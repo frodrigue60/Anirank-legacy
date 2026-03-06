@@ -24,9 +24,16 @@
                     </div>
                 @endif
 
-                <div>
-                    <h1 class="text-3xl md:text-4xl font-black text-white mb-2">{{ $artist->name }}</h1>
-                    <div class="h-1 w-20 bg-primary rounded-full"></div>
+                <div class="flex-1">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+                        <div>
+                            <h1 class="text-3xl md:text-4xl font-black text-white mb-2">{{ $artist->name }}</h1>
+                            <div class="h-1 w-20 bg-primary rounded-full"></div>
+                        </div>
+
+                        {{-- Favorite Button --}}
+                        <livewire:artist-favorite-button :artist="$artist" />
+                    </div>
                 </div>
             </div>
 

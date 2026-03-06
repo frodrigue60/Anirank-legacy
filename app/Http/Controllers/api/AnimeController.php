@@ -148,13 +148,9 @@ class AnimeController extends Controller
             })
             ->when($type, function ($query, $type) {
                 $query->whereHas('format', function ($q) use ($type) {
-                    if ($type === 'tv_show') {
-                        $q->where('slug', 'tv');
-                    } elseif ($type === 'tv_short') {
-                        $q->where('slug', 'tv-short');
-                    } else {
-                        $q->where('slug', $type);
-                    }
+                    // Normalize underscore to hyphen for slugs like tv-short
+                    $slug = str_replace('_', '-', $type);
+                    $q->where('slug', $slug);
                 });
             })
             ->when($genre_id, function ($query, $genre_id) {

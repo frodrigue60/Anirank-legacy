@@ -98,7 +98,7 @@ class UserController extends Controller
     {
         try {
             $validator = Validator::make($request->all(), [
-                'score_format' => 'required|in:POINT_100,POINT_10_DECIMAL,POINT_10,POINT_5',
+                'score_format' => 'required|exists:score_formats,slug',
             ]);
 
             if ($validator->fails()) {
@@ -108,9 +108,9 @@ class UserController extends Controller
                 ]);
             }
 
-            $user = Auth::check() ? Auth::User() : null;
-            $user = User::find($user->id);
-            $user->score_format = $request->score_format;
+            $user = Auth::user();
+            $scoreFormat = DB::table('score_formats')->where('slug', $request->score_format)->first();
+            $user->score_format_id = $scoreFormat->id;
             $user->update();
 
             return response()->json([
@@ -326,9 +326,8 @@ class UserController extends Controller
 
     public function getUserRating($songId, $userId)
     {
-        return DB::table('ratings')
-            ->where('rateable_type', Song::class)
-            ->where('rateable_id', $songId)
+        return DB::table('song_ratings')
+            ->where('song_id', $songId)
             ->where('user_id', $userId)
             ->first(['rating']);
     }

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Song;
+use App\Models\Artist;
 use App\Models\SongVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Favorite;
 
 class FavoriteController extends Controller
 {
@@ -19,98 +20,35 @@ class FavoriteController extends Controller
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function toggleSong(Song $song)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Favorite $favorite)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Favorite $favorite)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Favorite $favorite)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Favorite $favorite)
-    {
-        //
-    }
-
-    public function toggle(SongVariant $variant)
-    {
-        $songVariant = $variant;
-
         if (!Auth::check()) {
             return redirect()->back()->with('warning', 'Please login');
         }
 
         $user = Auth::user();
+        $results = $song->favorites()->toggle($user->id);
+        $isFavorite = count($results['attached']) > 0;
 
-        // Verificar si el tema ya está en favoritos
-        $favorite = Favorite::where('user_id', $user->id)
-            ->where('favoritable_id', $songVariant->id)
-            ->where('favoritable_type', SongVariant::class)
-            ->first();
+        return redirect()->back()->with('success', $isFavorite ? 'Song added to favorites' : 'Song removed from favorites');
+    }
 
-        if ($favorite) {
-            $favorite->delete();
-            return redirect()->back()->with('success', 'Theme removed to favorites');
-        } else {
-            Favorite::create([
-                'user_id' => $user->id,
-                'favoritable_id' => $songVariant->id,
-                'favoritable_type' => SongVariant::class,
-            ]);
-            return redirect()->back()->with('success', 'Theme added to favorites');
+    public function toggleArtist(Artist $artist)
+    {
+        if (!Auth::check()) {
+            return redirect()->back()->with('warning', 'Please login');
         }
+
+        $user = Auth::user();
+        $results = $artist->favoritedBy()->toggle($user->id);
+        $isFavorite = count($results['attached']) > 0;
+
+        return redirect()->back()->with('success', $isFavorite ? 'Artist added to favorites' : 'Artist removed from favorites');
+    }
+
+    public function toggle(SongVariant $variant)
+    {
+        // Mantener compatibilidad pero redirigir al Song base
+        return $this->toggleSong($variant->song);
     }
 }

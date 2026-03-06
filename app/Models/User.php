@@ -26,7 +26,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'score_format',
+        'score_format_id',
         'slug',
         'avatar',
         'banner',
@@ -127,9 +127,14 @@ class User extends Authenticatable
         return $this->hasMany(Reaction::class);
     }
 
-    public function favorites()
+    public function favoriteArtists()
     {
-        return $this->hasMany(Favorite::class);
+        return $this->belongsToMany(Artist::class, 'artist_user')->withTimestamps();
+    }
+    
+    public function favoriteSongs()
+    {
+        return $this->belongsToMany(Song::class, 'song_user')->withTimestamps();
     }
 
     public function comments()
@@ -233,5 +238,15 @@ class User extends Authenticatable
         return $this->belongsToMany(Badge::class)
             ->withPivot('awarded_at')
             ->withTimestamps();
+    }
+
+    public function scoreFormat()
+    {
+        return $this->belongsTo(ScoreFormat::class, 'score_format_id');
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
     }
 }

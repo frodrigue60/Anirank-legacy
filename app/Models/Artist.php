@@ -47,8 +47,34 @@ class Artist extends Model
         return null;
     }
 
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'artist_user')->withTimestamps();
+    }
+
     public function songs()
     {
         return $this->belongsToMany(Song::class);
+    }
+
+    public function toggleFavorite($userId = null)
+    {
+        $userId ??= \Illuminate\Support\Facades\Auth::id() ?? auth('sanctum')->id();
+        
+        if (!$userId) return false;
+
+        $results = $this->favoritedBy()->toggle($userId);
+        $isAttached = count($results['attached']) > 0;
+
+        if ($isAttached) {
+            \App\Models\Activity::log($userId, 'favorite_artist', $this->id, 'artist');
+        } else {
+            \App\Models\Activity::where('user_id', $userId)
+                ->where('action_type', 'favorite_artist')
+                ->where('target_id', $this->id)
+                ->delete();
+        }
+
+        return $isAttached;
     }
 }

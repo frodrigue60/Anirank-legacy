@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
-use App\Models\Favorite;
-use App\Models\Reaction;
 use App\Models\Season;
 use App\Models\Song;
 use App\Models\Year;
@@ -43,14 +41,7 @@ class SongController extends Controller
             ->when($year_id, fn ($q) => $q->where('year_id', $year_id))
             ->when($season_id, fn ($q) => $q->where('season_id', $season_id))
             ->when($type, fn ($q) => $q->where('type', $type))
-            ->when(Auth::guard('sanctum')->check(), function ($q) {
-                $userId = Auth::guard('sanctum')->id();
-                $q->withExists([
-                    'reactions as liked' => fn ($q) => $q->where('user_id', $userId)->where('type', 1),
-                    'reactions as disliked' => fn ($q) => $q->where('user_id', $userId)->where('type', -1),
-                    'favorites as is_favorited' => fn ($q) => $q->where('user_id', $userId),
-                ]);
-            })
+            ->withUserInteractions()
             ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar', 'year', 'season'])
             ->withCount(['likes', 'dislikes'])
             ->withAvg('ratings', 'rating')
@@ -109,12 +100,7 @@ class SongController extends Controller
         ]);
 
         if (Auth::guard('sanctum')->check()) {
-            $userId = Auth::guard('sanctum')->id();
-            $song->loadExists([
-                'reactions as liked' => fn ($q) => $q->where('user_id', $userId)->where('type', 1),
-                'reactions as disliked' => fn ($q) => $q->where('user_id', $userId)->where('type', -1),
-                'favorites as is_favorited' => fn ($q) => $q->where('user_id', $userId),
-            ]);
+            $song->loadUserInteractions();
         }
 
         $song->anime->append(['cover_url', 'banner_url']);
@@ -134,14 +120,7 @@ class SongController extends Controller
             ->where('id', '!=', $song->id)
             ->with(['artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
-            ->when(Auth::guard('sanctum')->check(), function ($q) {
-                $userId = Auth::guard('sanctum')->id();
-                $q->withExists([
-                    'reactions as liked' => fn ($q) => $q->where('user_id', $userId)->where('type', 1),
-                    'reactions as disliked' => fn ($q) => $q->where('user_id', $userId)->where('type', -1),
-                    'favorites as is_favorited' => fn ($q) => $q->where('user_id', $userId),
-                ]);
-            })
+            ->withUserInteractions()
             ->get();
 
         $relatedSongs->each(function ($related) {
@@ -227,65 +206,36 @@ class SongController extends Controller
     // Método privado para manejar la reacción
     private function handleReaction($song, $type)
     {
-        $user = Auth::check() ? Auth::user() : null;
+        $user = Auth::user();
 
-        // Buscar si ya existe una reacción del usuario para este anime
-        $reaction = Reaction::where('user_id', $user->id)
-            ->where('reactable_id', $song->id)
-            ->where('reactable_type', Song::class)
-            ->first();
+        // Usar la relación pivot para manejar la reacción
+        $existing = $song->reactions()->where('user_id', $user->id)->first();
 
-        if ($reaction) {
-            if ($reaction->type === $type) {
-                // Si la reacción es la misma, eliminarla (toggle)
-                $reaction->delete();
+        if ($existing) {
+            if ($existing->pivot->type === $type) {
+                // Toggle off
+                $song->reactions()->detach($user->id);
             } else {
-                // Si la reacción es diferente, actualizarla
-                $reaction->update(['type' => $type]);
+                // Update type
+                $song->reactions()->updateExistingPivot($user->id, ['type' => $type]);
             }
         } else {
-            // Si no existe una reacción, crear una nueva
-            Reaction::create([
-                'user_id' => $user->id,
-                'reactable_id' => $song->id,
-                'reactable_type' => Song::class,
-                'type' => $type,
-            ]);
+            // New reaction
+            $song->reactions()->attach($user->id, ['type' => $type]);
         }
     }
 
     public function toggleFavorite(Song $song)
     {
+        $user = Auth::user();
+        $results = $song->favorites()->toggle($user->id);
+        $isFavorite = count($results['attached']) > 0;
 
-        $user = Auth::check() ? Auth::user() : null;
-
-        // Verificar si el tema ya está en favoritos
-        $favorite = Favorite::where('user_id', $user->id)
-            ->where('favoritable_id', $song->id)
-            ->where('favoritable_type', Song::class)
-            ->first();
-
-        if ($favorite) {
-            $favorite->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Removed from favorites',
-                'favorite' => false,
-            ], 200);
-        } else {
-            Favorite::create([
-                'user_id' => $user->id,
-                'favoritable_id' => $song->id,
-                'favoritable_type' => Song::class,
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Added to favorites',
-                'favorite' => true,
-            ], 200);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => $isFavorite ? 'Added to favorites' : 'Removed from favorites',
+            'favorite' => $isFavorite,
+        ], 200);
     }
 
     public function rate(Request $request, Song $song)
@@ -320,7 +270,7 @@ class SongController extends Controller
                 break;
         }
 
-        $song->rateOnce($score, $user->id);
+        $song->rate($score, $user->id);
         $average = round($song->averageRating * $factor, 1);
 
         return response()->json([
@@ -494,9 +444,8 @@ class SongController extends Controller
 
     public function getUserRating(int $song_id, int $user_id)
     {
-        return DB::table('ratings')
-            ->where('rateable_type', Song::class)
-            ->where('rateable_id', $song_id)
+        return DB::table('song_ratings')
+            ->where('song_id', $song_id)
             ->where('user_id', $user_id)
             ->first(['rating']);
     }
@@ -561,8 +510,7 @@ class SongController extends Controller
     public function comments(Song $song)
     {
         $comments = Comment::with('replies', 'user')
-            ->where('commentable_id', $song->id)
-            ->where('commentable_type', Song::class)
+            ->where('song_id', $song->id)
             ->where('parent_id', null)
             ->orderByDesc('created_at')
             ->paginate(5);

@@ -7,8 +7,6 @@ use Livewire\Attributes\Validate;
 use App\Models\Song;
 use App\Models\Anime;
 use App\Models\Comment;
-use App\Models\Reaction;
-use App\Models\Favorite;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -82,8 +80,7 @@ class SongDetail extends Component
         $this->comments = Comment::with(['user', 'user.badges', 'replies' => function ($query) {
             $query->orderBy('created_at', 'asc');
         }, 'replies.user'])
-            ->where('commentable_id', $this->song->id)
-            ->where('commentable_type', Song::class)
+            ->where('song_id', $this->song->id)
             ->where('parent_id', null)
             ->orderByDesc('created_at')
             ->get();
@@ -152,29 +149,26 @@ class SongDetail extends Component
     private function toggleReaction($type)
     {
         $userId = Auth::id();
-        $existingReaction = $this->song->reactions()
-            ->where('user_id', $userId)
-            ->first();
-
+        $existing = $this->song->reactions()->where('user_id', $userId)->first();
         $typeName = $type === 1 ? 'like' : 'dislike';
 
-        if ($existingReaction) {
-            if ($existingReaction->type == $type) {
-                $existingReaction->delete();
+        if ($existing) {
+            if ($existing->pivot->type == $type) {
+                // Toggle off
+                $this->song->reactions()->detach($userId);
                 $this->dispatch('toast', type: 'info', message: "Removed $typeName");
             } else {
-                $existingReaction->update(['type' => $type]);
+                // Update type
+                $this->song->reactions()->updateExistingPivot($userId, ['type' => $type]);
                 $this->dispatch('toast', type: 'success', message: ucfirst($typeName) . "d the song");
             }
         } else {
-            $this->song->reactions()->create([
-                'user_id' => $userId,
-                'type' => $type
-            ]);
+            // New reaction
+            $this->song->reactions()->attach($userId, ['type' => $type]);
             $this->dispatch('toast', type: 'success', message: ucfirst($typeName) . "d the song");
         }
 
-        $this->song->loadCount(['likes', 'dislikes']);
+        $this->song->updateReactionCounters();
         $this->song->refresh();
     }
 
@@ -183,19 +177,14 @@ class SongDetail extends Component
         if (!Auth::check()) return redirect()->route('login');
 
         $userId = Auth::id();
-        $existingFavorite = $this->song->favorites()
-            ->where('user_id', $userId)
-            ->first();
-
-        if ($existingFavorite) {
-            $existingFavorite->delete();
-            $this->dispatch('toast', type: 'info', message: 'Removed from favorites');
-        } else {
-            $this->song->favorites()->create([
-                'user_id' => $userId
-            ]);
-            $this->dispatch('toast', type: 'success', message: 'Added to favorites!');
-        }
+        $results = $this->song->favorites()->toggle($userId);
+        
+        $isFavorite = count($results['attached']) > 0;
+        
+        $this->dispatch('toast', 
+            type: $isFavorite ? 'success' : 'info', 
+            message: $isFavorite ? 'Added to favorites!' : 'Removed from favorites'
+        );
 
         $this->song->refresh();
     }
@@ -356,7 +345,7 @@ class SongDetail extends Component
                 throw new \Exception('Invalid rating value.');
             }
 
-            $this->song->rateOnce($value, Auth::id());
+            $this->song->rate($value, Auth::id());
             $this->calculateScore();
             $this->showRatingModal = false;
 
