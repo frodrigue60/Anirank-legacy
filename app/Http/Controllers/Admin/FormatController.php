@@ -23,7 +23,6 @@ class FormatController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:formats,name',
-            'slug' => 'required|string|max:255|unique:formats,slug',
         ]);
 
         Format::create($validated);
@@ -46,7 +45,6 @@ class FormatController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:formats,name,' . $format->id,
-            'slug' => 'required|string|max:255|unique:formats,slug,' . $format->id,
         ]);
 
         $format->update($validated);

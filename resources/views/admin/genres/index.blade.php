@@ -45,7 +45,7 @@
                             {{ $genre->slug }}
                         </td>
                         <td class="p-4 relative">
-                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="flex items-center justify-end gap-2">
                                 <a href="{{ route('admin.genres.edit', $genre) }}" 
                                    class="p-2 text-zinc-400 hover:text-white hover:bg-zinc-700 rounded-xl transition-all"
                                    title="Edit Genre">

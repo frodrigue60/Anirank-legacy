@@ -30,15 +30,7 @@
                 @enderror
             </div>
 
-            <div class="space-y-2">
-                <label for="slug" class="block text-xs font-bold text-zinc-400 uppercase tracking-widest">Slug</label>
-                <input type="text" name="slug" id="slug" value="{{ old('slug') }}" required
-                       class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm font-mono @error('slug') border-rose-500 focus:border-rose-500 focus:ring-rose-500/50 @enderror">
-                <p class="text-zinc-500 text-[10px] uppercase tracking-wider mt-1">Unique URL identifier (e.g., action-adventure)</p>
-                @error('slug')
-                    <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
-                @enderror
-            </div>
+
 
             <div class="pt-4 flex justify-end">
                 <button type="submit" 
@@ -51,14 +43,5 @@
     </div>
 </div>
 
-{{-- Auto-generate slug from name --}}
-<script>
-    document.getElementById('name').addEventListener('input', function() {
-        let slug = this.value.toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/[\s_-]+/g, '-')
-            .replace(/^-+|-+$/g, '');
-        document.getElementById('slug').value = slug;
-    });
-</script>
+
 @endsection

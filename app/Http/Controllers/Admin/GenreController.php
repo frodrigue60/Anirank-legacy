@@ -23,7 +23,6 @@ class GenreController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:genres,name',
-            'slug' => 'required|string|max:255|unique:genres,slug',
         ]);
 
         Genre::create($validated);
@@ -46,7 +45,6 @@ class GenreController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:genres,name,' . $genre->id,
-            'slug' => 'required|string|max:255|unique:genres,slug,' . $genre->id,
         ]);
 
         $genre->update($validated);
