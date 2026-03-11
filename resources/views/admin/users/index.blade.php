@@ -84,7 +84,7 @@
                                                     class="w-full h-full object-cover">
                                             </div>
                                             <div class="flex flex-col">
-                                                <a href="{{ route('admin.users.show', $user->id) }}"
+                                                <a href="{{ route('admin.users.show', $user) }}"
                                                     class="text-sm font-bold text-white hover:text-blue-400 transition-colors">
                                                     {{ $user->name }}
                                                 </a>
@@ -122,12 +122,12 @@
                                     <td class="px-6 py-4">
                                         <div class="flex items-center justify-end gap-2">
                                             @if (Auth::user()->isAdmin())
-                                                <a href="{{ route('admin.users.edit', $user->id) }}"
+                                                <a href="{{ route('admin.users.edit', $user) }}"
                                                     class="p-2 bg-zinc-800 hover:bg-blue-600 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700 hover:border-blue-500"
                                                     title="Edit User">
                                                     <span class="material-symbols-outlined text-sm">edit</span>
                                                 </a>
-                                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="post"
+                                                <form action="{{ route('admin.users.destroy', $user) }}" method="post"
                                                     class="inline">
                                                     @csrf
                                                     @method('DELETE')

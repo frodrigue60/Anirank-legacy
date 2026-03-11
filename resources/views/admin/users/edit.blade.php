@@ -13,7 +13,7 @@
 
         {{-- Form Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden p-8">
-            <form method="POST" action="{{ route('admin.users.update', $user->id) }}" enctype="multipart/form-data"
+            <form method="POST" action="{{ route('admin.users.update', $user) }}" enctype="multipart/form-data"
                 class="space-y-8">
                 @csrf
                 @method('PUT')

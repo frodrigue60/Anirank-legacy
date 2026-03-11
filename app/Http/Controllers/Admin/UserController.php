@@ -125,14 +125,21 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        //
+        $breadcrumb = [
+            ['name' => 'Users', 'url' => route('admin.users.index')],
+            ['name' => 'Details', 'url' => route('admin.users.show', $user)],
+        ];
+        
+        $user->load(['roles', 'badges']);
+
+        return view('admin.users.show', compact('user', 'breadcrumb'));
     }
 
     public function edit(User $user)
     {
         $breadcrumb = [
             ['name' => 'Users', 'url' => route('admin.users.index')],
-            ['name' => 'Edit', 'url' => route('admin.users.edit', $user->id)],
+            ['name' => 'Edit', 'url' => route('admin.users.edit', $user)],
         ];
         $user = User::with(['roles', 'badges'])->findOrFail($user->id);
         $roles = Role::all();
