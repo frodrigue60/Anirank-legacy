@@ -207,7 +207,7 @@ class UserController extends Controller
 
         // Handle Roles
         $submittedRoles = $request->has('role_id') ? array_map('intval', $request->role_id) : [];
-        $currentRoles = $user->roles()->pluck('id')->toArray();
+        $currentRoles = $user->roles()->pluck('roles.id')->toArray();
         if (array_diff($submittedRoles, $currentRoles) !== array_diff($currentRoles, $submittedRoles)) {
             $user->roles()->sync($submittedRoles);
             $changesMade = true;
@@ -215,7 +215,7 @@ class UserController extends Controller
 
         // Handle Badges
         $submittedBadges = $request->has('badge_id') ? array_map('intval', $request->badge_id) : [];
-        $currentBadges = $user->badges()->pluck('id')->toArray();
+        $currentBadges = $user->badges()->pluck('badges.id')->toArray();
         if (array_diff($submittedBadges, $currentBadges) !== array_diff($currentBadges, $submittedBadges)) {
             if (empty($submittedBadges)) {
                 $user->badges()->detach();
