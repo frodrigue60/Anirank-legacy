@@ -195,6 +195,12 @@ class User extends Authenticatable
     {
         parent::boot();
 
+        static::creating(function ($user) {
+            if (empty($user->slug)) {
+                $user->generateSlug();
+            }
+        });
+
         static::deleting(function ($user) {
             $disk = env('FILESYSTEM_DISK', 'public');
             if ($user->avatar && \Illuminate\Support\Facades\Storage::disk($disk)->exists($user->avatar)) {
