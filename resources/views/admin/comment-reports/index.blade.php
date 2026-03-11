@@ -1,18 +1,18 @@
 @extends('layouts.admin')
 
-@section('title', 'Issue Reports')
+@section('title', 'Comment Reports')
 
 @section('content')
     <div class="space-y-8">
         {{-- Custom Header Section --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-bold text-white tracking-tight">System Audits</h1>
-                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">User Reports & Bug Tracking
+                <h1 class="text-3xl font-bold text-white tracking-tight">Comment Reports</h1>
+                <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">User Reports & Moderation
                 </p>
             </div>
         </div>
-        <p class="text-zinc-400 mt-1">Review community flags, content issues, and broken links.</p>
+        <p class="text-zinc-400 mt-1">Review flagged comments for inappropriate content or spam.</p>
 
         {{-- Table Card --}}
         <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden">
@@ -37,17 +37,15 @@
                                 <td class="px-6 py-4 text-sm font-mono text-zinc-500 text-center">#{{ $report->id }}</td>
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
-                                        @if ($report->song)
-                                            <a href="{{ route('admin.songs.index', ['anime_id' => $report->song->anime_id]) }}"
-                                                class="text-sm font-bold text-white hover:text-blue-400 transition-colors line-clamp-1">
-                                                {{ $report->song->name }}
-                                            </a>
+                                        @if ($report->comment)
+                                            <span class="text-sm font-bold text-white line-clamp-1">
+                                                {{ Str::limit($report->comment->content, 50) }}
+                                            </span>
                                             <span class="text-[10px] text-zinc-500 mt-1 font-medium truncate max-w-xs">
-                                                {{ $report->song->anime->title ?? 'N/A' }}
+                                                By: {{ $report->comment->user->name ?? 'Unknown User' }}
                                             </span>
                                         @else
-                                            <span class="text-sm text-zinc-500 italic line-clamp-1">Broken Link / Deleted
-                                                Content</span>
+                                            <span class="text-sm text-zinc-500 italic line-clamp-1">Deleted Comment</span>
                                             <span class="text-[10px] text-zinc-600 mt-1 font-medium truncate max-w-xs">
                                                 {{ $report->source }}
                                             </span>
@@ -58,7 +56,7 @@
                                     {{ $report->user_id }}
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <form action="{{ route('admin.reports.toggle', $report->id) }}" method="POST">
+                                    <form action="{{ route('admin.comment-reports.toggle', $report->id) }}" method="POST">
                                         @csrf
                                         @method('PATCH')
                                         @if ($report->status == 'pending')
@@ -79,12 +77,12 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-end gap-2">
                                         @if (Auth::user()->isAdmin() || Auth::user()->isEditor())
-                                            <a href="{{ route('admin.reports.show', $report->id) }}"
+                                            <a href="{{ route('admin.comment-reports.show', $report->id) }}"
                                                 class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700"
                                                 title="View Report Details">
                                                 <span class="material-symbols-outlined">visibility</span>
                                             </a>
-                                            <form action="{{ route('admin.reports.destroy', $report->id) }}" method="post"
+                                            <form action="{{ route('admin.comment-reports.destroy', $report->id) }}" method="post"
                                                 class="inline">
                                                 @csrf
                                                 @method('DELETE')

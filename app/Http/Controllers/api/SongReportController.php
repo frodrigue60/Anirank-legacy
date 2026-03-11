@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Report;
+use App\Models\SongReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class ReportController extends Controller
+class SongReportController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -52,7 +52,7 @@ class ReportController extends Controller
             ]);
         }
 
-        Report::create([
+        SongReport::create([
             'song_id' => $request->song_id,
             'title' => $request->title,
             'content' => $request->content,

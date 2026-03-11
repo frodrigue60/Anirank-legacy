@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content  ">
             @if (Auth::check())
-                <form action="" method="post">
+                <form action="{{ route('reports.store') }}" method="post">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Report {{ $anime->title }}

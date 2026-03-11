@@ -11,7 +11,7 @@
             @endguest
 
             @auth
-                <form action="" method="post" id="form-report" data-songid="{{ $song->id }}">
+                <form action="{{ route('reports.store') }}" method="post" id="form-report" data-songid="{{ $song->id }}">
                     @csrf
                     <div class="modal-header">
                         <h5 class="modal-title">Report {{ $anime->title }}

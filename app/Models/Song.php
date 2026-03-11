@@ -362,7 +362,7 @@ class Song extends Model
 
     public function reports()
     {
-        return $this->hasMany(Report::class);
+        return $this->hasMany(SongReport::class);
     }
 
     public function rankingHistory()

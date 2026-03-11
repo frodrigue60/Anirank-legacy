@@ -44,14 +44,14 @@ class Anime extends Model
     {
         if (!$this->cover) return null;
         if (filter_var($this->cover, FILTER_VALIDATE_URL)) return $this->cover;
-        return Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->cover);
+        return Storage::url($this->cover);
     }
 
     public function getBannerUrlAttribute()
     {
         if (!$this->banner) return null;
         if (filter_var($this->banner, FILTER_VALIDATE_URL)) return $this->banner;
-        return Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->banner);
+        return Storage::url($this->banner);
     }
 
     public function songs()
@@ -59,10 +59,6 @@ class Anime extends Model
         return $this->hasMany(Song::class);
     }
 
-    public function reports()
-    {
-        return $this->hasMany(Report::class);
-    }
 
     public function year()
     {

@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\Report;
+use App\Models\SongReport;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 
@@ -58,13 +58,13 @@ class ReportModal extends Component
             $source = request()->header('Referer') ?? url()->previous() ?? 'unknown';
             $source = substr($source, 0, 255);
 
-            $report = Report::create([
+            $report = SongReport::create([
                 'song_id' => $this->songId,
                 'user_id' => Auth::id(),
                 'title' => $this->title,
                 'content' => $this->content ?? 'No details provided',
                 'source' => $source,
-                'status' => Report::STATUS_PENDING,
+                'status' => SongReport::STATUS_PENDING,
             ]);
 
             \Illuminate\Support\Facades\Log::info('Report created successfully', ['id' => $report->id, 'song_id' => $this->songId]);

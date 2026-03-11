@@ -41,6 +41,11 @@ class Comment extends Model
         return $this->belongsTo(Song::class);
     }
 
+    public function reports()
+    {
+        return $this->hasMany(CommentReport::class);
+    }
+
     // Relación para respuestas (hijos)
     public function replies()
     {

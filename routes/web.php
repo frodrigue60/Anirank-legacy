@@ -4,8 +4,9 @@ use App\Http\Controllers\Admin\AnimeController as AdminAnimeController;
 use App\Http\Controllers\Admin\ArtistController as AdminArtistController;
 use App\Http\Controllers\Admin\BadgeController as AdminBadgeController;
 use App\Http\Controllers\Admin\CommentController as AdminCommentController;
+use App\Http\Controllers\Admin\CommentReportController as AdminCommentReportController;
 use App\Http\Controllers\Admin\ProducerController as AdminProducerController;
-use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\SongReportController as AdminSongReportController;
 use App\Http\Controllers\Admin\RoleController as AdminRoleController;
 use App\Http\Controllers\Admin\SeasonController as AdminSeasonController;
 use App\Http\Controllers\Admin\SongController as AdminSongController;
@@ -21,7 +22,8 @@ use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PlaylistController;
 use App\Http\Controllers\ProducerController;
-use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CommentReportController;
+use App\Http\Controllers\SongReportController;
 use App\Http\Controllers\SongController;
 use App\Http\Controllers\SongVariantController;
 use App\Http\Controllers\StudioController;
@@ -80,7 +82,8 @@ Route::resource('animes', AnimeController::class)->only(['store', 'update', 'des
 Route::resource('songs', SongController::class)->only(['store', 'update', 'destroy']);
 Route::resource('variants', SongVariantController::class);
 Route::resource('requests', UserRequestController::class);
-Route::resource('reports', ReportController::class);
+Route::resource('reports', SongReportController::class)->only(['store']);
+Route::resource('comment-reports', CommentReportController::class)->only(['store']);
 Route::resource('playlists', PlaylistController::class);
 
 /*
@@ -106,9 +109,17 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
     Route::resource('studios', AdminStudioController::class);
     Route::resource('producers', AdminProducerController::class);
 
-    // Reports
-    Route::patch('/reports/{report}/toggle', [AdminReportController::class, 'toggle'])->name('reports.toggle');
-    Route::resource('reports', AdminReportController::class);
+    // Song Reports
+    Route::patch('/song-reports/{report}/toggle', [AdminSongReportController::class, 'toggle'])->name('song-reports.toggle');
+    Route::resource('song-reports', AdminSongReportController::class)->parameters([
+        'song-reports' => 'report'
+    ]);
+
+    // Comment Reports
+    Route::patch('/comment-reports/{report}/toggle', [AdminCommentReportController::class, 'toggle'])->name('comment-reports.toggle');
+    Route::resource('comment-reports', AdminCommentReportController::class)->parameters([
+        'comment-reports' => 'report'
+    ]);
 
     // Animes
     Route::controller(AdminAnimeController::class)->prefix('animes')->as('animes.')->group(function () {

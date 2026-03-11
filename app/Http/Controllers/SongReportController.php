@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Report;
+use App\Models\SongReport;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class ReportController extends Controller
+class SongReportController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -51,13 +51,13 @@ class ReportController extends Controller
             }
 
             try {
-                $report = new Report();
+                $report = new SongReport();
                 $report->song_id = $request->song_id;
                 $report->user_id = Auth::id();
                 $report->title = $request->title;
                 $report->content = $request->content ?? 'No details provided';
                 $report->source = $request->header('Referer') ?? url()->previous();
-                $report->status = Report::STATUS_PENDING;
+                $report->status = SongReport::STATUS_PENDING;
                 $report->save();
 
                 return redirect()->back()->with('success', 'Thanks for your report! Our staff will review it soon.');
@@ -75,7 +75,7 @@ class ReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Report $report)
+    public function show(SongReport $report)
     {
         //
     }
@@ -86,7 +86,7 @@ class ReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Report $report)
+    public function edit(SongReport $report)
     {
         //
     }
@@ -98,7 +98,7 @@ class ReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Report $report)
+    public function update(Request $request, SongReport $report)
     {
         //
     }
@@ -109,7 +109,7 @@ class ReportController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Report $report)
+    public function destroy(SongReport $report)
     {
         //
     }

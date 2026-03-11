@@ -8,7 +8,8 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\PlaylistController;
 use App\Http\Controllers\Api\AnimeController;
 use App\Http\Controllers\Api\ProducerController;
-use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\CommentReportController;
+use App\Http\Controllers\Api\SongReportController;
 use App\Http\Controllers\Api\SongController;
 use App\Http\Controllers\Api\SongVariantController;
 use App\Http\Controllers\Api\StudioController;
@@ -110,9 +111,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('songs/comments', 'storeComment')->name('api.songs.store.comment');
     });
 
-    // Reports
-    Route::controller(ReportController::class)->group(function () {
-        Route::post('reports', 'store')->name('api.reports.store');
+    // Song Reports
+    Route::controller(SongReportController::class)->group(function () {
+        Route::post('songs/reports', 'store')->name('api.reports.store');
+    });
+
+    // Comment Reports
+    Route::controller(CommentReportController::class)->group(function () {
+        Route::post('comments/reports', 'store')->name('api.comments.reports.store');
     });
 
     // Comments
