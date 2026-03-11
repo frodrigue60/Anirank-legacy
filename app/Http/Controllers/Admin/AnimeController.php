@@ -76,6 +76,8 @@ class AnimeController extends Controller
     {
         $seasons = Season::all();
         $years = Year::all();
+        $formats = Format::orderBy('name')->get();
+        $genres = Genre::orderBy('name')->get();
         $types = self::songTypes();
         $animeStatus = self::animeStatuses();
 
@@ -84,7 +86,7 @@ class AnimeController extends Controller
             ['name' => 'Create anime', 'url' => ''],
         ]);
 
-        return view('admin.animes.create', compact('years', 'seasons', 'types', 'animeStatus', 'breadcrumb'));
+        return view('admin.animes.create', compact('years', 'seasons', 'formats', 'genres', 'types', 'animeStatus', 'breadcrumb'));
     }
 
     public function store(Request $request)
@@ -95,11 +97,15 @@ class AnimeController extends Controller
         $anime->description = $request->description;
         $anime->year_id = $request->year;
         $anime->season_id = $request->season;
+        $anime->format_id = $request->format;
         $anime->status = $this->resolveAnimeStatus($request);
 
         $this->storeAnimeImages($anime, $request);
 
         if ($anime->save()) {
+            if ($request->has('genres')) {
+                $anime->genres()->sync($request->genres);
+            }
             return redirect(route('admin.songs.index', ['anime_id' => $anime->id]))
                 ->with('success', 'Anime created successfully');
         }
@@ -126,6 +132,8 @@ class AnimeController extends Controller
     {
         $seasons = Season::all();
         $years = Year::all();
+        $formats = Format::orderBy('name')->get();
+        $genres = Genre::orderBy('name')->get();
         $types = self::songTypes();
         $animeStatus = self::animeStatuses();
 
@@ -134,7 +142,7 @@ class AnimeController extends Controller
             ['name' => $anime->title, 'url' => ''],
         ]);
 
-        return view('admin.animes.edit', compact('anime', 'types', 'animeStatus', 'breadcrumb', 'years', 'seasons'));
+        return view('admin.animes.edit', compact('anime', 'types', 'animeStatus', 'breadcrumb', 'years', 'seasons', 'formats', 'genres'));
     }
 
     public function update(Request $request, Anime $anime)
@@ -145,11 +153,15 @@ class AnimeController extends Controller
         $anime->title = $request->title;
         $anime->slug = Str::slug($request->title);
         $anime->description = $request->description;
+        $anime->year_id = $request->year;
+        $anime->season_id = $request->season;
+        $anime->format_id = $request->format;
         $anime->status = $this->resolveAnimeStatus($request);
 
         $this->storeAnimeImages($anime, $request);
 
         if ($anime->update()) {
+            $anime->genres()->sync($request->genres ?? []);
             return redirect(route('admin.animes.index'))->with('success', 'Anime Updated Successfully');
         }
 

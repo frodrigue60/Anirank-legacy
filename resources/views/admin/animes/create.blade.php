@@ -88,6 +88,38 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="space-y-2">
+                        <label for="format_id"
+                            class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Format</label>
+                        <select name="format" id="format_id" required
+                            class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12">
+                            <option value="">Select format</option>
+                            @foreach ($formats as $format)
+                                <option value="{{ $format->id }}" {{ old('format') == $format->id ? 'selected' : '' }}>
+                                    {{ $format->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                {{-- Genres --}}
+                <div class="space-y-6 bg-zinc-950/30 p-6 rounded-3xl border border-zinc-800/50">
+                    <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-widest flex items-center">
+                        <span class="material-symbols-outlined mr-2 text-blue-500">category</span> GENRES
+                    </h3>
+                    
+                    <div class="space-y-2">
+                        <select name="genres[]" id="genres" multiple
+                            class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm min-h-[160px]">
+                            @foreach ($genres as $genre)
+                                <option value="{{ $genre->id }}" {{ (is_array(old('genres')) && in_array($genre->id, old('genres'))) ? 'selected' : '' }}>
+                                    {{ $genre->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-zinc-500 text-[10px] uppercase tracking-wider mt-2">Hold Ctrl (Windows) or Command (Mac) to select multiple genres.</p>
+                    </div>
                 </div>
 
                 {{-- Visuals --}}
