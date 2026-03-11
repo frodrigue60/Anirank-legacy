@@ -47,6 +47,8 @@
                     <x-admin.sidebar-link route="admin.studios.index" icon="business" label="Studios" />
                     <x-admin.sidebar-link route="admin.years.index" icon="calendar_today" label="Years" />
                     <x-admin.sidebar-link route="admin.seasons.index" icon="ac_unit" label="Seasons" />
+                    <x-admin.sidebar-link route="admin.formats.index" icon="video_library" label="Formats" />
+                    <x-admin.sidebar-link route="admin.genres.index" icon="category" label="Genres" />
                     <x-admin.sidebar-link route="admin.roles.index" icon="security" label="Roles" />
                 </div>
             </div>
