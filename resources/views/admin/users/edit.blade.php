@@ -45,14 +45,48 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label for="userPass"
-                                class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">Change
-                                Password</label>
-                            <input type="password" name="password" id="userPass"
-                                class="block w-full bg-zinc-950/50 border border-zinc-800 text-white rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12"
-                                placeholder="Leave blank to keep current">
+                        <div class="space-y-2 col-span-2" x-data="{
+                            password: '',
+                            copied: false,
+                            generatePassword() {
+                                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+                                let pass = '';
+                                for (let i = 0; i < 16; i++) {
+                                    pass += chars.charAt(Math.floor(Math.random() * chars.length));
+                                }
+                                this.password = pass;
+                            },
+                            copyToClipboard() {
+                                if (!this.password) return;
+                                navigator.clipboard.writeText(this.password).then(() => {
+                                    this.copied = true;
+                                    setTimeout(() => this.copied = false, 2000);
+                                });
+                            }
+                        }">
+                            <label for="userPass" class="block text-sm font-bold text-zinc-400 uppercase tracking-widest">
+                                Change Password / Reset
+                            </label>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <div class="relative flex-1">
+                                    <input type="text" name="password" id="userPass" x-model="password"
+                                        class="block w-full bg-zinc-950/50 border border-zinc-800 text-white font-mono rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all text-sm h-12"
+                                        placeholder="Leave blank to keep current">
+                                    
+                                    <button type="button" @click="copyToClipboard" :class="copied ? 'text-emerald-500' : 'text-zinc-500 hover:text-white'"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 transition-colors p-1" title="Copy to clipboard">
+                                        <span class="material-symbols-outlined text-sm" x-text="copied ? 'check' : 'content_copy'">content_copy</span>
+                                    </button>
+                                </div>
+                                
+                                <button type="button" @click="generatePassword"
+                                    class="h-12 px-6 flex items-center justify-center gap-2 bg-blue-600/10 hover:bg-blue-600 text-blue-500 hover:text-white border border-blue-600/20 font-bold rounded-2xl transition-all text-xs uppercase tracking-widest whitespace-nowrap">
+                                    <span class="material-symbols-outlined text-sm">autorenew</span>
+                                    Generate
+                                </button>
+                            </div>
+                            <p class="text-[10px] text-zinc-500 mt-1">Leave the field blank if you do not wish to reset the password.</p>
                         </div>
 
                         <div class="space-y-4 col-span-2">

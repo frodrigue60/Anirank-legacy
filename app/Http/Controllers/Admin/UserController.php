@@ -154,55 +154,74 @@ class UserController extends Controller
 
         if ($validator->fails()) {
             return Redirect::back()->withErrors($validator)->withInput();
-        } else {
-            $user->name = $request->name;
-            $user->email = $request->email;
+        }
 
-            if ($request->filled('password')) {
-                $user->password = Hash::make($request->password);
+        $user->fill([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        // Handle Avatar Update
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+                Storage::disk(config('filesystems.default'))->delete($user->avatar);
             }
-
-            // Handle Avatar Update
-            if ($request->hasFile('avatar')) {
-                if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
-                    Storage::disk(config('filesystems.default'))->delete($user->avatar);
-                }
-                $user->avatar = $request->file('avatar')->store('profile', config('filesystems.default'));
-            } elseif ($request->filled('avatar_src')) {
-                if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
-                    Storage::disk(config('filesystems.default'))->delete($user->avatar);
-                }
-                $user->avatar = $request->avatar_src;
+            $user->avatar = $request->file('avatar')->store('profile', config('filesystems.default'));
+        } elseif ($request->filled('avatar_src') && $user->avatar !== $request->avatar_src) {
+            if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+                Storage::disk(config('filesystems.default'))->delete($user->avatar);
             }
+            $user->avatar = $request->avatar_src;
+        }
 
-            // Handle Banner Update
-            if ($request->hasFile('banner')) {
-                if ($user->banner && !filter_var($user->banner, FILTER_VALIDATE_URL)) {
-                    Storage::disk(config('filesystems.default'))->delete($user->banner);
-                }
-                $user->banner = $request->file('banner')->store('banners', config('filesystems.default'));
-            } elseif ($request->filled('banner_src')) {
-                if ($user->banner && !filter_var($user->banner, FILTER_VALIDATE_URL)) {
-                    Storage::disk(config('filesystems.default'))->delete($user->banner);
-                }
-                $user->banner = $request->banner_src;
+        // Handle Banner Update
+        if ($request->hasFile('banner')) {
+            if ($user->banner && !filter_var($user->banner, FILTER_VALIDATE_URL)) {
+                Storage::disk(config('filesystems.default'))->delete($user->banner);
             }
+            $user->banner = $request->file('banner')->store('banners', config('filesystems.default'));
+        } elseif ($request->filled('banner_src') && $user->banner !== $request->banner_src) {
+            if ($user->banner && !filter_var($user->banner, FILTER_VALIDATE_URL)) {
+                Storage::disk(config('filesystems.default'))->delete($user->banner);
+            }
+            $user->banner = $request->banner_src;
+        }
 
-            if ($user->save()) {
-                if ($request->has('role_id')) {
-                    $user->roles()->sync($request->role_id);
-                }
+        $changesMade = false;
 
-                if ($request->has('badge_id')) {
-                    $user->badges()->sync($request->badge_id);
-                } else {
-                    $user->badges()->detach();
-                }
+        if ($user->isDirty()) {
+            $user->save();
+            $changesMade = true;
+        }
 
-                return Redirect::route('admin.users.index')->with('success', 'User Updated Successfully');
+        // Handle Roles
+        $submittedRoles = $request->has('role_id') ? array_map('intval', $request->role_id) : [];
+        $currentRoles = $user->roles()->pluck('id')->toArray();
+        if (array_diff($submittedRoles, $currentRoles) !== array_diff($currentRoles, $submittedRoles)) {
+            $user->roles()->sync($submittedRoles);
+            $changesMade = true;
+        }
+
+        // Handle Badges
+        $submittedBadges = $request->has('badge_id') ? array_map('intval', $request->badge_id) : [];
+        $currentBadges = $user->badges()->pluck('id')->toArray();
+        if (array_diff($submittedBadges, $currentBadges) !== array_diff($currentBadges, $submittedBadges)) {
+            if (empty($submittedBadges)) {
+                $user->badges()->detach();
             } else {
-                return Redirect::back()->with('error', 'Something went wrong!');
+                $user->badges()->sync($submittedBadges);
             }
+            $changesMade = true;
+        }
+
+        if ($changesMade) {
+            return Redirect::route('admin.users.index')->with('success', 'User Updated Successfully');
+        } else {
+            return Redirect::route('admin.users.index')->with('info', 'No changes were made');
         }
     }
 
