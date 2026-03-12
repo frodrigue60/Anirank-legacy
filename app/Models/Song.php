@@ -33,6 +33,8 @@ class Song extends Model
         'season_id',
         'year_id',
         'views',
+        'prev_main_rank',
+        'prev_seasonal_rank',
     ];
 
     public const TYPE_OPENING = 'OP';
@@ -379,26 +381,12 @@ class Song extends Model
 
     public function getPreviousRank()
     {
-        if ($this->relationLoaded('previousRanking')) {
-            return $this->previousRanking?->rank;
-        }
-
-        return $this->rankingHistory()
-            ->where('date', '<', now()->toDateString())
-            ->orderBy('date', 'desc')
-            ->value('rank');
+        return $this->prev_main_rank;
     }
 
     public function getPreviousSeasonalRank()
     {
-        if ($this->relationLoaded('previousRanking')) {
-            return $this->previousRanking?->seasonal_rank;
-        }
-
-        return $this->rankingHistory()
-            ->where('date', '<', now()->toDateString())
-            ->orderBy('date', 'desc')
-            ->value('seasonal_rank');
+        return $this->prev_seasonal_rank;
     }
 
     // -------------------------------------------------------------------------

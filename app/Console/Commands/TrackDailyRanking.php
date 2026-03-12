@@ -117,6 +117,19 @@ class TrackDailyRanking extends Command
                 $updateData
             );
 
+            // Denormalize to songs table for performance
+            $songUpdate = [];
+            if (isset($data['rank'])) {
+                $songUpdate['prev_main_rank'] = $data['rank'];
+            }
+            if (isset($data['seasonal_rank'])) {
+                $songUpdate['prev_seasonal_rank'] = $data['seasonal_rank'];
+            }
+
+            if (!empty($songUpdate)) {
+                Song::where('id', $songId)->update($songUpdate);
+            }
+
             $bar->advance();
         }
 
