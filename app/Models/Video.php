@@ -13,8 +13,6 @@ class Video extends Model
     protected $fillable = [
         'embed_code',
         'video_src',
-        'type',
-        'disk',
         'song_variant_id',
     ];
 
@@ -25,8 +23,8 @@ class Video extends Model
         parent::boot();
 
         static::deleting(function ($video) {
-            if ($video->video_src && Storage::disk($video->disk)->exists($video->video_src)) {
-                Storage::disk($video->disk)->delete($video->video_src);
+            if ($video->video_src && Storage::disk()->exists($video->video_src)) {
+                Storage::disk()->delete($video->video_src);
             }
         });
     }
@@ -41,27 +39,48 @@ class Video extends Model
         return $this->belongsTo(SongVariant::class);
     }
 
+    /**
+     * Resolves the best available video source based on existence.
+     * 1. S3 File (video_src)
+     * 2. Embed Code
+     * @return array|null
+     */
+    public function getSourceDataAttribute()
+    {
+        if ($this->video_src && Storage::disk()->exists($this->video_src)) {
+            return [
+                'url' => Storage::url($this->video_src),
+                'type' => 'file'
+            ];
+        }
+
+        if ($this->embed_code) {
+            return [
+                'url' => $this->embed_code,
+                'type' => 'embed'
+            ];
+        }
+
+        return null;
+    }
+
     public function isEmbed()
     {
-        return $this->type === 'embed';
+        return $this->source_data['type'] === 'embed' ?? false;
     }
 
     public function isLocal()
     {
-        return $this->type === 'file';
+        return $this->source_data['type'] === 'file' ?? false;
     }
 
     public function getEmbedUrlAttribute()
     {
-        if (!$this->isEmbed()) return null;
-
-        return $this->embed_code;
+        return $this->isEmbed() ? $this->embed_code : null;
     }
 
     public function getLocalUrlAttribute()
     {
-        if (!$this->isLocal()) return null;
-
-        return Storage::disk($this->disk)->url($this->video_src);
+        return $this->isLocal() ? Storage::url($this->video_src) : null;
     }
 }

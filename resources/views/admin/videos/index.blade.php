@@ -37,7 +37,7 @@
                                 <td class="px-6 py-4">
                                     <span
                                         class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-zinc-800 text-zinc-300 border border-zinc-700">
-                                        {{ $video->type }}
+                                        {{ $video->source_data['type'] ?? 'N/A' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">

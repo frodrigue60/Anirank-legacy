@@ -106,25 +106,28 @@ class SongDetail extends Component
             return '';
         }
 
-        $video = $this->currentVariant->video;
+        $sourceData = $this->currentVariant->video->source_data;
 
-        if ($video->isEmbed()) {
-            // embed_code contains full <iframe> HTML, extract the src attribute
-            if (preg_match('/src=["\']([^"\']+)["\']/', $video->embed_code, $matches)) {
+        if (!$sourceData) {
+            return '';
+        }
+
+        $url = $sourceData['url'];
+
+        if ($sourceData['type'] === 'embed') {
+            // If it's a full <iframe>/html, extract the src
+            if (preg_match('/src=["\']([^"\']+)["\']/', $url, $matches)) {
                 $url = $matches[1];
-                // Append autoplay parameter
-                $separator = str_contains($url, '?') ? '&' : '?';
-                return $url . $separator . 'autoplay=1';
             }
-            return $video->embed_code;
+            
+            // Append autoplay if it's a URL
+            if (filter_var($url, FILTER_VALIDATE_URL)) {
+                $separator = str_contains($url, '?') ? '&' : '?';
+                $url = $url . $separator . 'autoplay=1';
+            }
         }
 
-        // File type
-        if ($video->video_src && Storage::disk($video->disk)->exists($video->video_src)) {
-            return Storage::disk($video->disk)->url($video->video_src);
-        }
-
-        return $video->video_src ?? '';
+        return $url;
     }
 
     public function isCurrentEmbed()

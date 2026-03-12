@@ -11,13 +11,13 @@
                 isEmbed = $event.detail.isEmbed;
                 videoSrc = $event.detail.src;
                 $nextTick(() => {
-                    if (!isEmbed) {
+                    if (!isEmbed && videoSrc) {
                         const vid = $el.querySelector('video');
                         if (vid) { vid.load(); vid.play(); }
                     }
                 });
             ">
-            @if ($currentVariant && $currentVariant->video)
+            <div x-show="videoSrc" class="w-full h-full">
                 <template x-if="isEmbed">
                     <iframe :src="videoSrc" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media"
                         allowfullscreen></iframe>
@@ -28,14 +28,15 @@
                         <source :src="videoSrc" type="video/mp4">
                     </video>
                 </template>
-            @else
-                <div class="absolute inset-0 flex items-center justify-center bg-surface-darker">
-                    <div class="text-center">
-                        <span class="material-symbols-outlined text-6xl text-white/20 mb-4">videocam_off</span>
-                        <p class="text-white/40">No video available</p>
-                    </div>
+            </div>
+            
+            <div x-show="!videoSrc" class="absolute inset-0 flex items-center justify-center bg-surface-darker">
+                <div class="text-center">
+                    <span class="material-symbols-outlined text-6xl text-white/20 mb-4">videocam_off</span>
+                    <p class="text-white/40 font-bold uppercase tracking-widest text-xs">No video source available</p>
+                    <p class="text-white/20 text-[10px] mt-2">Checking mirror sources...</p>
                 </div>
-            @endif
+            </div>
         </div>
 
         {{-- Title & Actions Section --}}

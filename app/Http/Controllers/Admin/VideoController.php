@@ -109,8 +109,6 @@ class VideoController extends Controller
                 $request->video->storeAs($path, $file_name);
 
                 $video->video_src = $path.$file_name;
-                $video->type = 'file';
-                $video->disk = config('filesystems.default');
             } else {
                 $validator = Validator::make($request->all(), [
                     'embed' => 'required',
@@ -123,7 +121,6 @@ class VideoController extends Controller
                 }
 
                 $video->embed_code = $request->embed;
-                $video->type = 'embed';
             }
 
             $video->save();
@@ -206,14 +203,11 @@ class VideoController extends Controller
 
                 // Delete old file after new one is safely stored
                 $oldFile = $video->video_src;
-                $oldDisk = $video->disk;
-                if ($oldFile && Storage::disk($oldDisk)->exists($oldFile)) {
-                    Storage::disk($oldDisk)->delete($oldFile);
+                if ($oldFile && Storage::disk()->exists($oldFile)) {
+                    Storage::disk()->delete($oldFile);
                 }
 
                 $video->video_src = $path.$file_name;
-                $video->type = 'file';
-                $video->disk = config('filesystems.default');
             } else {
                 $validator = Validator::make($request->all(), [
                     'embed' => 'required',
@@ -227,7 +221,6 @@ class VideoController extends Controller
 
                 $video->embed_code = $request->embed;
                 $video->video_src = null;
-                $video->type = 'embed';
             }
 
             $video->update();
