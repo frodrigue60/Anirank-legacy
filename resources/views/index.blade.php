@@ -270,6 +270,8 @@
 
         {{-- SIDEBAR --}}
         <aside class="lg:col-span-3 flex flex-col gap-8 sm:max-w-[400px] sm:mx-auto">
+
+
             <div class="bg-surface-darker rounded-2xl p-6 border border-white/5">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="font-bold text-white text-lg">Featured Artists</h3>
@@ -308,8 +310,10 @@
                 </div>
             </div>
 
+            <livewire:announcement-sidebar />
+
             {{-- EVENT/COMMUNITY BOX --}}
-            <div class="relative rounded-2xl overflow-hidden aspect-4/5 flex flex-col justify-end p-6 group">
+            {{-- <div class="relative rounded-2xl overflow-hidden aspect-4/5 flex flex-col justify-end p-6 group">
                 <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                     style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAH_og0-9n8HCwoymOtvxCZ2iSwhi1s0A9GouQSn-K7NzkZ13nzTIqMOJ6cq1utUw0s-FL7CewN6C8VFcJizGXn7mHZASt9HtY3-Lhm7ktTQLi7ouj5QP8adxWImQ_5RxcUGZRHyujm7HGEcipxIes_YOw3FD7C2XnhIYlfxnYJ8zeWxbouotxhLpbP4NwK2OAuftUr0xAL6mD6jN8392YwYPYusIbgoJXxmVZ38rnjbBuYc5uaDeXAuuWdDfBjH2c72v2y7Btneg8');">
                 </div>
@@ -323,14 +327,14 @@
                         class="w-full bg-[#5865F2] text-white font-bold py-3 rounded-lg hover:bg-[#4752C4] transition-colors inline-block text-center">Join
                         Now</a>
                 </div>
-            </div>
+            </div> --}}
 
             {{-- ADS placeholder --}}
-            <div
+            {{-- <div
                 class="p-8 rounded-2xl text-center border border-dashed border-white/10 bg-surface-darker/50 flex flex-col items-center justify-center min-h-[250px] group">
                 <span class="material-symbols-outlined text-[32px] text-white/10 mb-2">ad_units</span>
                 <div class="text-white/20 text-[10px] font-black tracking-[0.2em] uppercase">Advertisement</div>
-            </div>
+            </div> --}}
         </aside>
     </main>
 

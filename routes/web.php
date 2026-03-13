@@ -166,6 +166,9 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
 
     // Badges
     Route::resource('badges', AdminBadgeController::class);
+
+    // Announcements
+    Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class);
 });
 
 /*
