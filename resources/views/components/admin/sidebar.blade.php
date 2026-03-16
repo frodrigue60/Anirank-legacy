@@ -64,6 +64,7 @@
                     <x-admin.sidebar-link route="admin.song-reports.index" icon="flag" label="Song Reports" />
                     <x-admin.sidebar-link route="admin.comment-reports.index" icon="report" label="Comment Reports" />
                     <x-admin.sidebar-link route="admin.requests.index" icon="mail" label="Requests" />
+                    <x-admin.sidebar-link route="admin.audit-logs.index" icon="history" label="Audit Logs" />
                 </div>
             </div>
         </div>

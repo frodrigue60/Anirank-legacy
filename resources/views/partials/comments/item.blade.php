@@ -4,7 +4,7 @@
         @if ($comment->user)
             <a href="{{ route('users.show', $comment->user) }}"
                 class="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-white/10 hover:ring-2 hover:ring-primary transition-all">
-                <x-ui.image :src="$comment->user->avatar_url" :alt="$comment->user->name" class="w-full h-full" fallback="default-avatar.webp" />
+                <x-ui.image :src="$comment->user->avatar_url" :alt="$comment->user->name" class="w-full h-full" />
             </a>
         @else
             <div class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 border border-white/5">
@@ -20,8 +20,7 @@
                             class="font-bold text-white text-sm hover:text-primary transition-colors">{{ $comment->user->name }}</a>
                         @foreach ($comment->user->badges as $badge)
                             <span class="flex items-center" title="{{ $badge->name }}">
-                                <x-ui.image :src="$badge->icon_url" :alt="$badge->name" class="w-4 h-4 rounded-sm"
-                                    fallback="default-badge.webp" />
+                                <x-ui.image :src="$badge->icon_url" :alt="$badge->name" class="w-4 h-4 rounded-sm" />
                             </span>
                         @endforeach
                     @else

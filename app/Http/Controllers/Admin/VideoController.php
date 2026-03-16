@@ -123,6 +123,7 @@ class VideoController extends Controller
                 $video->embed_code = $request->embed;
             }
 
+            $video->status = $this->resolveStatus($request);
             $video->save();
 
             return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Video saved successfully');
@@ -223,6 +224,7 @@ class VideoController extends Controller
                 $video->video_src = null;
             }
 
+            $video->status = $this->resolveStatus($request);
             $video->update();
 
             return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Video updated successfully');
@@ -261,5 +263,19 @@ class VideoController extends Controller
         ];
 
         return $mimeMap[$mimeType] ?? 'bin';
+    }
+
+    /**
+     * Determine the status based on the user's role.
+     */
+    private function resolveStatus(Request $request): bool
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        if ($user->hasRole('admin') || $user->hasRole('editor')) {
+            return (bool) $request->status;
+        }
+
+        return false;
     }
 }

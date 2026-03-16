@@ -9,10 +9,6 @@ class CommentReport extends Model
 {
     use HasFactory;
 
-    const STATUS_PENDING = 'pending';
-    const STATUS_RESOLVED = 'resolved';
-    const STATUS_DISMISSED = 'dismissed';
-
     protected $fillable = [
         'comment_id',
         'user_id',
@@ -20,6 +16,10 @@ class CommentReport extends Model
         'content',
         'source',
         'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     public function comment()
@@ -34,7 +34,7 @@ class CommentReport extends Model
 
     public function toggle()
     {
-        $this->status = ($this->status === self::STATUS_PENDING) ? self::STATUS_RESOLVED : self::STATUS_PENDING;
+        $this->status = !$this->status;
         return $this->save();
     }
 }

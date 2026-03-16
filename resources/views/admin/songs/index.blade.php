@@ -82,8 +82,18 @@
                                     <td class="px-6 py-4 text-sm font-mono text-zinc-500">#{{ $song->id }}</td>
                                     <td class="px-6 py-4">
                                         <div class="flex flex-col">
-                                            <span
-                                                class="text-sm font-bold text-white group-hover:text-primary transition-colors">{{ $song->name }}</span>
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="text-sm font-bold text-white group-hover:text-primary transition-colors">{{ $song->name }}</span>
+                                                @if ($song->status)
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" title="Active"></span>
+                                                @else
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-zinc-600" title="Hidden"></span>
+                                                @endif
+                                                @if ($song->hasInactiveArtists())
+                                                    <span class="material-symbols-outlined text-[10px] text-amber-500 animate-pulse" title="Partial Artist Availability (Some artists are inactive)">warning</span>
+                                                @endif
+                                            </div>
                                             <span
                                                 class="text-[10px] text-zinc-500 uppercase font-black tracking-widest mt-0.5">{{ $song->slug }}</span>
                                         </div>

@@ -9,7 +9,7 @@ use App\Models\Video;
 
 class SongVariant extends Model
 {
-    use HasFactory;
+    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
 
     protected $fillable = [
         'id',
@@ -17,11 +17,22 @@ class SongVariant extends Model
         'song_id',
         'views',
         'spoiler',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     protected static function boot()
     {
         parent::boot();
+
+        static::saving(function ($model) {
+            if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->hasRole('creator')) {
+                $model->status = false;
+            }
+        });
 
         static::deleting(function ($songVariant) {
             if ($songVariant->video) {

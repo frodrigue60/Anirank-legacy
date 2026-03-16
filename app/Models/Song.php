@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Session;
 
 class Song extends Model
 {
-    use HasFactory;
+    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
 
     protected $appends = [
         'name',
@@ -28,13 +28,12 @@ class Song extends Model
         'song_en',
         'theme_num',
         'type',
-        'slug',
-        'anime_id',
-        'season_id',
-        'year_id',
-        'views',
-        'prev_main_rank',
         'prev_seasonal_rank',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     public const TYPE_OPENING = 'OP';
@@ -44,6 +43,12 @@ class Song extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::saving(function ($model) {
+            if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->hasRole('creator')) {
+                $model->status = false;
+            }
+        });
 
         static::deleting(function ($song) {
             foreach ($song->songVariants as $variant) {
@@ -453,5 +458,13 @@ class Song extends Model
             ['user_id' => $user_id],
             ['rating' => $value]
         );
+    }
+
+    /**
+     * Check if the song has at least one inactive artist.
+     */
+    public function hasInactiveArtists()
+    {
+        return $this->artists()->where('status', false)->exists();
     }
 }

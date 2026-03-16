@@ -54,6 +54,11 @@
         </div>
 
         <div class="flex items-center gap-4 flex-1 justify-end max-w-lg">
+            {{-- Notifications --}}
+            @auth
+                @livewire('navbar-notifications-indicator')
+            @endauth
+
             {{-- Search Trigger --}}
             <button onclick="document.getElementById('modal-search').classList.remove('hidden')"
                 class="relative w-full max-w-xs hidden sm:flex items-center group bg-surface-darker/50 border border-white/10 rounded-full h-10 px-4 text-white/40 hover:border-primary/50 transition-all">
@@ -69,8 +74,7 @@
                     @auth
                         <div
                             class="w-9 h-9 rounded-full bg-cover bg-center ring-2 ring-transparent group-hover:ring-primary transition-all shadow-lg">
-                            <x-ui.image :src="Auth::user()->avatar_url" :alt="Auth::user()->name" class="w-9 h-9 rounded-full"
-                                fallback="default-badge.webp" />
+                            <x-ui.image :src="Auth::user()->avatar_url" :alt="Auth::user()->name" class="w-9 h-9 rounded-full" />
                         </div>
                         <div
                             class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-background-dark">

@@ -89,7 +89,7 @@
                     </h3>
 
                     <div class="space-y-3">
-                        @if ($report->status == 'pending')
+                        @if (!$report->status)
                             <form action="{{ route('admin.comment-reports.toggle', $report->id) }}" method="POST" class="w-full">
                                 @csrf
                                 @method('PATCH')

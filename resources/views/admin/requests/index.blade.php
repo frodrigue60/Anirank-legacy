@@ -39,7 +39,7 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center justify-end gap-2">
                                         @if (Auth::user()->isAdmin() || Auth::user()->isEditor())
-                                            @if ($request->status == 'pending')
+                                            @if (!$request->status)
                                                 <a href="{{ route('admin.requests.show', $request->id) }}"
                                                     class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-lg transition-all border border-zinc-700"
                                                     title="View Request">

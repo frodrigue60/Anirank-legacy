@@ -62,6 +62,7 @@ class SongVariantController extends Controller
         $songVariant->season_id = $song->season_id;
         $songVariant->year_id = $song->year_id;
         $songVariant->spoiler = false;
+        $songVariant->status = $this->resolveStatus($request);
 
         if ($songVariant->save()) {
             return redirect(route('admin.variants.index', ['song_id' => $song->id]))->with('success', 'Song variant added successfully');
@@ -122,6 +123,7 @@ class SongVariantController extends Controller
         $songVariant->season_id = $song->season_id;
         $songVariant->year_id = $song->year_id;
         $songVariant->spoiler = false;
+        $songVariant->status = $this->resolveStatus($request);
 
         if ($songVariant->update()) {
             return redirect(route('admin.variants.index', ['song_id' => $songVariant->song->id]))->with('success', 'Song variant updated successfully');
@@ -138,5 +140,19 @@ class SongVariantController extends Controller
         } else {
             return redirect(route('admin.variants.index', ['song_id' => $songVariant->song_id]))->with('error', 'Error deleting variant');
         }
+    }
+
+    /**
+     * Determine the status based on the user's role.
+     */
+    private function resolveStatus(Request $request): bool
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        if ($user->hasRole('admin') || $user->hasRole('editor')) {
+            return (bool) $request->status;
+        }
+
+        return false;
     }
 }

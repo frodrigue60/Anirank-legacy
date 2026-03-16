@@ -63,6 +63,7 @@
             @include('layouts.alerts')
 
             @yield('content')
+            {{ $slot ?? '' }}
 
             @include('layouts.modal-search')
 

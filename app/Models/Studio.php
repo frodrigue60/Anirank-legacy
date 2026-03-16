@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Studio extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\Auditable;
     protected $appends = ['logo_url'];
 
     protected $fillable = [

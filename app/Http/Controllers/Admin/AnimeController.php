@@ -602,11 +602,7 @@ class AnimeController extends Controller
      */
     private function resolveAnimeStatus(Request $request): bool
     {
-        $user = Auth::user();
-
-        if ($user->hasRole('creator')) {
-            return false;
-        }
+        $user = \Illuminate\Support\Facades\Auth::user();
 
         if ($user->hasRole('admin') || $user->hasRole('editor')) {
             return (bool) $request->animeStatus;

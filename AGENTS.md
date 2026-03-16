@@ -1786,21 +1786,27 @@ The application heavily utilizes **Livewire** for reactive UI components, especi
 
 The following features are identified as standard/premium upgrades for the Anirank CMS to enhance security, user engagement, and scalability:
 
-- [ ] **Audit Trails**: Implement an activity logging system to track administrative changes (who edited what and when).
-- [ ] **Real-time Notifications**: Centralized notification system using Laravel Reverb/Pusher for replies, solved reports, and new seasonal releases.
-- [x] **Media Library**: A centralized manager for image/video assets with automatic WebP conversion and lazy-loading optimizations.
-- [x] **SEO Suite**: Enhanced meta-tag management (Title, Description, OpenGraph) per post and song.
-- [ ] **Intelligent Caching**: Use Redis to store complex ranking calculations, improving performance under high traffic.
+### 1 Nivel: Moderado (Implementación Rápida)
+
+- [x] **Audit Trails**: Implement an activity logging system to track administrative changes.
+- [x] **Audit Trails**: Implemented DB level audit logs for entities.
+- [x] **Notifications Center**: Persistent system for non-realtime updates like replies and follows.
+- [x] **Notifications Center**: Implemented DB level notifications for entities.
 - [ ] **Social Login**: Integration with Discord, Google, or Twitter via Laravel Socialite.
-- [ ] **Internal API**: Full REST/GraphQL API to power potential mobile apps or third-party integrations.
-- [ ] **Gamification**: Achievement system and badges for active contributors and highly-rated theme discoverers.
-- [ ] **Refined User Engagement**:
-    - [ ] **Themes Quiz**: Interactive guessing games with score tracking.
-    - [ ] **Seasonal Predictions**: Community voting on upcoming top-rated themes.
-    - [ ] **User Milestones**: Automated trackable achievements (e.g., "100 Endings Listened").
-- [x] **Social & Community**:
-    - [x] **Thematic Battles**: "Bracket-style" or "1v1" song duels to generate dynamic popularity rankings.
-    - [x] **Activity Feed**: Real-time social wall for user interactions (likes, rates, follows).
-- [ ] **Advanced Personalization & UX**:
-    - [ ] **Non-Stop Player**: Radio-mode continuous playback based on user taste and genres.
-    - [ ] **AniList Profile Sync**: Import "Watching/Completed" lists to customize theme recommendations and avoid spoilers.
+- [x] **Follow System**: Allow users to follow each other to build a personalized social experience.
+- [x] **Follow System**: Implemented DB level pivot table for user follows.
+
+### 2 Nivel: Avanzado (Lógica de Negocio Densa)
+
+- [ ] **Intelligent Caching**: Use Redis to store complex ranking calculations.
+- [ ] **Gamification & Progression**: Achievement system with XP, levels, and badges.
+- [ ] **Themes Quiz**: Interactive guessing games with score tracking.
+- [ ] **Seasonal Predictions**: Community voting on upcoming top-rated themes.
+- [ ] **User Milestones**: Automated trackable achievements (e.g., "100 Endings Listened").
+
+### 3 Nivel: Experto (Complejidad de Integración / Alta Carga)
+
+- [ ] **Real-time Engine**: Centralized messaging using Laravel Reverb/Pusher for instant UI updates.
+- [ ] **Internal API**: Full REST/GraphQL API to power potential mobile apps.
+- [ ] **Smart Mixes**: Radio-mode and auto-generated playlists based on taste and mood.
+- [ ] **Full Bidirectional AniList Sync**: Comprehensive synchronization of lists and scores.

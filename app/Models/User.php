@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, \App\Traits\Auditable;
     protected $appends = ['avatar_url', 'banner_url'];
 
     /**
@@ -216,7 +216,8 @@ class User extends Authenticatable
     public function getAvatarUrlAttribute()
     {
         if ($this->avatar) {
-            return \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->avatar);
+            if (filter_var($this->avatar, FILTER_VALIDATE_URL)) return $this->avatar;
+            return \Illuminate\Support\Facades\Storage::url($this->avatar);
         }
 
         $name = isset($this->name) ? urlencode($this->name) : 'User';
@@ -225,7 +226,28 @@ class User extends Authenticatable
 
     public function getBannerUrlAttribute()
     {
-        return $this->banner ? \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->banner) : null;
+        if (!$this->banner) return null;
+        if (filter_var($this->banner, FILTER_VALIDATE_URL)) return $this->banner;
+        return \Illuminate\Support\Facades\Storage::url($this->banner);
+    }
+
+    /**
+     * Update or create a specific type of image (avatar or banner).
+     */
+    public function updateOrCreateImage(string $path, string $type)
+    {
+        $disk = config('filesystems.default');
+        $oldPath = $this->{$type};
+
+        if ($oldPath && \Illuminate\Support\Facades\Storage::disk($disk)->exists($oldPath)) {
+            \Illuminate\Support\Facades\Storage::disk($disk)->delete($oldPath);
+        }
+
+        $this->update([
+            $type => $path
+        ]);
+
+        return $this;
     }
 
     /**
@@ -255,5 +277,94 @@ class User extends Authenticatable
     public function ratings()
     {
         return $this->hasMany(Rating::class);
+    }
+
+    /**
+     * Users that are following this user.
+     */
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'followed_id', 'follower_id')->withTimestamps();
+    }
+
+    /**
+     * Users that this user is following.
+     */
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'follows', 'follower_id', 'followed_id')->withTimestamps();
+    }
+
+    /**
+     * Check if the user is following another user.
+     */
+    public function isFollowing(User $user)
+    {
+        return $this->following()->where('followed_id', $user->id)->exists();
+    }
+
+    /**
+     * Get notifications for the user.
+     */
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class)->latest();
+    }
+
+    /**
+     * Get unread notifications for the user.
+     */
+    public function unreadNotifications()
+    {
+        return $this->notifications()->unread();
+    }
+
+    /**
+     * Follow a user.
+     */
+    public function follow(User $user)
+    {
+        if ($this->id === $user->id) {
+            return;
+        }
+
+        $res = $this->following()->syncWithoutDetaching([$user->id]);
+
+        // Trigger notification if it's a new follow
+        if (!empty($res['attached'])) {
+            $user->notifications()->create([
+                'type' => 'follow',
+                'subject_id' => $this->id,
+                'subject_type' => 'user',
+                'data' => [
+                    'follower_id' => $this->id,
+                    'follower_name' => $this->name,
+                    'follower_avatar' => $this->avatar_url,
+                    'message' => "{$this->name} started following you",
+                ],
+            ]);
+        }
+
+        return $res;
+    }
+
+    /**
+     * Unfollow a user.
+     */
+    public function unfollow(User $user)
+    {
+        return $this->following()->detach($user->id);
+    }
+
+    /**
+     * Toggle follow state for a user.
+     */
+    public function toggleFollow(User $user)
+    {
+        if ($this->isFollowing($user)) {
+            return $this->unfollow($user);
+        }
+
+        return $this->follow($user);
     }
 }

@@ -181,6 +181,8 @@ class SongController extends Controller
         }
 
         $song->slug = $song->type.$song->theme_num;
+        $song->status = $this->resolveStatus($request);
+
         if ($song->save()) {
             $song->artists()->sync($artistsIds);
 
@@ -308,6 +310,8 @@ class SongController extends Controller
         }
 
         $song->slug = $song->type.$song->theme_num;
+        $song->status = $this->resolveStatus($request);
+
         // dd($song);
         if ($song->update()) {
             $song->artists()->sync($artistsIds);
@@ -357,5 +361,19 @@ class SongController extends Controller
         }
 
         return $string;
+    }
+
+    /**
+     * Determine the status based on the user's role.
+     */
+    private function resolveStatus(Request $request): bool
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        if ($user->hasRole('admin') || $user->hasRole('editor')) {
+            return (bool) $request->status;
+        }
+
+        return false;
     }
 }

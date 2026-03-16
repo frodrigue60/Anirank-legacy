@@ -43,8 +43,19 @@ class UserRequestController extends Controller
     public function attend(UserRequest $userRequest)
     {
         $userRequest->attended_by = Auth::id();
-        $userRequest->status = 'attended';
+        $userRequest->status = true;
         $userRequest->save();
+
+        // Notify the user who made the request
+        $userRequest->user->notifications()->create([
+            'type' => 'activity',
+            'subject_id' => $userRequest->id,
+            'subject_type' => 'user_request',
+            'data' => [
+                'request_title' => $userRequest->title,
+                'message' => 'Your request "' . $userRequest->title . '" has been attended by staff.',
+            ],
+        ]);
 
         return Redirect::back()->with('success', 'Request marked as attended.');
     }

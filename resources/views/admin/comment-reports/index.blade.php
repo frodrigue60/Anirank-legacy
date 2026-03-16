@@ -59,7 +59,7 @@
                                     <form action="{{ route('admin.comment-reports.toggle', $report->id) }}" method="POST">
                                         @csrf
                                         @method('PATCH')
-                                        @if ($report->status == 'pending')
+                                        @if (!$report->status)
                                             <button type="submit"
                                                 class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-white transition-all">
                                                 <span class="material-symbols-outlined text-sm mr-1.5">schedule</span>

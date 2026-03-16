@@ -6,6 +6,7 @@ use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Models\SongVariant;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class CommentController extends Controller
 {
@@ -157,11 +158,26 @@ class CommentController extends Controller
         try {
             $request->validate(['content' => 'required|string']);
 
-            $comment->replies()->create([
+            $reply = $comment->replies()->create([
                 'content' => $request->content,
                 'user_id' => Auth::id(),
                 'song_id' => $comment->song_id,
             ]);
+
+            // Notify parent comment author if they are not the one replying
+            if ($comment->user_id !== Auth::id()) {
+                $comment->user->notifications()->create([
+                    'type' => 'reply',
+                    'subject_id' => $reply->id,
+                    'subject_type' => 'comment',
+                    'data' => [
+                        'replier_name' => Auth::user()->name,
+                        'replier_avatar' => Auth::user()->avatar_url,
+                        'comment_content' => Str::limit($reply->content, 50),
+                        'message' => Auth::user()->name . ' replied to your comment',
+                    ],
+                ]);
+            }
 
             return back()->with('success', 'Respuesta enviada.');
         } catch (\Throwable $th) {

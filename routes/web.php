@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\SongReportController as AdminSongReportController
 use App\Http\Controllers\Admin\SongVariantController as AdminSongVariantController;
 use App\Http\Controllers\Admin\StudioController as AdminStudioController;
 use App\Http\Controllers\Admin\TournamentController as AdminTournamentController;
+use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\UserRequestController as AdminUserRequestController;
 use App\Http\Controllers\Admin\VideoController as AdminVideoController;
@@ -169,6 +170,9 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
 
     // Announcements
     Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class);
+
+    // Audit Logs
+    Route::get('audit-logs', [AdminAuditLogController::class, 'index'])->name('audit-logs.index');
 });
 
 /*
@@ -184,6 +188,7 @@ Route::middleware('auth')->group(function () {
 
     // Profile Management
     Route::controller(UserController::class)->group(function () {
+        Route::get('/notifications', \App\Livewire\NotificationsList::class)->name('notifications.index');
         Route::post('/profile/score-format', 'changeScoreFormat')->name('profile.score-format');
         Route::post('/profile/avatar', 'uploadProfilePic')->name('profile.avatar');
         Route::post('/profile/banner', 'uploadBannerPic')->name('profile.banner');

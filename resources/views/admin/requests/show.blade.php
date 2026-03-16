@@ -11,7 +11,7 @@
                 User Content Proposal</p>
         </div>
 
-        <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden shadow-xl">
+        <div class="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl shadow-xl overflow-hidden">
             {{-- Content Section --}}
             <div class="p-8">
                 <div class="flex items-center justify-between mb-8">
@@ -19,7 +19,7 @@
                         <span class="material-symbols-outlined mr-2 text-blue-500">mail_lock</span> REQUEST CONTENT
                     </h3>
                     <div class="flex items-center gap-2">
-                        @if ($userRequest->status == 'pending')
+                        @if (!$userRequest->status)
                             <span
                                 class="flex items-center gap-1.5 px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-full text-[10px] font-black uppercase tracking-widest text-amber-500">
                                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
@@ -42,7 +42,7 @@
 
                     <div class="space-y-4">
                         <div class="flex items-start justify-between">
-                            <h4 class="text-xl font-bold text-white tracking-tight leading-none uppercase tracking-widest">
+                            <h4 class="text-xl font-bold text-white tracking-widest leading-none uppercase">
                                 {{ $userRequest->title }}
                             </h4>
                             <span
@@ -71,7 +71,7 @@
                 </div>
 
                 <div class="flex items-center gap-3 w-full sm:w-auto">
-                    @if ($userRequest->status == 'pending')
+                    @if (!$userRequest->status)
                         <form action="{{ route('admin.requests.attend', $userRequest->id) }}" method="post"
                             class="flex-1 sm:flex-none">
                             @csrf

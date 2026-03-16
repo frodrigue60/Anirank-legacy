@@ -28,15 +28,37 @@
 
             {{-- User Info --}}
             <div class="flex-1 text-center md:text-left pb-4 md:pb-6">
-                <div class="flex flex-col gap-1 md:gap-2">
-                    <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-xl">
-                        {{ $user->name }}
-                    </h1>
-                    <div class="flex items-center justify-center md:justify-start gap-3">
-                        <div class="h-1 w-12 bg-primary rounded-full"></div>
-                        <span class="text-white/40 text-xs md:text-sm font-black uppercase tracking-[0.2em]">Collector
-                            Archive</span>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="flex flex-col gap-1 md:gap-2">
+                        <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-xl">
+                            {{ $user->name }}
+                        </h1>
+                        <div class="flex items-center justify-center md:justify-start gap-3">
+                            <div class="h-1 w-12 bg-primary rounded-full"></div>
+                            <span class="text-white/40 text-xs md:text-sm font-black uppercase tracking-[0.2em]">Collector
+                                Archive</span>
+                        </div>
+
+                        {{-- Stats --}}
+                        <div class="flex items-center justify-center md:justify-start gap-6 mt-4 md:mt-6">
+                            <div class="flex flex-col">
+                                <span class="text-white font-black text-lg md:text-xl">{{ $user->followers()->count() }}</span>
+                                <span class="text-white/40 text-[10px] md:text-xs font-bold uppercase tracking-widest">Followers</span>
+                            </div>
+                            <div class="h-8 w-px bg-white/10"></div>
+                            <div class="flex flex-col">
+                                <span class="text-white font-black text-lg md:text-xl">{{ $user->following()->count() }}</span>
+                                <span class="text-white/40 text-[10px] md:text-xs font-bold uppercase tracking-widest">Following</span>
+                            </div>
+                        </div>
                     </div>
+
+                    {{-- Actions --}}
+                    @if(auth()->check() && auth()->id() !== $user->id)
+                        <div class="flex items-center justify-center md:justify-end">
+                            @livewire('follow-button', ['user' => $user])
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

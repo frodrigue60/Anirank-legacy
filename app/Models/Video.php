@@ -14,13 +14,24 @@ class Video extends Model
         'embed_code',
         'video_src',
         'song_variant_id',
+        'status',
     ];
 
-    use HasFactory;
+    protected $casts = [
+        'status' => 'boolean',
+    ];
+
+    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
 
     protected static function boot()
     {
         parent::boot();
+
+        static::saving(function ($model) {
+            if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->hasRole('creator')) {
+                $model->status = false;
+            }
+        });
 
         static::deleting(function ($video) {
             if ($video->video_src && Storage::disk()->exists($video->video_src)) {

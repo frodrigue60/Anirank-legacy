@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class Format extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\Auditable;
 
     protected $fillable = [
         'name',

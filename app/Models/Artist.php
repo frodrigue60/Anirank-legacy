@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Artist extends Model
 {
-    use HasFactory;
+    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
     protected $appends = ['avatar_url'];
 
     protected $fillable = [
@@ -15,11 +15,22 @@ class Artist extends Model
         'name_jp',
         'slug',
         'avatar',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     protected static function boot()
     {
         parent::boot();
+
+        static::saving(function ($model) {
+            if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->hasRole('creator')) {
+                $model->status = false;
+            }
+        });
 
         static::creating(function ($artist) {
             if (empty($artist->slug)) {
@@ -41,7 +52,8 @@ class Artist extends Model
     public function getAvatarUrlAttribute()
     {
         if ($this->avatar) {
-            return \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->avatar);
+            if (filter_var($this->avatar, FILTER_VALIDATE_URL)) return $this->avatar;
+            return \Illuminate\Support\Facades\Storage::url($this->avatar);
         }
 
         return null;
@@ -76,5 +88,24 @@ class Artist extends Model
         }
 
         return $isAttached;
+    }
+
+    /**
+     * Update or create a specific type of image (avatar).
+     */
+    public function updateOrCreateImage(string $path, string $type)
+    {
+        $disk = config('filesystems.default');
+        $oldPath = $this->{$type};
+
+        if ($oldPath && \Illuminate\Support\Facades\Storage::disk($disk)->exists($oldPath)) {
+            \Illuminate\Support\Facades\Storage::disk($disk)->delete($oldPath);
+        }
+
+        $this->update([
+            $type => $path
+        ]);
+
+        return $this;
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Anime extends Model
 {
-    use HasFactory;
+    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
 
     protected $appends = ['cover_url', 'banner_url'];
 
@@ -17,17 +17,23 @@ class Anime extends Model
         'slug',
         'description',
         'anilist_id',
-        'status',
-        'year_id',
-        'season_id',
-        'format_id',
-        'cover',
         'banner',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     protected static function boot()
     {
         parent::boot();
+
+        static::saving(function ($model) {
+            if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->hasRole('creator')) {
+                $model->status = false;
+            }
+        });
 
         static::deleting(function ($anime) {
             $disk = env('FILESYSTEM_DISK', 'public');
@@ -110,5 +116,24 @@ class Anime extends Model
         $this->status = ! $this->status;
 
         return $this->save();
+    }
+
+    /**
+     * Update or create a specific type of image (cover or banner).
+     */
+    public function updateOrCreateImage(string $path, string $type)
+    {
+        $disk = config('filesystems.default');
+        $oldPath = $this->{$type};
+
+        if ($oldPath && \Illuminate\Support\Facades\Storage::disk($disk)->exists($oldPath)) {
+            \Illuminate\Support\Facades\Storage::disk($disk)->delete($oldPath);
+        }
+
+        $this->update([
+            $type => $path
+        ]);
+
+        return $this;
     }
 }

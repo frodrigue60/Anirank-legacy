@@ -99,7 +99,10 @@ class ArtistController extends Controller
             $artist->avatar = $request->avatar_src;
         }
 
+        $artist->status = $this->resolveStatus($request);
+
         if ($artist->save()) {
+
             // Automate avatar generation for new artists ONLY if none was provided
             if (!$artist->avatar) {
                 $this->generateThumbnail($artist);
@@ -177,6 +180,8 @@ class ArtistController extends Controller
             }
             $artist->avatar = $request->avatar_src;
         }
+
+        $artist->status = $this->resolveStatus($request);
 
         if ($artist->save()) {
             return redirect(route('admin.artists.index'))->with('success', 'Data has been updated successfully');
@@ -256,5 +261,19 @@ class ArtistController extends Controller
         }
 
         return $slug;
+    }
+
+    /**
+     * Determine the status based on the user's role.
+     */
+    private function resolveStatus(Request $request): bool
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        if ($user->hasRole('admin') || $user->hasRole('editor')) {
+            return (bool) $request->status;
+        }
+
+        return false;
     }
 }

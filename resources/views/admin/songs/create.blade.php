@@ -8,8 +8,8 @@
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-white tracking-tight">Add Theme Song</h1>
             <p class="text-zinc-400 mt-1 uppercase text-[10px] font-black tracking-widest">
-                @if ($currentPost)
-                    Register a new opening or ending for {{ $currentPost->title }}
+                @if ($currentAnime)
+                    Register a new opening or ending for {{ $currentAnime->title }}
                 @else
                     Register a new opening or ending entry
                 @endif
@@ -91,8 +91,8 @@
                             return {
                                 search: '',
                                 results: [],
-                                selectedId: {{ old('anime_id') ?? $selectedPostId ? old('anime_id') ?? $selectedPostId : 'null' }},
-                                selectedTitle: '{{ $currentPost ? addslashes($currentPost->title) : '' }}',
+                                selectedId: {{ old('anime_id') ?? $selectedAnimeId ? old('anime_id') ?? $selectedAnimeId : 'null' }},
+                                selectedTitle: '{{ $currentAnime ? addslashes($currentAnime->title) : '' }}',
                                 loading: false,
                                 showResults: false,
 
