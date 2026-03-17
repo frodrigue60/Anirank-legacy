@@ -201,8 +201,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/{variant}/rate', 'rate')->name('rate');
         Route::post('/{variant}/like', 'like')->name('like');
         Route::post('/{variant}/dislike', 'dislike')->name('dislike');
-        Route::post('/{variant}/favorite', 'toggleFavorite')->name('favorite');
     });
+
+    Route::post('/songs/{song}/favorite', [SongController::class, 'toggleFavorite'])->name('songs.favorite');
 
     // Comments
     Route::controller(CommentController::class)->prefix('comments')->as('comments.')->group(function () {

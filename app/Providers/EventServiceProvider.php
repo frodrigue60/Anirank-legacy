@@ -20,6 +20,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         \Illuminate\Auth\Events\Login::class => [
             \App\Listeners\UpdateLastLogin::class,
+            \App\Listeners\UpdateDailyLoginXp::class,
         ],
     ];
 

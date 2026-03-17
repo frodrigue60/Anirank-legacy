@@ -183,6 +183,12 @@ class SongDetail extends Component
         $results = $this->song->favorites()->toggle($userId);
         
         $isFavorite = count($results['attached']) > 0;
+
+        if ($isFavorite) {
+            app(\App\Services\XpService::class)->award(Auth::user(), 'add_favorite', [
+                'song_id' => $this->song->id
+            ]);
+        }
         
         $this->dispatch('toast', 
             type: $isFavorite ? 'success' : 'info', 
@@ -212,10 +218,16 @@ class SongDetail extends Component
         if ($this->replyingTo) {
             $this->validateOnly('replyBody');
 
-            $this->song->comments()->create([
+            $comment = $this->song->comments()->create([
                 'user_id' => Auth::id(),
                 'content' => $this->replyBody,
                 'parent_id' => $this->replyingTo
+            ]);
+
+            app(\App\Services\XpService::class)->award(Auth::user(), 'comment', [
+                'comment_id' => $comment->id,
+                'parent_id' => $this->replyingTo,
+                'song_id' => $this->song->id
             ]);
 
             $this->replyBody = '';
@@ -223,9 +235,14 @@ class SongDetail extends Component
         } else {
             $this->validateOnly('commentBody');
 
-            $this->song->comments()->create([
+            $comment = $this->song->comments()->create([
                 'user_id' => Auth::id(),
                 'content' => $this->commentBody
+            ]);
+
+            app(\App\Services\XpService::class)->award(Auth::user(), 'comment', [
+                'comment_id' => $comment->id,
+                'song_id' => $this->song->id
             ]);
 
             $this->commentBody = '';
@@ -306,6 +323,10 @@ class SongDetail extends Component
 
         $playlist->songs()->attach($this->song->id, ['position' => 1]);
 
+        app(\App\Services\XpService::class)->award(Auth::user(), 'create_playlist', [
+            'playlist_id' => $playlist->id
+        ]);
+
         $this->newPlaylistName = '';
         $this->openPlaylistModal();
         $this->dispatch('toast', type: 'success', message: 'Playlist created successfully!');
@@ -321,6 +342,12 @@ class SongDetail extends Component
         } else {
             $maxPos = $playlist->songs()->max('position') ?? 0;
             $playlist->songs()->attach($this->song->id, ['position' => $maxPos + 1]);
+
+            app(\App\Services\XpService::class)->award(Auth::user(), 'add_to_playlist', [
+                'playlist_id' => $playlist->id,
+                'song_id' => $this->song->id
+            ]);
+
             $this->dispatch('toast', type: 'success', message: 'Added to playlist');
         }
 
@@ -349,6 +376,12 @@ class SongDetail extends Component
             }
 
             $this->song->rate($value, Auth::id());
+
+            app(\App\Services\XpService::class)->award(Auth::user(), 'rate_song', [
+                'song_id' => $this->song->id,
+                'rating' => $value
+            ]);
+
             $this->calculateScore();
             $this->showRatingModal = false;
 

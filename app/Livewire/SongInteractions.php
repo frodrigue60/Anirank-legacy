@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Song;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
+use App\Services\XpService;
 
 class SongInteractions extends Component
 {
@@ -95,6 +96,12 @@ class SongInteractions extends Component
 
         $results = $this->song->favorites()->toggle(Auth::id());
         $isAdded = count($results['attached']) > 0;
+
+        if ($isAdded) {
+            app(XpService::class)->award(Auth::user(), 'add_favorite', [
+                'song_id' => $this->song->id
+            ]);
+        }
 
         $this->dispatch(
             'toast',

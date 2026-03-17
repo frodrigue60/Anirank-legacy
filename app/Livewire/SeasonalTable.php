@@ -63,7 +63,12 @@ class SeasonalTable extends Component
 
         $song = Song::find($songId);
         if ($song) {
-            $song->toggleFavorite();
+            $isAdded = $song->toggleFavorite();
+            if ($isAdded) {
+                app(\App\Services\XpService::class)->award(Auth::user(), 'add_favorite', [
+                    'song_id' => $song->id
+                ]);
+            }
         }
     }
 

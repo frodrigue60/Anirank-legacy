@@ -7,9 +7,16 @@ use Illuminate\Http\Request;
 use App\Models\SongVariant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Services\XpService;
 
 class CommentController extends Controller
 {
+    protected $xpService;
+
+    public function __construct(XpService $xpService)
+    {
+        $this->xpService = $xpService;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -48,6 +55,11 @@ class CommentController extends Controller
         $comment = new Comment($validatedData);
         $comment->user_id = $user->id;
         $comment->save();
+
+        $this->xpService->award($user, 'comment', [
+            'comment_id' => $comment->id,
+            'song_id' => $comment->song_id
+        ]);
 
         return redirect()->back()->with('status', '¡Comentario añadido con éxito!');
     }
@@ -162,6 +174,12 @@ class CommentController extends Controller
                 'content' => $request->content,
                 'user_id' => Auth::id(),
                 'song_id' => $comment->song_id,
+            ]);
+
+            $this->xpService->award(Auth::user(), 'comment', [
+                'comment_id' => $reply->id,
+                'parent_id' => $comment->id,
+                'song_id' => $comment->song_id
             ]);
 
             // Notify parent comment author if they are not the one replying

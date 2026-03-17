@@ -7,9 +7,16 @@ use App\Models\Playlist;
 use App\Models\Anime;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Services\XpService;
 
 class PlaylistController extends Controller
 {
+    protected $xpService;
+
+    public function __construct(XpService $xpService)
+    {
+        $this->xpService = $xpService;
+    }
     public function index()
     {
         $playlists = Auth::user()->playlists()
@@ -38,6 +45,10 @@ class PlaylistController extends Controller
         $playlist->description = $request->input('description');
         $playlist->user_id = Auth::id();
         $playlist->save();
+
+        $this->xpService->award(Auth::user(), 'create_playlist', [
+            'playlist_id' => $playlist->id
+        ]);
 
         $message = 'Playlist created successfully.';
 

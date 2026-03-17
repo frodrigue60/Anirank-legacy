@@ -12,9 +12,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Services\XpService;
 
 class SongVariantController extends Controller
 {
+    protected $xpService;
+
+    public function __construct(XpService $xpService)
+    {
+        $this->xpService = $xpService;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -276,6 +283,12 @@ class SongVariantController extends Controller
                 // Utilizar el score ajustado
                 $songVariant->song->rate($score, Auth::User()->id);
 
+                $this->xpService->award(Auth::user(), 'rate_song', [
+                    'song_id' => $songVariant->song_id,
+                    'variant_id' => $songVariant->id,
+                    'score' => $score
+                ]);
+
                 return redirect()->back()->with('success', 'Rated Successfully');
             } else {
                 return redirect()->back()->with('warning', 'Only values between 1 and 100');
@@ -446,19 +459,6 @@ class SongVariantController extends Controller
         return $variant;
     }
 
-    public function toggleFavorite(SongVariant $variant)
-    {
-        if (! Auth::check()) {
-            return redirect()->back()->with('warning', 'Please login');
-        }
-
-        $user = Auth::user();
-        $song = $variant->song;
-        $results = $song->favorites()->toggle($user->id);
-        $isFavorite = count($results['attached']) > 0;
-
-        return redirect()->back()->with('success', $isFavorite ? 'Song added to favorites' : 'Song removed from favorites');
-    }
 
     public function ranking()
     {

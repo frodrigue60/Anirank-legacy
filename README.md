@@ -7,8 +7,8 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🚀 AniList Synchronization**: Automatically fetch anime metadata, themes, and studio/producer relationships directly from AniList.
 - **🎬 Studio vs. Producer Distinction**: Separates animation studios (creative) from production companies/committees (business) for better data accuracy.
 - **📊 Seasonal Charts**: Browse the latest themes organized by year and season.
-- **🏆 Global & Seasonal Rankings**: Real-time leaderboards for top-rated and most-viewed openings and endings, with distinct seasonal scoping.
-- **📈 Ranking Trends**: Daily historical snapshots for songs, displaying performance trends (Up/Down/Same/New) with visual indicators for both global and seasonal context.
+- **🏆 Global & Seasonal Rankings**: Real-time leaderboards for top-rated and most-viewed openings and endings, with distinct seasonal scoping and daily historical snapshots.
+- **📈 Ranking Trends**: Daily performance tracking (Up/Down/Same/New) for both global and seasonal rankings, with visual trend indicators.
 - **🏅 Badges & Rewards System**: Centralized system to reward user participation with unique badges, managed directly from the admin panel.
 - **🖼️ High-Performance Media Rendering**: Standardized `<x-ui.image>` component with lazy-loading, error fallbacks, and automated avatar generation for users and artists.
 - **🔢 Centralized Score Formatting**: Flexible rating display system supporting multiple formats (100-point, 10-point, 10-point decimal, 5-point) with centralized logic in the model layer.
@@ -17,11 +17,10 @@ Anirank is a modern, premium web application for discovering, exploring, and ran
 - **🔐 Dynamic Role Management**: A robust many-to-many role system (`User <-> Role`) with unified middleware for scalable permissions.
 - **📊 Advanced Analytics**: Time-series view tracking for trending content and a premium admin dashboard with interactive charts.
 - **🛠️ Standardized Admin Panel**: Robust CRUD control with unified search patterns and RESTful state management.
-- **🔔 Unified Notification System**: Real-time feedback via a custom subtle toast notification system, replacing intrusive popups.
-- **📝 Streamlined Request Workflow**: Simplified user request system with automatic categorization and manual staff-controlled status tracking.
-- **🖼️ Dynamic Storage System**: Fully disk-agnostic file management for all media (images, videos, avatars, badges). Switch between local and S3/MinIO storage with a single `.env` variable (`FILESYSTEM_DISK`). Includes polymorphic `Image` model with automatic disk tracking and safe deletion guards.
-- **🔍 SEO Centralization**: Single-source meta tag management using Blade partials, eliminating redundancy across views.
 - **⚡ Vite Optimization**: Streamlined asset configuration to minimize production bundle size and improve build performance.
+- **🛡️ Audit Log System**: Comprehensive tracking of all resource mutations (Create, Update, Delete) for core models (Anime, Song, Artist, etc.).
+- **🔔 Unified Notification System**: Real-time user alerts for social interactions (replies, follows) and staff announcements via a centralized JSON-based system.
+- **🤝 Social Connectivity**: Dynamic user-to-user follows and a global activity feed capturing community interactions.
 - **🏷️ Automated Genre System**: Multi-layered categorization with direct AniList synchronization and advanced filtering capabilities across all database views.
 - **🔒 Livewire Request Guard**: Application-wide optimization pattern that blocks redundant requests and disables interactive elements during data loading for a robust UX.
 - **🚀 Optimized Dispatching**: Migrated inter-component events (like modal triggers) to client-side dispatches, eliminating unnecessary server roundtrips.

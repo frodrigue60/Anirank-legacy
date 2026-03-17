@@ -85,6 +85,21 @@ To maintain a lean production bundle, `vite.config.mjs` only registers high-leve
 - **Client-Side Dispatching**: For component-to-component communication (like opening modals), we use Alpine's `@click="$dispatch('event')"` instead of `wire:click="$dispatch('event')"`. This bypasses the unnecessary server roundtrip of the origin component, sending the request directly to the target listener.
 - **Server-Side Submission Guards**: Sensitive actions (like submitting reports) implement a protected `$isSubmitting` boolean state to prevent double-processing on the backend.
 
+### 🛡️ Audit Log System (Staff Actions)
+
+All resource mutations (Create, Update, Delete) for core models are tracked in the `audit_logs` table.
+
+- **Models Tracked**: `Anime`, `Song`, `SongVariant`, `Video`, `Artist`.
+- **Data Saved**: `old_values`, `new_values` (JSON), `event` type, `ip_address`, `user_agent`, and the `url` where the action occurred.
+- **Access**: Only Admins can view the full audit trail.
+
+### 🔔 Integrated Notification System
+
+The application uses a unified notification system stored in the `notifications` table, using JSON payloads for frontend flexibility.
+
+- **Trigger Points**: Comment replies, user follow events, liked content (optional), and staff announcements.
+- **Agnostic subjects**: Uses `subject_id` and `subject_type` (like 'song' or 'comment') instead of hardcoded class names for cross-system compatibility.
+
 ### Livewire Infinite Scroll Pattern
 
 All infinite scroll implementations use **Alpine's `x-intersect.once`** instead of Livewire's `wire:intersect`. This prevents the IntersectionObserver from re-firing in a loop after each Livewire re-render.
@@ -202,7 +217,7 @@ Represents an **anime series**.
 | `slug`        | string  | URL-friendly unique identifier.          |
 | `description` | text    | Synopsis/description (nullable).         |
 | `anilist_id`  | bigint  | ID from the AniList API (nullable).      |
-| `status`      | boolean | Published status (0=draft, 1=published). |
+| `status`      | boolean | Published status (0=inactive, 1=active). |
 | `year_id`     | FK      | References `years.id`.                   |
 | `season_id`   | FK      | References `seasons.id`.                 |
 | `format_id`   | FK      | References `formats.id`.                 |
@@ -238,19 +253,20 @@ Represents an **anime genre** (e.g., Action, Romance, Sci-Fi).
 
 Represents a **theme song** (Opening or Ending) associated with a Post.
 
-| Field            | Type   | Description                                |
-| ---------------- | ------ | ------------------------------------------ |
-| `song_romaji`    | string | Romanized song title (nullable).           |
-| `song_jp`        | string | Japanese song title (nullable).            |
-| `song_en`        | string | English song title (nullable).             |
-| `theme_num`      | string | Theme number (e.g., "1" for OP1).          |
-| `type`           | enum   | `OP`, `ED`, `INS` (Insert), `OTH` (Other). |
-| `slug`           | string | URL-friendly identifier.                   |
-| `likes_count`    | bigint | Denormalized likes counter.                |
-| `dislikes_count` | bigint | Denormalized dislikes counter.             |
-| `post_id`        | FK     | References `animes.id`.                    |
-| `year_id`        | FK     | References `years.id`.                     |
-| `season_id`      | FK     | References `seasons.id`.                   |
+| Field            | Type    | Description                                |
+| ---------------- | ------- | ------------------------------------------ |
+| `song_romaji`    | string  | Romanized song title (nullable).           |
+| `song_jp`        | string  | Japanese song title (nullable).            |
+| `song_en`        | string  | English song title (nullable).             |
+| `theme_num`      | string  | Theme number (e.g., "1" for OP1).          |
+| `type`           | enum    | `OP`, `ED`, `INS` (Insert), `OTH` (Other). |
+| `slug`           | string  | URL-friendly identifier.                   |
+| `likes_count`    | bigint  | Denormalized likes counter.                |
+| `dislikes_count` | bigint  | Denormalized dislikes counter.             |
+| `post_id`        | FK      | References `animes.id`.                    |
+| `year_id`        | FK      | References `years.id`.                     |
+| `season_id`      | FK      | References `seasons.id`.                   |
+| `status`         | boolean | Active status (0=inactive, 1=active).      |
 
 **Relationships:**
 
@@ -288,6 +304,7 @@ Represents a **specific version** of a song (e.g., V1, V2, Creditless, Spoiler).
 | `spoiler`        | boolean | Flag if the variant contains spoilers.  |
 | `year_id`        | FK      | References `years.id`.                  |
 | `season_id`      | FK      | References `seasons.id`.                |
+| `status`         | boolean | Active status (0=inactive, 1=active).   |
 
 **Relationships:**
 
@@ -303,12 +320,13 @@ Represents a **specific version** of a song (e.g., V1, V2, Creditless, Spoiler).
 
 Represents the **actual video file** for a SongVariant.
 
-| Field             | Type   | Description                                    |
-| ----------------- | ------ | ---------------------------------------------- |
-| `video_src`       | string | Path to the local video file (storage).        |
-| `embed_code`      | string | Embed URL for external videos (e.g., YouTube). |
-| `type`            | string | `file` for local, `embed` for external.        |
-| `song_variant_id` | FK     | References `song_variants.id`.                 |
+| Field             | Type    | Description                                    |
+| ----------------- | ------- | ---------------------------------------------- |
+| `video_src`       | string  | Path to the local video file (storage).        |
+| `embed_code`      | string  | Embed URL for external videos (e.g., YouTube). |
+| `type`            | string  | `file` for local, `embed` for external.        |
+| `song_variant_id` | FK      | References `song_variants.id`.                 |
+| `status`          | boolean | Active status (0=inactive, 1=active).          |
 
 **Relationships:**
 
@@ -326,11 +344,12 @@ Represents the **actual video file** for a SongVariant.
 
 Represents a **musician or band**.
 
-| Field     | Type   | Description                      |
-| --------- | ------ | -------------------------------- |
-| `name`    | string | Artist name (romanized/English). |
-| `name_jp` | string | Japanese name (nullable).        |
-| `slug`    | string | URL-friendly identifier.         |
+| Field     | Type    | Description                           |
+| --------- | ------- | ------------------------------------- |
+| `name`    | string  | Artist name (romanized/English).      |
+| `name_jp` | string  | Japanese name (nullable).             |
+| `slug`    | string  | URL-friendly identifier.              |
+| `status`  | boolean | Active status (0=inactive, 1=active). |
 
 **Trait:** Uses `HasImages`.
 
@@ -341,6 +360,7 @@ Represents a **musician or band**.
 - `belongsToMany` → `Song`
 - `belongsToMany` (Favorites) → `User` via `artist_user`.
 - `morphMany` → `Image` (via `HasImages` trait)
+- `hasMany` → `Follow` (as followed)
 
 ---
 
@@ -377,6 +397,8 @@ Standard Laravel user model with extensions.
 | `score_format_id` | FK       | References `score_formats.id`.                |
 | `last_login_at`   | datetime | Timestamp of the user's most recent activity. |
 | `slug`            | string   | URL-friendly identifier.                      |
+| `xp`              | bigint   | Total accumulated XP.                         |
+| `level`           | integer  | Current user level.                           |
 
 **Trait:** Uses `HasImages`.
 
@@ -389,6 +411,9 @@ Standard Laravel user model with extensions.
 - `belongsToMany` (Song Favorites) → `Song` via `song_user`.
 - `belongsToMany` (Artist Favorites) → `Artist` via `artist_user`.
 - `morphMany` → `Image` (alias via `images()`)
+- `hasMany` → `Follow` (as follower/followed)
+- `hasMany` → `Notification`
+- `hasMany` → `AuditLog`
 
 **Key Methods:**
 
@@ -462,7 +487,7 @@ Polymorphic comment system with nested replies.
 **Relationships:**
 
 - `belongsTo` → `User`, `Song`
-- `hasMany` → `replies` (self-referencing)
+- `hasMany` → `replies` (self-referencing), `Report`
 - `belongsToMany` (Reactions) → `User` via `comment_reactions`.
 
 ---
@@ -498,12 +523,12 @@ Stores user ratings for Songs. Polimorphism removed for DB independence.
 
 ### Supporting Models
 
-| Model      | Purpose                                                                                     |
-| ---------- | ------------------------------------------------------------------------------------------- |
-| `Year`     | Represents a year (e.g., 2024). Has many Posts, Songs.                                      |
-| `Season`   | Represents a season (Winter, Spring, Summer, Fall).                                         |
-| `Studio`   | Animation studio (creative). Many-to-many with Anime. Auto-generates `slug` on `creating`.  |
-| `Producer` | Production company/committee. Many-to-many with Anime. Auto-generates `slug` on `creating`. |
+| Model      | Purpose                                                                                                              |
+| ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| `Year`     | Represents a year (e.g., 2024). Has many Posts, Songs.                                                               |
+| `Season`   | Represents a season (Winter, Spring, Summer, Fall).                                                                  |
+| `Studio`   | Animation studio (creative). Many-to-many with Anime. Auto-generates `slug` on `creating`. Adds `status` (boolean).  |
+| `Producer` | Production company/committee. Many-to-many with Anime. Auto-generates `slug` on `creating`. Adds `status` (boolean). |
 
 ### `Badge`
 
@@ -581,23 +606,133 @@ Records a user's vote in a specific matchup.
 
 ---
 
+### `AuditLog`
+
+Tracks staff actions on core resources.
+
+| Field            | Type   | Description                                   |
+| ---------------- | ------ | --------------------------------------------- |
+| `user_id`        | FK     | References `users.id` (The staff performing). |
+| `event`          | string | `created`, `updated`, `deleted`.              |
+| `auditable_id`   | bigint | ID of the modified resource.                  |
+| `auditable_type` | string | Model name (e.g., `Anime`).                   |
+| `old_values`     | json   | Snapshot before change.                       |
+| `new_values`     | json   | Snapshot after change.                        |
+
+---
+
+### `Notification`
+
+User-specific alerts for social interactions.
+
+| Field          | Type   | Description                          |
+| -------------- | ------ | ------------------------------------ |
+| `user_id`      | FK     | Recipient user.                      |
+| `type`         | string | `reply`, `follow`, etc.              |
+| `subject_id`   | bigint | ID of the linked object.             |
+| `subject_type` | string | Normalized type (e.g., `song`).      |
+| `data`         | json   | Full payload for UI (titles, icons). |
+| `read_at`      | tstamp | Null for unread notifications.       |
+
+---
+
+### `Follow`
+
+Many-to-many relationship between users.
+
+| Field         | Type | Description          |
+| ------------- | ---- | -------------------- |
+| `follower_id` | FK   | User who followed.   |
+| `followed_id` | FK   | User being followed. |
+
+---
+
+### `Activity`
+
+Centralized log for the global community activity feed.
+
+| Field          | Type   | Description                           |
+| -------------- | ------ | ------------------------------------- |
+| `user_id`      | FK     | Acting user.                          |
+| `action_type`  | string | `favorite_song`, `rating`, `comment`. |
+| `target_id`    | bigint | ID of the resource.                   |
+| `target_type`  | string | Normalized type (e.g., `artist`).     |
+| `action_value` | text   | Optional score or snippet.            |
+
+---
+
+### `Announcement`
+
+Site-wide events or maintenance notices.
+
+| Field       | Type    | Description                 |
+| ----------- | ------- | --------------------------- |
+| `title`     | string  | Subject of the notice.      |
+| `type`      | string  | `info`, `warning`, `event`. |
+| `priority`  | integer | Order of appearance.        |
+| `is_active` | boolean | Visibility flag.            |
+| `starts_at` | tstamp  | Schedule start.             |
+| `ends_at`   | tstamp  | Schedule end.               |
+
+---
+
 | `Format` | Anime format (TV, Movie, OVA). Has many Posts. |
 | `ExternalLink` | External links (MAL, AniList). Many-to-many with Post. |
-| `Report` | User-submitted reports for SongVariants. |
+| `SongReport` | User-submitted reports for SongVariants. Status is boolean (`is_attended`). |
+| `CommentReport` | User-submitted reports for Comments. Status is boolean (`is_attended`). |
+
+---
+
+### `XpActivity`
+
+Configuration for XP-rewarding actions.
+
+| Field              | Type    | Description                            |
+| :----------------- | :------ | :------------------------------------- |
+| `key`              | string  | Unique identifier (e.g., `rate_song`). |
+| `xp_amount`        | integer | XP awarded.                            |
+| `description`      | string  | Human-readable explanation.            |
+| `cooldown_seconds` | integer | Time logic before re-awarding.         |
+
+---
+
+### `XpLog`
+
+Audit trail for user XP gains.
+
+| Field            | Type    | Description                     |
+| :--------------- | :------ | :------------------------------ |
+| `user_id`        | FK      | References `users.id`.          |
+| `xp_activity_id` | FK      | References `xp_activities.id`.  |
+| `xp_amount`      | integer | Amount gained.                  |
+| `metadata`       | json    | Context data (e.g., `song_id`). |
+
+---
+
+### `Level`
+
+Defines the progression and required XP per level.
+
+| Field      | Type    | Description                               |
+| :--------- | :------ | :---------------------------------------- |
+| `level`    | integer | Level number (PK).                        |
+| `min_xp`   | bigint  | Minimum XP to reach this level.           |
+| `name`     | string  | Optional title.                           |
+| `badge_id` | FK      | References `badges.id` (optional reward). |
 
 #### `user_requests`
 
 User-submitted requests (e.g., "add this anime").
 
-| Column        | Type          | Description                    |
-| ------------- | ------------- | ------------------------------ |
-| `id`          | `bigint` (PK) | Primary key                    |
-| `title`       | `string`      | Summary title (category-based) |
-| `content`     | `text`        | Request message                |
-| `status`      | `string`      | `pending` or `attended`        |
-| `user_id`     | `FK → users`  | Submitting user                |
-| `attended_by` | `FK → users`  | Staff who marked as attended   |
-| `timestamps`  | `datetime`    | Created/updated at             |
+| Column        | Type          | Description                           |
+| ------------- | ------------- | ------------------------------------- |
+| `id`          | `bigint` (PK) | Primary key                           |
+| `title`       | `string`      | Summary title (category-based)        |
+| `content`     | `text`        | Request message                       |
+| `status`      | `boolean`     | `is_attended` (0=pending, 1=attended) |
+| `user_id`     | `FK → users`  | Submitting user                       |
+| `attended_by` | `FK → users`  | Staff who marked as attended          |
+| `timestamps`  | `datetime`    | Created/updated at                    |
 
 ---
 
@@ -1799,7 +1934,7 @@ The following features are identified as standard/premium upgrades for the Anira
 ### 2 Nivel: Avanzado (Lógica de Negocio Densa)
 
 - [ ] **Intelligent Caching**: Use Redis to store complex ranking calculations.
-- [ ] **Gamification & Progression**: Achievement system with XP, levels, and badges.
+- [x] **Gamification & Progression**: Achievement system with XP, levels, and badges.
 - [ ] **Themes Quiz**: Interactive guessing games with score tracking.
 - [ ] **Seasonal Predictions**: Community voting on upcoming top-rated themes.
 - [ ] **User Milestones**: Automated trackable achievements (e.g., "100 Endings Listened").

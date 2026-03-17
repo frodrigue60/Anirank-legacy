@@ -9,8 +9,34 @@ use App\Models\Season;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use App\Services\XpService;
+
 class SongController extends Controller
 {
+    protected $xpService;
+
+    public function __construct(XpService $xpService)
+    {
+        $this->xpService = $xpService;
+    }
+
+    public function toggleFavorite(Song $song)
+    {
+        if (! Auth::check()) {
+            return redirect()->back()->with('warning', 'Please login');
+        }
+
+        $user = Auth::user();
+        $isFavorite = $song->toggleFavorite($user->id);
+
+        if ($isFavorite) {
+            $this->xpService->award($user, 'add_favorite', [
+                'song_id' => $song->id
+            ]);
+        }
+
+        return redirect()->back()->with('success', $isFavorite ? 'Song added to favorites' : 'Song removed from favorites');
+    }
     /**
      * Display a listing of the resource.
      *
