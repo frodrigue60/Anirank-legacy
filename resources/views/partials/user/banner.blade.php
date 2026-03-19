@@ -7,7 +7,7 @@
     {{-- Banner Image with Gradient Overlay --}}
     <div class="h-[250px] md:h-[350px] w-full bg-surface-dark relative bg-cover bg-center transition-all duration-700 group/banner"
         style="background-image: url('{{ $bannerUrl }}')">
-        <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"></div>
+        <div class="absolute inset-0 bg-linear-to-t from-background via-background/40 to-transparent"></div>
         <div class="absolute inset-0 bg-black/20 group-hover/banner:bg-black/10 transition-colors duration-500"></div>
     </div>
 
@@ -17,7 +17,7 @@
             {{-- Avatar Wrapper --}}
             <div class="relative group/avatar">
                 <div
-                    class="absolute -inset-1 bg-gradient-to-tr from-primary to-primary-light rounded-full blur opacity-25 group-hover/avatar:opacity-50 transition duration-500">
+                    class="absolute -inset-1 bg-linear-to-tr from-primary to-primary-light rounded-full blur opacity-25 group-hover/avatar:opacity-50 transition duration-500">
                 </div>
                 <div
                     class="relative w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-background overflow-hidden bg-surface-dark shadow-2xl">
@@ -47,7 +47,7 @@
                                     <span class="text-primary">{{ number_format($user->xp) }} <span class="text-white/20">/</span> {{ $user->next_level ? number_format($user->next_level->min_xp) : 'MAX' }} XP</span>
                                 </div>
                                 <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                    <div class="h-full bg-gradient-to-r from-primary to-primary-light transition-all duration-1000 shadow-[0_0_12px_rgba(127,19,236,0.5)]"
+                                    <div class="h-full bg-linear-to-r from-primary to-primary-light transition-all duration-1000 shadow-[0_0_12px_rgba(127,19,236,0.5)]"
                                         style="width: {{ $user->xp_progress }}%"></div>
                                 </div>
                             </div>

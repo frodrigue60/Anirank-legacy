@@ -12,6 +12,8 @@
 }" x-show="visible"
     x-transition:enter="transition ease-out duration-300" x-transition:enter-start="translate-y-full"
     x-transition:enter-end="translate-y-0"
+    x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-y-0"
+    x-transition:leave-end="translate-y-full"
     @song-loaded.window="
         console.log('GlobalBottomPlayer: Song loaded event received', $event.detail);
         songTitle = $event.detail.title;
@@ -19,7 +21,8 @@
         artistNames = $event.detail.artists || 'Various Artists';
         thumbnailImg = $event.detail.thumbnail || 'https://lh3.googleusercontent.com/aida-public/65b3671a742c8d20fd4f8e568ba7a6f23fcf6ca0e872e41132644917a86f9f52';
     "
-    class="fixed bottom-0 left-0 w-full z-[100] bg-background-dark/80 backdrop-blur-2xl border-t border-primary/30 h-24 flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+    class="fixed bottom-0 left-0 w-full z-100 bg-background-dark/80 backdrop-blur-2xl border-t border-primary/30 h-24 flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"
+    x-cloak>
 
     {{-- Neon Glow Top Border --}}
     <div class="absolute top-0 left-0 w-full h-[2px] bg-primary shadow-[0_0_15px_#7f13ec]"></div>

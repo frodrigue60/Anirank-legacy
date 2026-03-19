@@ -15,6 +15,8 @@
                     href="{{ route('songs.ranking') }}">Ranking</a>
                 <a class="text-sm font-medium {{ Request::is('playlists*') ? 'text-primary' : 'text-white/60 hover:text-white' }} transition-colors"
                     href="{{ route('playlists.index') }}">Playlists</a>
+                <a class="text-sm font-medium {{ Request::routeIs('stats') ? 'text-primary' : 'text-white/60 hover:text-white' }} transition-colors"
+                    href="{{ route('stats') }}">Stats</a>
 
                 {{-- Discover Dropdown --}}
                 <div class="relative">
@@ -214,6 +216,12 @@
                 <span
                     class="material-symbols-outlined {{ Request::is('playlists*') ? 'filled' : '' }}">playlist_play</span>
                 <span class="font-medium text-sm">Playlists</span>
+            </a>
+            <a href="{{ route('stats') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 transition-all {{ Request::routeIs('stats') ? 'bg-primary/10 text-primary' : '' }}">
+                <span
+                    class="material-symbols-outlined {{ Request::routeIs('stats') ? 'filled' : '' }}">leaderboard</span>
+                <span class="font-medium text-sm">Stats</span>
             </a>
 
             <div class="h-px bg-white/5 my-4"></div>

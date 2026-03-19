@@ -36,6 +36,8 @@ use App\Http\Controllers\UserRequestController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/stats', [\App\Http\Controllers\StatsController::class, 'index'])->name('stats');
+
 /*
 |--------------------------------------------------------------------------
 | Public Routes
