@@ -13,6 +13,8 @@
                     href="{{ route('songs.seasonal') }}">Season</a>
                 <a class="text-sm font-medium {{ Request::routeIs('songs.ranking') ? 'text-primary' : 'text-white/60 hover:text-white' }} transition-colors"
                     href="{{ route('songs.ranking') }}">Ranking</a>
+                <a class="text-sm font-medium {{ Request::is('playlists*') ? 'text-primary' : 'text-white/60 hover:text-white' }} transition-colors"
+                    href="{{ route('playlists.index') }}">Playlists</a>
 
                 {{-- Discover Dropdown --}}
                 <div class="relative">
@@ -42,6 +44,10 @@
                         <a href="{{ route('producers.index') }}"
                             class="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
                             <span class="material-symbols-outlined text-[18px]">token</span> Producers
+                        </a>
+                        <a href="{{ route('ranking.users') }}"
+                            class="flex items-center gap-3 px-4 py-2 text-sm text-white/80 hover:bg-white/5 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">group</span> User Ranking
                         </a>
                         <div class="h-px bg-white/10 my-1 mx-2"></div>
                         <a href="{{ route('tournaments.index') }}"
@@ -195,7 +201,19 @@
                 class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 transition-all {{ Request::routeIs('songs.ranking') ? 'bg-primary/10 text-primary' : '' }}">
                 <span
                     class="material-symbols-outlined {{ Request::routeIs('songs.ranking') ? 'filled' : '' }}">military_tech</span>
-                <span class="font-medium text-sm">Rankings</span>
+                <span class="font-medium text-sm">Song Ranking</span>
+            </a>
+            <a href="{{ route('ranking.users') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 transition-all {{ Request::routeIs('ranking.users') ? 'bg-primary/10 text-primary' : '' }}">
+                <span
+                    class="material-symbols-outlined {{ Request::routeIs('ranking.users') ? 'filled' : '' }}">group</span>
+                <span class="font-medium text-sm">User Ranking</span>
+            </a>
+            <a href="{{ route('playlists.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 transition-all {{ Request::is('playlists*') ? 'bg-primary/10 text-primary' : '' }}">
+                <span
+                    class="material-symbols-outlined {{ Request::is('playlists*') ? 'filled' : '' }}">playlist_play</span>
+                <span class="font-medium text-sm">Playlists</span>
             </a>
 
             <div class="h-px bg-white/5 my-4"></div>

@@ -49,11 +49,11 @@
     <div
         class="flex flex-col bg-background-dark text-white font-display antialiased overflow-hidden shadow-2xl shadow-primary/5 min-h-[calc(100vh-120px)] p-0 md:px-8">
         {{-- Player layout content --}}
-        <main class="flex-1 flex flex-col lg:flex-row overflow-hidden gap-4">
-            {{-- Left Sidebar: Player & Info (60%) --}}
+        <main class="flex-1 grid grid-cols-1 lg:grid-cols-10 overflow-hidden gap-6 h-full min-h-0">
+            {{-- Left Section: Player & Info (6/10) --}}
             <aside
-                class="w-full lg:w-[60%] flex flex-col px-8 mx-auto overflow-y-auto bg-gradient-to-b from-background-dark to-surface-darker custom-scrollbar pb-4 rounded-lg">
-                <div class="relative aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl mb-8 group ring-1 ring-white/10"
+                class="lg:col-span-6 flex flex-col px-4 md:px-8 mx-auto overflow-y-auto bg-linear-to-b from-background-dark to-surface-darker custom-scrollbar pb-8 rounded-2xl border border-white/5">
+                <div class="relative aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl mb-8 mt-6 group ring-1 ring-white/10"
                     id="player-wrapper">
                     <div id="player-container" class="w-full h-full flex items-center justify-center">
                         {{-- Initializing State --}}
@@ -98,44 +98,56 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-8">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1 min-w-0 pr-6">
+                <div class="flex flex-col gap-10">
+                    <div class="flex justify-between items-start gap-8">
+                        <div class="flex-1 min-w-0">
                             <h1 id="current-song-title"
-                                class="text-4xl font-black text-white tracking-tight leading-tight mb-2 truncate drop-shadow-sm">
+                                class="text-5xl font-black text-white tracking-tight leading-tight mb-4 truncate drop-shadow-xl">
                                 Loading...</h1>
-                            <div class="flex flex-col items-start gap-3">
-                                <p id="current-anime-title" class="text-xl font-bold text-primary truncate"></p>
-                                <p id="current-artists" class="text-white/80 font-bold truncate"></p>
-
+                            <div class="flex flex-col items-start gap-2">
+                                <p id="current-anime-title" class="text-2xl font-black text-primary truncate uppercase tracking-tight leading-none"></p>
+                                <p id="current-artists" class="text-lg text-white/50 font-bold truncate"></p>
                             </div>
                         </div>
-                        <div class="flex flex-col items-end gap-1 shrink-0">
-                            <livewire:song-interactions :songId="$queue[0]['song_id']" mode="score" />
+                        <div class="flex flex-col items-end gap-3 shrink-0">
+                            @if(count($queue) > 0)
+                                <div class="bg-white/5 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
+                                    <livewire:song-interactions :songId="$queue[0]['song_id']" mode="score" />
+                                </div>
+                            @endif
                             <div
-                                class="flex items-center gap-1.5 text-white/40 text-xs font-bold uppercase tracking-widest">
-                                <p id="current-song-type" class="text-white/60 font-medium"></p>
+                                class="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full border border-primary/20">
+                                <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                                <p id="current-song-type" class="text-[10px] font-black text-primary uppercase tracking-widest leading-none"></p>
                             </div>
                         </div>
                     </div>
 
                     <div
-                        class="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+                        class="flex flex-wrap items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl gap-6">
                         <div class="flex-1">
-                            <livewire:song-interactions :songId="$queue[0]['song_id']" />
+                            @if(count($queue) > 0)
+                                <livewire:song-interactions :songId="$queue[0]['song_id']" />
+                            @endif
                         </div>
-                        <div class="flex items-center gap-4 ml-8">
-                            <div class="flex items-center gap-4 px-4 py-2 bg-white/5 rounded-xl border border-white/5 mr-2">
-                                <span id="current-time" class="text-xs font-black tabular-nums">0:00</span>
+                        <div class="flex items-center gap-6">
+                            <div class="flex items-center gap-5 px-5 py-2.5 bg-black/40 rounded-2xl border border-white/5">
+                                <span id="current-time" class="text-sm font-black tabular-nums text-white">0:00</span>
                                 <span class="text-white/20 font-bold">/</span>
-                                <span id="duration" class="text-xs font-black tabular-nums text-white/40">0:00</span>
+                                <span id="duration" class="text-sm font-black tabular-nums text-white/40">0:00</span>
                             </div>
-                            <a href="{{ route('playlists.edit', $playlist->id) }}"
-                                class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-xl">
-                                <span class="material-symbols-outlined text-[20px]">edit</span>
-                            </a>
+                            @auth
+                                @if($playlist->user_id === Auth::id())
+                                    <a href="{{ route('playlists.edit', $playlist->id) }}"
+                                        class="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center hover:bg-primary hover:text-white transition-all shadow-2xl group/edit"
+                                        title="Edit Playlist">
+                                        <span class="material-symbols-outlined text-[24px] group-hover:rotate-12 transition-transform">edit</span>
+                                    </a>
+                                @endif
+                            @endauth
                         </div>
                     </div>
+                </div>
 
                     {{-- Description/About Panel --}}
                     <div class="p-6 rounded-2xl bg-surface-dark/40 border border-white/5 backdrop-blur-sm">
@@ -157,41 +169,52 @@
                                 here</span>
                         </div> --}}
                     </div>
-                </div>
-            </aside>
-
-            {{-- Right Section: Queue (40%) --}}
-            <section class="w-full lg:w-[40%] flex flex-col bg-surface-darker overflow-hidden shadow-2xl rounded-lg">
-                {{-- Desktop Player Bottom Bar --}}
-                <div class="p-6 bg-surface-dark/60 backdrop-blur-2xl flex items-center justify-between z-10">
-                    <div class="flex items-center gap-4 group">
+                {{-- Player Controls Bar --}}
+                <div class="mt-auto pt-8 border-t border-white/5 flex flex-wrap items-center justify-between gap-6">
+                    <div class="flex items-center gap-6 group">
                         <button id="mute-btn"
-                            class="w-10 h-10 rounded-lg bg-surface-dark flex items-center justify-center hover:text-primary transition-all">
-                            <span class="material-symbols-outlined">volume_up</span>
+                            class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:text-primary transition-all shadow-xl">
+                            <span class="material-symbols-outlined text-[28px]">volume_up</span>
                         </button>
                         <div
-                            class="w-24 h-1.5 bg-white/10 rounded-full relative overflow-hidden group-hover:h-2 transition-all">
+                            class="w-40 h-2 bg-white/10 rounded-full relative overflow-hidden group-hover:h-3 transition-all cursor-pointer">
                             <input type="range" id="volume-slider" min="0" max="100" value="100"
                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                            <div id="volume-progress" class="h-full bg-primary shadow-[0_0_10px_#7f13ec]"
+                            <div id="volume-progress"
+                                class="h-full bg-linear-to-r from-primary to-primary/60 shadow-[0_0_20px_rgba(127,19,236,0.3)] pointer-events-none"
                                 style="width: 100%"></div>
                         </div>
                     </div>
 
-                    <div class="flex gap-3">
+                    <div class="flex items-center gap-4">
                         <button id="prev-btn"
-                            class="w-12 h-12 rounded-xl bg-surface-dark border border-white/10 flex items-center justify-center hover:bg-white/5 text-white/60 hover:text-white transition-all">
-                            <span class="material-symbols-outlined">skip_previous</span>
+                            class="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-white/40 hover:text-white transition-all shadow-xl group/btn">
+                            <span
+                                class="material-symbols-outlined text-[32px] group-hover:-translate-x-1 transition-transform">skip_previous</span>
                         </button>
                         <button id="play-pause-btn"
-                            class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center hover:bg-primary/80 shadow-lg shadow-primary/20 transition-all transform active:scale-95">
-                            <span class="material-symbols-outlined filled text-white text-[32px]">play_arrow</span>
+                            class="w-20 h-20 rounded-[2.5rem] bg-primary flex items-center justify-center hover:scale-105 hover:shadow-[0_0_40px_rgba(127,19,236,0.4)] shadow-2xl transition-all transform active:scale-95">
+                            <span class="material-symbols-outlined filled text-white text-[48px]">play_arrow</span>
                         </button>
                         <button id="next-btn"
-                            class="w-12 h-12 rounded-xl bg-surface-dark border border-white/10 flex items-center justify-center hover:bg-white/5 text-white/60 hover:text-white transition-all">
-                            <span class="material-symbols-outlined">skip_next</span>
+                            class="w-16 h-16 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-white/40 hover:text-white transition-all shadow-xl group/btn">
+                            <span
+                                class="material-symbols-outlined text-[32px] group-hover:translate-x-1 transition-transform">skip_next</span>
                         </button>
                     </div>
+                </div>
+            </aside>
+
+            {{-- Right Section: Queue (4/10) --}}
+            <section
+                class="lg:col-span-4 flex flex-col bg-surface-darker/50 backdrop-blur-md overflow-hidden shadow-2xl rounded-2xl border border-white/5 h-full min-h-0">
+                {{-- Desktop Player Bottom Bar --}}
+                <div class="p-6 bg-surface-dark/20 border-b border-white/5 flex items-center justify-between sticky top-0 z-10 backdrop-blur-xl">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">queue_music</span>
+                        <h2 class="text-sm font-black uppercase tracking-[0.2em] text-white/90">Up Next</h2>
+                    </div>
+                    <span id="queue-count" class="text-[10px] font-black px-2 py-1 bg-white/5 rounded-md text-white/40">0 items</span>
                 </div>
                 {{-- <div
                     class="p-6 flex items-center justify-between border-b border-white/5 bg-surface-dark/20 backdrop-blur-xl">
@@ -291,9 +314,9 @@
                 if (!item) return;
 
                 // UI Update
-                this.titleEl.textContent = item.song_title;
-                if (this.animeEl) this.animeEl.textContent = item.anime_name || 'Unknown Anime';
-                if (this.artistEl) this.artistEl.textContent = item.artist_names || 'Unknown Artist';
+                this.titleEl.textContent = item.title || 'Unknown Theme';
+                if (this.animeEl) this.animeEl.textContent = item.anime || 'Unknown Anime';
+                if (this.artistEl) this.artistEl.textContent = item.artists || 'Unknown Artist';
                 if (this.typeEl) this.typeEl.textContent = item.song_type || 'Theme';
                 if (this.ratingEl) this.ratingEl.textContent = item.average_rating || 'N/A';
 
@@ -315,7 +338,7 @@
                 this.seekProgress.style.width = '0%';
                 this.stopYouTubeTimeTracking();
 
-                if (item.video_type === 'embed') {
+                if (item.type === 'embed') {
                     const embedUrl = this.parseEmbedInput(item.video_url);
                     if (embedUrl) {
                         this.loadYouTubeEmbed(embedUrl);
@@ -360,11 +383,19 @@
             }
 
             extractYouTubeId(url) {
-                const patterns = [/v=([^"&?/ ]{11})/, /youtu\.be\/([^"&?/ ]{11})/, /embed\/([^"&?/ ]{11})/];
+                if (!url) return null;
+                const patterns = [
+                    /(?:v=|\/v\/|embed\/|v\/|youtu\.be\/|\/v=|^v=)([^#\&\?]{11})/,
+                    /[?&]v=([^#\&\?]{11})/,
+                    /embed\/([^#\&\?]{11})/,
+                    /\/([^#\&\?]{11})$/
+                ];
                 for (const pattern of patterns) {
                     const match = url.match(pattern);
-                    if (match) return match[1];
+                    if (match && match[1]) return match[1];
                 }
+                // Fallback for raw IDs
+                if (url.length === 11 && !url.includes('/') && !url.includes('.')) return url;
                 return null;
             }
 
@@ -613,8 +644,8 @@
                                                                                                                                                                             </div>
                                                                                                                                                                         </div>
                                                                                                                                                                         <div class="flex-1 min-w-0">
-                                                                                                                                                                            <h4 class="font-bold text-white/90 truncate text-base group-hover:text-white transition-colors">${item.song_title || 'Unknown Theme'}</h4>
-                                                                                                                                                                            <p class="text-xs text-white/40 truncate">${item.artist_names || 'Various Artists'} • ${item.anime_name || 'Various Anime'} • ${item.song_type || 'Theme'}</p>
+                                                                                                                                                                            <h4 class="font-bold text-white/90 truncate text-base group-hover:text-white transition-colors">${item.title || 'Unknown Theme'}</h4>
+                                                                                                                                                                            <p class="text-xs text-white/40 truncate">${item.artists || 'Various Artists'} • ${item.anime || 'Various Anime'} • ${item.song_type || 'Theme'}</p>
                                                                                                                                                                         </div>
                                                                                                                                                                         <div class="flex flex-col items-end shrink-0">
                                                                                                                                                                             <div class="flex items-center gap-1 text-yellow-400/60 font-bold text-sm">

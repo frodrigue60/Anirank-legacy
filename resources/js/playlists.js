@@ -1,6 +1,7 @@
 import { API, csrfToken, token } from "@/app.js";
 
-const currentSong = document.querySelector("#add-to-playlist").dataset.songId;
+const addToPlaylistBtn = document.querySelector("#add-to-playlist");
+const currentSongId = addToPlaylistBtn ? addToPlaylistBtn.dataset.songId : null;
 let headersData = {};
 let bodyData = {};
 
@@ -108,7 +109,7 @@ class PlaylistManager {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
         };
-        bodyData = JSON.stringify({ song_id: currentSong });
+        bodyData = JSON.stringify({ song_id: currentSongId });
 
         try {
             const response = await API.post(
@@ -159,7 +160,7 @@ class PlaylistManager {
 
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
-            data.song_id = currentSong; // Añadir canción automáticamente
+            data.song_id = currentSongId; // Añadir canción automáticamente
 
             const response = await API.post(
                 API.PLAYLISTS.BASE,
@@ -188,7 +189,7 @@ class PlaylistManager {
                 renderNewPlaylistElement(newPlaylist);
 
                 // ACTUALIZAR CACHÉ
-                const cached = this.cache.get(this.currentSong) || {
+                const cached = this.cache.get(this.currentSongId) || {
                     playlists: [],
                 };
                 cached.playlists.push(newPlaylist); // ← al final

@@ -412,9 +412,20 @@
                 // Handle iframe/embed HTML tags — extract src attribute first
                 const iframeMatch = url.match(/(?:<iframe|<embed)[^>]+src=["']([^"']+)["']/i);
                 if (iframeMatch) url = iframeMatch[1];
-                // Standard YouTube URL patterns
-                const match = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([^"&?\/ ]{11})/);
-                return match ? match[1] : null;
+
+                const patterns = [
+                    /(?:v=|\/v\/|embed\/|v\/|youtu\.be\/|\/v=|^v=)([^#\&\?]{11})/,
+                    /[?&]v=([^#\&\?]{11})/,
+                    /embed\/([^#\&\?]{11})/,
+                    /\/([^#\&\?]{11})$/
+                ];
+                for (const pattern of patterns) {
+                    const match = url.match(pattern);
+                    if (match && match[1]) return match[1];
+                }
+                // Fallback for raw IDs
+                if (url.length === 11 && !url.includes('/') && !url.includes('.')) return url;
+                return null;
             }
 
             function formatTime(s) {

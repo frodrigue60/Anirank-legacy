@@ -53,6 +53,7 @@ Route::controller(SongController::class)->group(function () {
     Route::get('/songs', 'index')->name('songs.index');
     Route::get('/songs/seasonal', 'seasonal')->name('songs.seasonal');
     Route::get('/songs/ranking', 'ranking')->name('songs.ranking');
+    Route::get('/ranking/users', \App\Livewire\RankingUsers::class)->name('ranking.users');
     Route::get('/song/{anime:slug}/{song:slug}', 'showAnimeSong')->name('songs.show.nested')->scopeBindings();
 });
 

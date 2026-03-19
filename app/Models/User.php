@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, \App\Traits\Auditable;
-    protected $appends = ['avatar_url', 'banner_url'];
+    protected $appends = ['avatar_url', 'banner_url', 'xp_progress', 'level_name'];
 
     /**
      * The attributes that are mass assignable.
@@ -123,9 +123,9 @@ class User extends Authenticatable
         $this->slug = $slug;
     }
 
-    public function reactions()
+    public function activities()
     {
-        return $this->hasMany(Reaction::class);
+        return $this->hasMany(Activity::class);
     }
 
     public function favoriteArtists()
@@ -366,5 +366,54 @@ class User extends Authenticatable
         }
 
         return $this->follow($user);
+    }
+
+    /**
+     * Get the user's current level model.
+     */
+    public function getCurrentLevelAttribute()
+    {
+        return Level::where('level', $this->level)->first();
+    }
+
+    /**
+     * Get the user's next level model.
+     */
+    public function getNextLevelAttribute()
+    {
+        return Level::where('level', $this->level + 1)->first();
+    }
+
+    /**
+     * Get the XP progression percentage towards the next level.
+     */
+    public function getXpProgressAttribute()
+    {
+        $currentLevel = $this->current_level;
+        $nextLevel = $this->next_level;
+
+        if (!$nextLevel) {
+            return 100; // Max level reached
+        }
+
+        $minXp = $currentLevel ? $currentLevel->min_xp : 0;
+        $maxXp = $nextLevel->min_xp;
+
+        if ($maxXp <= $minXp) {
+            return 100;
+        }
+
+        $progress = (($this->xp - $minXp) / ($maxXp - $minXp)) * 100;
+
+        return min(100, max(0, $progress));
+    }
+
+    /**
+     * Get the level name or a default.
+     */
+    public function getLevelNameAttribute()
+    {
+        $level = $this->current_level;
+        return $level ? ($level->name ?? "Level {$this->level}") : "Level {$this->level}";
     }
 }

@@ -17,14 +17,22 @@ class PlaylistController extends Controller
     {
         $this->xpService = $xpService;
     }
-    public function index()
+    public function index(Request $request)
     {
-        $playlists = Auth::user()->playlists()
+        $query = Playlist::query()
             ->withCount('songs')
-            ->with(['songs' => function ($query) {
+            ->with(['user', 'songs' => function ($query) {
                 $query->with('anime')->limit(1);
-            }])
-            ->get();
+            }]);
+
+        if ($request->has('owned') && Auth::check()) {
+            $query->where('user_id', Auth::id());
+        } else {
+            $query->where('is_public', true);
+        }
+
+        $playlists = $query->latest()->paginate(12);
+
         return view('public.playlists.index', compact('playlists'));
     }
 
@@ -57,6 +65,10 @@ class PlaylistController extends Controller
 
     public function show(Playlist $playlist)
     {
+        if (!$playlist->is_public && (!Auth::check() || Auth::id() !== $playlist->user_id)) {
+            abort(403, 'This playlist is private.');
+        }
+
         $playlist->load(['songs.anime', 'songs.songVariants.video', 'songs.artists']);
 
         $queue = $playlist->songs->map(function ($song) {
@@ -91,20 +103,20 @@ class PlaylistController extends Controller
 
             return [
                 'song_id'         => $song->id,
-                'song_title'      => $song->name,
-                'artist_names'    => $song->artists->pluck('name')->join(', '),
-                'anime_name'      => $song->anime->title ?? 'Unknown Anime',
+                'title'           => $song->name,
+                'artists'         => $song->artists->pluck('name')->join(', '),
+                'anime'           => $song->anime->title ?? 'Unknown Anime',
                 'song_type'       => trim($formattedType),
                 'average_rating'  => number_format($song->averageRating, 1) ?? 'N/A',
                 'variant_id'      => $firstVariant->id,
                 'variant_quality' => $firstVariant->quality ?? 'unknown',
                 'video_id'        => $video->id,
-                'video_type'      => $video->type,
+                'type'            => $video->type,
                 'video_url'       => $video->type === 'embed'
                     ? $video->embed_url
                     : $video->local_url,
                 'duration'        => $video->duration ?? 0,
-                'thumbnail'   => $thumbnailUrl,
+                'thumbnail'       => $thumbnailUrl,
             ];
         })
             ->filter()

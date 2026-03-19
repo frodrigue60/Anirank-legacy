@@ -94,4 +94,9 @@ class Video extends Model
     {
         return $this->isLocal() ? Storage::url($this->video_src) : null;
     }
+
+    public function getTypeAttribute()
+    {
+        return $this->source_data['type'] ?? 'embed';
+    }
 }
