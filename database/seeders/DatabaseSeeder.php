@@ -19,23 +19,32 @@ class DatabaseSeeder extends Seeder
         // Seed roles first
         $this->call(RoleSeeder::class);
 
-        // Create admin user
-        $user = new User;
-        $user->name = 'Luis Rodz';
-        $user->slug = Str::slug($user->name);
-        $user->email = 'frodrigue60@gmail.com';
-        $user->password = bcrypt('a12edc21cd');
-        $user->save();
+        // Create admin user or update if exists
+        $user = User::updateOrCreate(
+            ['email' => 'frodrigue60@gmail.com'],
+            [
+                'name' => 'Luis Rodz',
+                'slug' => Str::slug('Luis Rodz'),
+                'password' => bcrypt('a12edc21cd'),
+            ]
+        );
 
-        // Assign admin role
+        // Assign admin role (idempotent)
         $adminRole = DB::table('roles')->where('slug', 'admin')->first();
         if ($adminRole) {
-            DB::table('role_user')->insert([
-                'user_id' => $user->id,
-                'role_id' => $adminRole->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            $hasRole = DB::table('role_user')
+                ->where('user_id', $user->id)
+                ->where('role_id', $adminRole->id)
+                ->exists();
+
+            if (!$hasRole) {
+                DB::table('role_user')->insert([
+                    'user_id' => $user->id,
+                    'role_id' => $adminRole->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
     }
 }

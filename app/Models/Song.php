@@ -30,6 +30,8 @@ class Song extends Model
         'type',
         'prev_seasonal_rank',
         'status',
+        'favorites_count',
+        'average_score',
     ];
 
     protected $casts = [
@@ -190,11 +192,7 @@ class Song extends Model
 
     public function getAverageRatingAttribute()
     {
-        if (array_key_exists('ratings_avg_rating', $this->attributes)) {
-            return $this->attributes['ratings_avg_rating'];
-        }
-
-        return $this->averageRating();
+        return $this->attributes['average_score'] ?? 0;
     }
 
     // Método para verificar si el usuario actual ha dado like
@@ -273,7 +271,7 @@ class Song extends Model
     // retorna la cantidad de veces que ha sido marcado como favorito
     public function getFavoritesCountAttribute()
     {
-        return $this->favorites()->count();
+        return $this->attributes['favorites_count'] ?? 0;
     }
 
     public function scopeWithUserInteractions($query)

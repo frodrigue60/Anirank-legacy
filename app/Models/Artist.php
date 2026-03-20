@@ -16,6 +16,7 @@ class Artist extends Model
         'slug',
         'avatar',
         'status',
+        'favorites_count',
     ];
 
     protected $casts = [
@@ -62,6 +63,11 @@ class Artist extends Model
     public function favoritedBy()
     {
         return $this->belongsToMany(User::class, 'artist_user')->withTimestamps();
+    }
+
+    public function getFavoritesCountAttribute()
+    {
+        return $this->attributes['favorites_count'] ?? 0;
     }
 
     public function songs()

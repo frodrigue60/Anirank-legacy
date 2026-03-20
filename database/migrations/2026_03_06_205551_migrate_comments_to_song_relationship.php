@@ -17,19 +17,31 @@ return new class extends Migration
             $table->foreignId('song_id')->nullable()->after('user_id')->constrained()->onDelete('cascade');
         });
 
-        // 2. Migrar datos existentes de SongVariant a Song
-        DB::table('comments')
-            ->where('commentable_type', 'App\\Models\\SongVariant')
-            ->join('song_variants', 'comments.commentable_id', '=', 'song_variants.id')
-            ->update(['comments.song_id' => DB::raw('song_variants.song_id')]);
+        // 2. Migrar datos existentes de SongVariant a Song (solo si hay datos)
+        if (DB::table('comments')->where('commentable_type', 'App\\Models\\SongVariant')->exists()) {
+            DB::table('song_variants')->orderBy('id')->chunk(500, function ($variants) {
+                foreach ($variants as $variant) {
+                    DB::table('comments')
+                        ->where('commentable_type', 'App\\Models\\SongVariant')
+                        ->where('commentable_id', $variant->id)
+                        ->update(['song_id' => $variant->song_id]);
+                }
+            });
+        }
 
         // 3. Manejar respuestas (replicar el song_id del padre)
-        // Usamos un loop o una query recursiva si es necesario, pero para niveles simples un update basta
-        DB::table('comments as child')
-            ->join('comments as parent', 'child.parent_id', '=', 'parent.id')
-            ->whereNull('child.song_id')
-            ->whereNotNull('parent.song_id')
-            ->update(['child.song_id' => DB::raw('parent.song_id')]);
+        if (DB::table('comments')->whereNotNull('parent_id')->whereNull('song_id')->exists()) {
+            // Un simple update con subconsulta para mayor compatibilidad
+            DB::table('comments as child')
+                ->whereNull('child.song_id')
+                ->whereNotNull('child.parent_id')
+                ->update([
+                    'song_id' => DB::table('comments as parent')
+                        ->whereColumn('parent.id', 'child.parent_id')
+                        ->select('song_id')
+                        ->limit(1)
+                ]);
+        }
 
         // 4. Eliminar columnas polimórficas
         Schema::table('comments', function (Blueprint $table) {
