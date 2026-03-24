@@ -1,7 +1,15 @@
 @php
     $profileUrl = $user->avatar_url;
     $bannerUrl = $user->banner_url;
+    $accentColor = $user->profile_color ?? '#7f13ec';
 @endphp
+
+<style>
+    .user-accent-bg { background: {{ $accentColor }}; }
+    .user-accent-text { color: {{ str_contains($accentColor, 'gradient') ? '#fff' : $accentColor }}; }
+    .user-accent-border { border-color: {{ str_contains($accentColor, 'gradient') ? 'transparent' : $accentColor }}; }
+    .user-accent-gradient { background: {{ $accentColor }}; }
+</style>
 
 <div class="relative w-full overflow-hidden">
     {{-- Banner Image with Gradient Overlay --}}
@@ -16,8 +24,7 @@
         <div class="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
             {{-- Avatar Wrapper --}}
             <div class="relative group/avatar">
-                <div
-                    class="absolute -inset-1 bg-linear-to-tr from-primary to-primary-light rounded-full blur opacity-25 group-hover/avatar:opacity-50 transition duration-500">
+                <div class="absolute -inset-1 user-accent-gradient rounded-full blur opacity-25 group-hover/avatar:opacity-50 transition duration-500">
                 </div>
                 <div
                     class="relative w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-background overflow-hidden bg-surface-dark shadow-2xl">
@@ -35,25 +42,26 @@
                                     {{ $user->name }}
                                 </h1>
                                 {{-- Level Badge --}}
-                                <div class="bg-primary/20 backdrop-blur-md border border-primary/30 px-3 py-1 rounded-full flex items-center gap-2 shadow-lg shadow-primary/10 group/level hover:bg-primary/30 transition-all duration-300">
-                                    <span class="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Lv.</span>
-                                    <span class="text-lg font-black text-white leading-none">{{ $user->level }}</span>
+                                <div class="backdrop-blur-md border border-white/10 px-3 py-1 rounded-full flex items-center gap-2 shadow-lg shadow-primary/10 group/level hover:bg-white/10 transition-all duration-300 relative overflow-hidden">
+                                    <div class="absolute inset-0 opacity-20 user-accent-bg"></div>
+                                    <span class="relative text-[10px] font-black user-accent-text uppercase tracking-[0.2em]">Lv.</span>
+                                    <span class="relative text-lg font-black text-white leading-none">{{ $user->level }}</span>
                                 </div>
                             </div>
 
                             <div class="flex flex-col gap-2">
                                 <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.15em]">
                                     <span class="text-white/40">{{ $user->level_name }}</span>
-                                    <span class="text-primary">{{ number_format($user->xp) }} <span class="text-white/20">/</span> {{ $user->next_level ? number_format($user->next_level->min_xp) : 'MAX' }} XP</span>
+                                    <span class="user-accent-text">{{ number_format($user->xp) }} <span class="text-white/20">/</span> {{ $user->next_level ? number_format($user->next_level->min_xp) : 'MAX' }} XP</span>
                                 </div>
                                 <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-                                    <div class="h-full bg-linear-to-r from-primary to-primary-light transition-all duration-1000 shadow-[0_0_12px_rgba(127,19,236,0.5)]"
+                                    <div class="h-full user-accent-gradient transition-all duration-1000 shadow-[0_0_12px_rgba(127,19,236,0.3)]"
                                         style="width: {{ $user->xp_progress }}%"></div>
                                 </div>
                             </div>
 
                             <div class="flex items-center justify-center md:justify-start gap-3">
-                                <div class="h-1 w-12 bg-primary rounded-full"></div>
+                                <div class="h-1 w-12 user-accent-bg rounded-full"></div>
                                 <span class="text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">Collector
                                     Archive</span>
                             </div>
@@ -79,12 +87,12 @@
                                     @foreach($user->badges as $badge)
                                         <div class="w-10 h-10 rounded-xl bg-surface-dark border border-white/5 p-1.5 group/badge relative hover:scale-110 transition-transform duration-300 cursor-help"
                                             title="{{ $badge->name }}: {{ $badge->description }}">
-                                            <div class="absolute inset-0 bg-primary/10 opacity-0 group-hover/badge:opacity-100 transition-opacity rounded-xl"></div>
+                                            <div class="absolute inset-0 opacity-0 group-hover/badge:opacity-20 transition-opacity rounded-xl user-accent-bg"></div>
                                             @if($badge->icon_url)
                                                 <img src="{{ $badge->icon_url }}" alt="{{ $badge->name }}" class="w-full h-full object-contain filter drop-shadow-sm">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center">
-                                                    <span class="material-symbols-outlined text-primary text-[20px] filled">military_tech</span>
+                                                    <span class="material-symbols-outlined user-accent-text text-[20px] filled">military_tech</span>
                                                 </div>
                                             @endif
                                         </div>

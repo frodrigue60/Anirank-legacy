@@ -12,7 +12,10 @@ class DailyMetric extends Model
     protected $fillable = [
         'song_id',
         'date',
-        'views_count'
+        'views_count',
+        'new_users_count',
+        'new_ratings_count',
+        'new_songs_count'
     ];
 
     /**

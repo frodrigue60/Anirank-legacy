@@ -30,3 +30,4 @@ public/.ngrok.exe.old
 ./Dockerfile.dockerfile
 /anirank-db-6.sql
 /logs.txt
+tmp

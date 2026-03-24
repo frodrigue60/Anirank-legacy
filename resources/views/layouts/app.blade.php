@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8">
@@ -27,7 +27,7 @@
     <meta name="msapplication-TileColor" content="#0E3D5F">
 
     {{-- Theme Detection (Blocking to prevent flickers) --}}
-    {{-- <script>
+    <script>
         (function() {
             const theme = localStorage.getItem('theme') || 'dark';
             if (theme === 'dark') {
@@ -36,7 +36,7 @@
                 document.documentElement.classList.remove('dark');
             }
         })();
-    </script> --}}
+    </script>
 
     {{-- Main Assets (Vite) --}}
     @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/ajaxSearch.js'])
@@ -55,7 +55,7 @@
 </head>
 
 <body
-    class="bg-background-dark text-white font-display min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-primary selection:text-white transition-colors duration-300">
+    class="bg-background text-text font-display min-h-screen flex flex-col overflow-x-hidden antialiased selection:bg-primary selection:text-white transition-colors duration-300">
     <div id="app">
         @include('layouts.navbar')
 

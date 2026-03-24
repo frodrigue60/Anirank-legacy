@@ -24,11 +24,43 @@ class UserSettings extends Component
 
     #[Validate('required|in:POINT_100,POINT_10_DECIMAL,POINT_10,POINT_5')]
     public $score_format;
+    public $activeTab = 'profile';
+    public $profile_color;
+
+    #[Validate('nullable|string|max:2000')]
+    public $about;
+
+    public function setTab($tab)
+    {
+        $this->activeTab = $tab;
+    }
+
+    public function setProfileColor($color)
+    {
+        $this->profile_color = $color;
+        $this->user->update(['profile_color' => $color]);
+        
+        session()->flash('profile_success', 'Profile accent color updated successfully!');
+    }
+
+    public function saveAbout()
+    {
+        $this->validateOnly('about');
+
+        try {
+            $this->user->update(['about' => $this->about]);
+            session()->flash('about_success', 'About section updated successfully!');
+        } catch (\Exception $e) {
+            session()->flash('about_error', 'Error updating about section: ' . $e->getMessage());
+        }
+    }
 
     public function mount()
     {
-        $this->user = Auth::user();
+        $this->user = auth()->user();
         $this->score_format = $this->user->score_format;
+        $this->profile_color = $this->user->profile_color ?? '#7f13ec';
+        $this->about = $this->user->about;
         $this->score_formats = [
             ['name' => '100 Point (100/100)', 'value' => 'POINT_100'],
             ['name' => '10.0 Point Decimal (10.0/10)', 'value' => 'POINT_10_DECIMAL'],

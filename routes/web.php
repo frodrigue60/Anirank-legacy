@@ -61,6 +61,9 @@ Route::controller(SongController::class)->group(function () {
 
 Route::controller(UserController::class)->group(function () {
     Route::get('/users/{user:slug}', 'show')->name('users.show');
+    Route::get('/{user:slug}/favorites', function($slug) {
+        return redirect()->route('users.show', $slug);
+    });
 });
 
 Route::controller(ArtistController::class)->group(function () {
@@ -196,7 +199,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/profile/avatar', 'uploadProfilePic')->name('profile.avatar');
         Route::post('/profile/banner', 'uploadBannerPic')->name('profile.banner');
         Route::get('/settings', 'settings')->name('users.settings');
-        Route::get('/{user:slug}/favorites', 'favorites')->name('users.favorites');
     });
 
     // Song Variants Interactions

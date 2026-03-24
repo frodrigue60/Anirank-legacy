@@ -29,6 +29,8 @@ class User extends Authenticatable
         'password',
         'score_format_id',
         'slug',
+        'profile_color',
+        'about',
         'avatar',
         'banner',
     ];

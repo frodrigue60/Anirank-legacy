@@ -27,10 +27,13 @@ class StatsController extends Controller
             'ratings' => Rating::count(),
         ];
 
+        $driver = DB::connection()->getDriverName();
+        $format = $driver === 'pgsql' ? "TO_CHAR(created_at, 'YYYY-MM')" : "DATE_FORMAT(created_at, '%Y-%m')";
+
         // 2. User Growth (Last 12 Months)
         $userGrowth = User::select(
             DB::raw('COUNT(id) as count'),
-            DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month")
+            DB::raw("$format as month")
         )
             ->where('created_at', '>=', Carbon::now()->subMonths(12))
             ->groupBy('month')
@@ -40,7 +43,7 @@ class StatsController extends Controller
         // 3. Rating Activity (Last 12 Months)
         $ratingActivity = Rating::select(
             DB::raw('COUNT(id) as count'),
-            DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month")
+            DB::raw("$format as month")
         )
             ->where('created_at', '>=', Carbon::now()->subMonths(12))
             ->groupBy('month')

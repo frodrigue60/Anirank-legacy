@@ -116,16 +116,10 @@ class Song extends Model
         if (! Session::has($key)) {
             DB::beginTransaction();
             try {
-                // Static global count
+                // Static global count (Trigger handles DailyMetric update)
                 DB::table('songs')
                     ->where('id', $this->id)
                     ->increment('views');
-
-                // Daily time-series count
-                DailyMetric::updateOrCreate(
-                    ['song_id' => $this->id, 'date' => now()->toDateString()],
-                    ['views_count' => DB::raw('views_count + 1')]
-                );
 
                 DB::commit();
                 Session::put($key, true);

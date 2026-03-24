@@ -8,18 +8,18 @@
 
     {{-- Filters Bar --}}
     <div class="mb-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 bg-surface-dark/30 p-4 rounded-xl border border-white/5"
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 bg-surface/30 p-4 rounded-xl border border-border-site"
             wire:loading.class="opacity-50 pointer-events-none transition-opacity">
             {{-- Search --}}
             <div class="relative group">
                 <label
-                    class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-focus-within:text-primary transition-colors">Search</label>
+                    class="block text-[10px] uppercase font-black text-text-muted mb-1.5 ml-1 tracking-widest group-focus-within:text-primary transition-colors">Search</label>
                 <div class="relative">
                     <span
-                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-primary transition-colors">search</span>
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-primary transition-colors">search</span>
                     <input wire:model.live.debounce.300ms="name" type="text" placeholder="Search anime..."
                         wire:loading.attr="disabled"
-                        class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-white/20">
+                        class="w-full bg-surface-deep border border-border-site rounded-lg py-2.5 pl-10 pr-4 text-sm text-text focus:outline-none focus:border-primary/50 transition-all placeholder:text-text-muted">
                 </div>
             </div>
 
@@ -29,7 +29,7 @@
                     class="block text-[10px] uppercase font-black text-white/40 mb-1.5 ml-1 tracking-widest group-hover:text-primary transition-colors">Year</label>
                 <div class="relative">
                     <select wire:model.live="year_id" wire:loading.attr="disabled"
-                        class="w-full bg-surface-darker border border-white/10 rounded-lg py-2.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-darker/80">
+                        class="w-full bg-surface-deep border border-border-site rounded-lg py-2.5 pl-4 pr-10 text-sm text-text focus:outline-none focus:border-primary/50 transition-all appearance-none cursor-pointer hover:bg-surface-deep/80">
                         <option value="">Any Year</option>
                         @foreach ($this->years as $year)
                             <option value="{{ $year->id }}">{{ $year->name }}</option>
@@ -149,7 +149,7 @@
                             </div>
                         </div>
                         <h3
-                            class="mt-2 text-sm font-bold text-white leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                            class="mt-2 text-sm font-bold text-text leading-tight line-clamp-2 group-hover:text-primary transition-colors">
                             <a href="{{ route('animes.show', $anime) }}">{{ $anime->title }}</a>
                         </h3>
                     </div>
@@ -159,7 +159,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 @foreach ($animes as $anime)
                     <div wire:key="anime-large-{{ $anime->id }}"
-                        class="flex bg-surface-dark rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group relative border border-white/5">
+                        class="flex bg-surface rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow group relative border border-border-site">
                         <div class="w-[120px] md:w-[180px] shrink-0 relative aspect-2/3">
                             <a href="{{ route('animes.show', $anime) }}" class="block w-full h-full">
                                 <x-ui.image :src="$anime->cover_url" :alt="$anime->title" loading="lazy"
@@ -209,7 +209,7 @@
                                     @endforeach
                                 </div>
                             @endif
-                            <div class="text-xs text-white/60 overflow-hidden line-clamp-6 leading-relaxed mb-auto">
+                            <div class="text-xs text-text-muted overflow-hidden line-clamp-6 leading-relaxed mb-auto">
                                 {!! strip_tags($anime->description) !!}
                             </div>
                         </div>
@@ -227,7 +227,7 @@
                         </div>
                         <div class="min-w-0 flex flex-col gap-2">
                             <h3
-                                class="text-sm font-bold text-white leading-tight truncate px-1 group-hover:text-primary transition-colors">
+                                class="text-sm font-bold text-text leading-tight truncate px-1 group-hover:text-primary transition-colors">
                                 <a href="{{ route('animes.show', $anime) }}">{{ $anime->title }}</a>
                             </h3>
                             <div class="flex items-center gap-3 text-xs text-white/40 mt-0.5 px-1">

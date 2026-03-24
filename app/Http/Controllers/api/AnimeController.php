@@ -57,11 +57,11 @@ class AnimeController extends Controller
         $popular = Song::withUserInteractions()
             ->with(['anime:id,title,slug,cover,banner'])
             ->withAvg('ratings', 'rating')
-            ->withCount('likes')
+            ->withCount('likes as calculated_likes_count')
             ->whereHas('anime', function ($query) use ($status) {
                 $query->where('status', $status);
             })
-            ->orderByDesc('likes_count')
+            ->orderByDesc('calculated_likes_count')
             ->take(25)
             ->get();
 

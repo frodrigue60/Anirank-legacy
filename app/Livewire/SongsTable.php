@@ -114,7 +114,7 @@ class SongsTable extends Component
         $query = Song::query()
             ->with(['anime:id,title,slug,cover,banner', 'artists:id,name,slug,avatar'])
             ->withAvg('ratings', 'rating')
-            ->withCount('likes')
+            ->withCount('likes as calculated_likes_count')
             ->whereHas('anime', function ($q) {
                 $q->where('status', true);
                 if ($this->name) {
@@ -145,7 +145,7 @@ class SongsTable extends Component
                 $query->orderByDesc('views');
                 break;
             case 'likeCount':
-                $query->orderByDesc('likes_count');
+                $query->orderByDesc('calculated_likes_count');
                 break;
             case 'recent':
             default:

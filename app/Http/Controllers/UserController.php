@@ -56,13 +56,6 @@ class UserController extends Controller
         return view('public.users.settings', compact('score_formats', 'user'));
     }
 
-    public function favorites()
-    {
-        $user = Auth::user();
-
-        return view('public.users.show', compact('user'));
-    }
-
     public function sortSongs($sort, $songs)
     {
         switch ($sort) {
@@ -108,7 +101,7 @@ class UserController extends Controller
         $songs->each(function ($song) use ($score_format) {
             $song->score = $song->formattedAvgScore($score_format);
             $song->user_score = isset($song->rating)
-                ? $song->formattedUserScore($score_format, auth()->id())
+                ? $song->formattedUserScore($score_format, Auth::id())
                 : null;
         });
 
