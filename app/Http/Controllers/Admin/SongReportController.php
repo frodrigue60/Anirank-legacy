@@ -63,7 +63,7 @@ class SongReportController extends Controller
         try {
             $report->toggle();
 
-            return redirect()->back()->with('success', 'Report #'.$report->id.' status updated to '.$report->status);
+            return redirect()->back()->with('success', 'Report #'.$report->id.' status updated to '.($report->status ? 'Resolved' : 'Pending'));
         } catch (\Throwable $th) {
             return redirect()->back()->with('error', 'Failed to update report: '.$th->getMessage());
         }

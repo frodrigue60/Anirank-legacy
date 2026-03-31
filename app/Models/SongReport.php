@@ -9,8 +9,8 @@ class SongReport extends Model
 {
     use HasFactory;
 
-    const STATUS_PENDING = 'pending';
-    const STATUS_FIXED = 'fixed';
+    const STATUS_PENDING = false;
+    const STATUS_FIXED = true;
 
     protected $fillable = [
         'user_id',
@@ -19,6 +19,10 @@ class SongReport extends Model
         'content',
         'source',
         'status',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     public function song()
@@ -33,7 +37,7 @@ class SongReport extends Model
 
     public function toggle()
     {
-        $this->status = $this->status === self::STATUS_FIXED ? self::STATUS_PENDING : self::STATUS_FIXED;
+        $this->status = !$this->status;
         return $this->save();
     }
 }

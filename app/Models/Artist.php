@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Artist extends Model
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
+    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope, \App\Traits\HasUuid;
     protected $appends = ['avatar_url'];
 
     protected $fillable = [
@@ -17,6 +17,9 @@ class Artist extends Model
         'avatar',
         'status',
         'favorites_count',
+        'enabled_songs',
+        'disabled_songs',
+        'animethemes_id',
     ];
 
     protected $casts = [

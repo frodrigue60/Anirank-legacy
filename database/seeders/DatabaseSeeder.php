@@ -20,27 +20,41 @@ class DatabaseSeeder extends Seeder
         $this->call(RoleSeeder::class);
 
         // Create admin user or update if exists
-        $user = User::updateOrCreate(
-            ['email' => 'frodrigue60@gmail.com'],
-            [
-                'name' => 'Luis Rodz',
-                'slug' => Str::slug('Luis Rodz'),
-                'password' => bcrypt('a12edc21cd'),
-            ]
-        );
+        // Note: withoutEvents() suppresses the HasUuid trait's creating event,
+        // so we set uuid explicitly on first creation only.
+        $user = User::withoutEvents(function () {
+            $existing = User::where('email', 'frodrigue60@gmail.com')->first();
 
-        // Assign admin role (idempotent)
-        $adminRole = DB::table('roles')->where('slug', 'admin')->first();
-        if ($adminRole) {
+            if ($existing) {
+                $existing->update([
+                    'name'     => 'Luis Rodz',
+                    'slug'     => Str::slug('Luis Rodz'),
+                    'password' => bcrypt('a12edc21cd'),
+                ]);
+                return $existing;
+            }
+
+            return User::create([
+                'uuid'     => (string) Str::uuid7(),
+                'email'    => 'frodrigue60@gmail.com',
+                'name'     => 'Luis Rodz',
+                'slug'     => Str::slug('Luis Rodz'),
+                'password' => bcrypt('a12edc21cd'),
+            ]);
+        });
+
+        // Assign owner role (idempotent)
+        $ownerRole = DB::table('roles')->where('slug', 'owner')->first();
+        if ($ownerRole) {
             $hasRole = DB::table('role_user')
                 ->where('user_id', $user->id)
-                ->where('role_id', $adminRole->id)
+                ->where('role_id', $ownerRole->id)
                 ->exists();
 
-            if (!$hasRole) {
+            if (! $hasRole) {
                 DB::table('role_user')->insert([
                     'user_id' => $user->id,
-                    'role_id' => $adminRole->id,
+                    'role_id' => $ownerRole->id,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

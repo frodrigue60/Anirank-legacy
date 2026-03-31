@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tournament extends Model
 {
+    use \App\Traits\HasUuid;
     protected $fillable = [
         'name', 'slug', 'description', 'size', 'type_filter', 'status', 'current_round',
         'winner_song_id', 'started_at', 'completed_at'

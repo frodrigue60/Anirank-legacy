@@ -12,10 +12,11 @@ use App\Models\UserRequest;
 use App\Models\Comment;
 use App\Models\Favorite;
 use Illuminate\Support\Str;
+use App\Traits\HasUuid;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, \App\Traits\Auditable;
+    use HasApiTokens, HasFactory, Notifiable, \App\Traits\Auditable, HasUuid;
     protected $appends = ['avatar_url', 'banner_url', 'xp_progress', 'level_name'];
 
     /**
@@ -62,6 +63,22 @@ class User extends Authenticatable
     public function userRequests()
     {
         return $this->hasMany(UserRequest::class);
+    }
+
+    /**
+     * Get the reports received by this user.
+     */
+    public function reportsReceived()
+    {
+        return $this->hasMany(UserReport::class, 'reported_user_id');
+    }
+
+    /**
+     * Get the reports submitted by this user.
+     */
+    public function reportsSubmitted()
+    {
+        return $this->hasMany(UserReport::class, 'reporter_user_id');
     }
 
     public function roles()

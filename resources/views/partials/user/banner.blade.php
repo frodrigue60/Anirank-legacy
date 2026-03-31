@@ -104,7 +104,14 @@
 
                     {{-- Actions --}}
                     @if(auth()->check() && auth()->id() !== $user->id)
-                        <div class="flex items-center justify-center md:justify-end">
+                        <div class="flex items-center justify-center md:justify-end gap-3">
+                            <button onclick="Livewire.dispatch('openUserReportModal', { reportedUserId: '{{ $user->id }}' })"
+                                class="p-2.5 rounded-xl border border-white/5 bg-white/5 text-white/40 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all duration-300 group"
+                                title="Report Profile">
+                                <span class="material-symbols-outlined transition-transform duration-300 group-hover:scale-110">
+                                    report
+                                </span>
+                            </button>
                             @livewire('follow-button', ['user' => $user])
                         </div>
                     @endif

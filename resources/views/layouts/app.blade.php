@@ -70,6 +70,7 @@
             @auth
                 <livewire:request-modal />
                 <livewire:report-modal />
+                <livewire:user-report-modal />
             @endauth
         </main>
 

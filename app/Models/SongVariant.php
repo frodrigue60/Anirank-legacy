@@ -9,7 +9,7 @@ use App\Models\Video;
 
 class SongVariant extends Model
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
+    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope, \App\Traits\HasUuid;
 
     protected $fillable = [
         'id',

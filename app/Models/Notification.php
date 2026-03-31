@@ -15,6 +15,7 @@ class Notification extends Model
         'type',
         'subject_id',
         'subject_type',
+        'subject_uuid',
         'data',
         'read_at',
     ];

@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\SongVariantController as AdminSongVariantControll
 use App\Http\Controllers\Admin\StudioController as AdminStudioController;
 use App\Http\Controllers\Admin\TournamentController as AdminTournamentController;
 use App\Http\Controllers\Admin\AuditLogController as AdminAuditLogController;
+use App\Http\Controllers\Admin\UserReportController as AdminUserReportController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\UserRequestController as AdminUserRequestController;
 use App\Http\Controllers\Admin\VideoController as AdminVideoController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\SongController;
 use App\Http\Controllers\SongVariantController;
 use App\Http\Controllers\StudioController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserReportController;
 use App\Http\Controllers\UserRequestController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -94,6 +96,7 @@ Route::resource('variants', SongVariantController::class);
 Route::resource('requests', UserRequestController::class);
 Route::resource('reports', SongReportController::class)->only(['store']);
 Route::resource('comment-reports', CommentReportController::class)->only(['store']);
+Route::resource('user-reports', UserReportController::class)->only(['store']);
 Route::resource('playlists', PlaylistController::class);
 
 /*
@@ -131,6 +134,12 @@ Route::middleware('role:admin,editor,creator')->prefix('admin')->as('admin.')->g
     Route::patch('/comment-reports/{report}/toggle', [AdminCommentReportController::class, 'toggle'])->name('comment-reports.toggle');
     Route::resource('comment-reports', AdminCommentReportController::class)->parameters([
         'comment-reports' => 'report'
+    ]);
+
+    // User Reports
+    Route::patch('/user-reports/{report}/toggle', [AdminUserReportController::class, 'toggle'])->name('user-reports.toggle');
+    Route::resource('user-reports', AdminUserReportController::class)->parameters([
+        'user-reports' => 'report'
     ]);
 
     // Animes

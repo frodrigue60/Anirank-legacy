@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Studio extends Model
 {
-    use HasFactory, \App\Traits\Auditable;
+    use HasFactory, \App\Traits\Auditable, \App\Traits\HasUuid;
     protected $appends = ['logo_url'];
 
     protected $fillable = [
         'name',
         'slug',
-        'logo'
+        'logo',
+        'anime_count'
     ];
 
     protected static function boot()
@@ -38,7 +39,7 @@ class Studio extends Model
     {
         if (!$this->logo) return null;
         if (filter_var($this->logo, FILTER_VALIDATE_URL)) return $this->logo;
-        return \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->logo);
+        return \Illuminate\Support\Facades\Storage::url($this->logo);
     }
 
     // Keep avatar_url for backward compatibility if needed

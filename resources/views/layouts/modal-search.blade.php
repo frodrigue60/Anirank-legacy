@@ -1,4 +1,4 @@
-<div id="modal-search" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+<div id="modal-search" class="fixed inset-0 z-100 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog"
     aria-modal="true">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {{-- Backdrop --}}
@@ -33,7 +33,7 @@
                     </div>
                     <form role="search" id="form-search" data-url-base="{{ config('app.url') }}">
                         <input id="searchInputModal"
-                            class="w-full !bg-surface-dark border border-white/10 rounded-full py-4 pl-12 pr-6 !text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium text-lg"
+                            class="w-full bg-surface-dark! border border-white/10 rounded-full py-4 pl-12 pr-6 text-white! placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all font-medium text-lg"
                             type="search" placeholder="Search anime, artists, users..." autocomplete="off">
                     </form>
                 </div>
@@ -49,9 +49,9 @@
                                     <span class="material-symbols-outlined text-[14px] filled">movie</span>
                                     Animes
                                 </span>
-                                <div class="h-px flex-grow bg-white/5"></div>
+                                <div class="h-px grow bg-white/5"></div>
                             </div>
-                            <div id="posts" class="grid grid-cols-1 gap-3"></div>
+                            <div id="animes" class="grid grid-cols-1 gap-3"></div>
                         </section>
 
                         {{-- Artists Section --}}
@@ -62,7 +62,7 @@
                                     <span class="material-symbols-outlined text-[14px] filled">person</span>
                                     Artists
                                 </span>
-                                <div class="h-px flex-grow bg-white/5"></div>
+                                <div class="h-px grow bg-white/5"></div>
                             </div>
                             <div id="artists" class="grid grid-cols-1 gap-3"></div>
                         </section>
@@ -75,7 +75,7 @@
                                     <span class="material-symbols-outlined text-[14px] filled">group</span>
                                     Users
                                 </span>
-                                <div class="h-px flex-grow bg-white/5"></div>
+                                <div class="h-px grow bg-white/5"></div>
                             </div>
                             <div id="users" class="grid grid-cols-1 gap-3"></div>
                         </section>

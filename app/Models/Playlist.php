@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Playlist extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\HasUuid;
 
     protected $fillable = ['name', 'description', 'user_id', 'is_public'];
 
