@@ -16,8 +16,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // Seed roles first
-        $this->call(RoleSeeder::class);
+        // Seed initial lookup tables and roles
+        $this->call([
+            RoleSeeder::class,
+            SeasonSeeder::class,
+            YearSeeder::class,
+            XpSystemSeeder::class,
+        ]);
 
         // Create admin user or update if exists
         // Note: withoutEvents() suppresses the HasUuid trait's creating event,
@@ -27,18 +32,19 @@ class DatabaseSeeder extends Seeder
 
             if ($existing) {
                 $existing->update([
-                    'name'     => 'Luis Rodz',
-                    'slug'     => Str::slug('Luis Rodz'),
+                    'name' => 'Luis Rodz',
+                    'slug' => Str::slug('Luis Rodz'),
                     'password' => bcrypt('a12edc21cd'),
                 ]);
+
                 return $existing;
             }
 
             return User::create([
-                'uuid'     => (string) Str::uuid7(),
-                'email'    => 'frodrigue60@gmail.com',
-                'name'     => 'Luis Rodz',
-                'slug'     => Str::slug('Luis Rodz'),
+                'uuid' => (string) Str::uuid7(),
+                'email' => 'frodrigue60@gmail.com',
+                'name' => 'Luis Rodz',
+                'slug' => Str::slug('Luis Rodz'),
                 'password' => bcrypt('a12edc21cd'),
             ]);
         });

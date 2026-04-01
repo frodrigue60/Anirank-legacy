@@ -24,6 +24,7 @@ return new class extends Migration
             // Profile
             $table->string('about', 500)->nullable();
             $table->string('profile_color', 20)->nullable();
+            $table->string('avatar')->nullable();
             $table->string('banner')->nullable();
 
             // Gamification

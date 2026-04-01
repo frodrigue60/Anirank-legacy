@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->nullable();
             $table->timestamps();
+            $table->boolean('current')->default(false);
         });
 
         Schema::create('years', function (Blueprint $table) {
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->string('slug')->nullable();
             $table->unsignedInteger('year')->nullable();
             $table->timestamps();
+            $table->boolean('current')->default(false);
         });
 
         Schema::create('score_formats', function (Blueprint $table) {

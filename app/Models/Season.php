@@ -13,6 +13,7 @@ class Season extends Model
     protected $fillable = [
         'name',
         'slug',
+        'current',
     ];
 
     public function animes()

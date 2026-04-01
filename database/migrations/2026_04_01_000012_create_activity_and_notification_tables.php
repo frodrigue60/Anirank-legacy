@@ -25,6 +25,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('type', 50); // 'reply', 'follow', 'like', etc.
             $table->unsignedBigInteger('subject_id')->nullable();
+            $table->uuid('subject_uuid')->nullable();
             $table->string('subject_type', 50)->nullable(); // 'song', 'comment', etc.
             $table->json('data');
             $table->timestamp('read_at')->nullable();
