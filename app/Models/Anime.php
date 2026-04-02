@@ -23,6 +23,8 @@ class Anime extends Model
         'anilist_id',
         'banner',
         'status',
+        'enabled_songs',
+        'disabled_songs',
     ];
 
     protected $casts = [
