@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class XpSystemSeeder extends Seeder
 {
@@ -23,12 +23,12 @@ class XpSystemSeeder extends Seeder
         ];
 
         foreach ($activities as $activity) {
-            \DB::table('xp_activities')->updateOrInsert(['key' => $activity['key']], $activity);
+            DB::table('xp_activities')->updateOrInsert(['key' => $activity['key']], $activity);
         }
 
         // Levels (1 to 100)
         for ($i = 1; $i <= 100; $i++) {
-            \DB::table('levels')->updateOrInsert(['level' => $i], [
+            DB::table('levels')->updateOrInsert(['level' => $i], [
                 'min_xp' => 500 * ($i - 1) * $i,
                 'name' => null,
                 'created_at' => now(),

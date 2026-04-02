@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Tournament extends Model
 {
+    use HasUuids;
+
     protected $fillable = [
-        'name', 'slug', 'description', 'size', 'type_filter', 'status', 'current_round',
+        'uuid', 'name', 'slug', 'description', 'size', 'type_filter', 'status', 'current_round',
         'winner_song_id', 'started_at', 'completed_at'
     ];
 

@@ -5,19 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ExternalLink extends Model
+class Permission extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'url',
-        'icon',
-        'type'
+        'slug',
+        'description',
     ];
 
-    public function anime()
+    public function roles()
     {
-        return $this->belongsToMany(Anime::class)->withTimestamps();
+        return $this->belongsToMany(Role::class);
     }
 }

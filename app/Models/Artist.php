@@ -4,13 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Artist extends Model
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
+    use HasFactory, HasUuids, \App\Traits\Auditable, \App\Traits\PublishedScope;
     protected $appends = ['avatar_url'];
 
     protected $fillable = [
+        'uuid',
+        'anime_themes_id',
+        'anilist_id',
         'name',
         'name_jp',
         'slug',

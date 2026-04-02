@@ -63,7 +63,7 @@ trait Auditable
         }
 
         AuditLog::create([
-            'user_id'        => $userId ?? 0,
+            'user_id'        => $userId,
             'event'          => $event,
             'auditable_id'   => $this->getKey(),
             'auditable_type' => $this->getMorphClass(),

@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Song extends Model
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
+    use HasFactory, HasUuids, \App\Traits\Auditable, \App\Traits\PublishedScope;
 
     protected $appends = [
         'name',
@@ -23,6 +24,8 @@ class Song extends Model
     ];
 
     protected $fillable = [
+        'uuid',
+        'anime_themes_id',
         'song_romaji',
         'song_jp',
         'song_en',

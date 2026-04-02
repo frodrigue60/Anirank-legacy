@@ -6,15 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 class Studio extends Model
 {
-    use HasFactory, \App\Traits\Auditable;
+    use HasFactory, HasUuids, \App\Traits\Auditable;
     protected $appends = ['logo_url'];
 
     protected $fillable = [
+        'uuid',
         'name',
         'slug',
-        'logo'
+        'logo',
+        'anime_count'
     ];
 
     protected static function boot()
@@ -49,6 +53,6 @@ class Studio extends Model
 
     public function animes()
     {
-        return $this->belongsToMany(Anime::class);
+        return $this->belongsToMany(Anime::class)->withTimestamps();
     }
 }

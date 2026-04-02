@@ -6,13 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 class Anime extends Model
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
+    use HasFactory, HasUuids, \App\Traits\Auditable, \App\Traits\PublishedScope;
 
     protected $appends = ['cover_url', 'banner_url'];
 
     protected $fillable = [
+        'uuid',
+        'anime_themes_id',
         'title',
         'slug',
         'description',
@@ -88,12 +92,12 @@ class Anime extends Model
 
     public function studios()
     {
-        return $this->belongsToMany(Studio::class);
+        return $this->belongsToMany(Studio::class)->withTimestamps();
     }
 
     public function producers()
     {
-        return $this->belongsToMany(Producer::class);
+        return $this->belongsToMany(Producer::class)->withTimestamps();
     }
 
     public function format()
@@ -103,12 +107,12 @@ class Anime extends Model
 
     public function genres()
     {
-        return $this->belongsToMany(Genre::class);
+        return $this->belongsToMany(Genre::class)->withTimestamps();
     }
 
     public function externalLinks()
     {
-        return $this->belongsToMany(ExternalLink::class);
+        return $this->belongsToMany(ExternalLink::class)->withTimestamps();
     }
 
     public function toggleStatus()

@@ -13,6 +13,7 @@ class SongVariant extends Model
 
     protected $fillable = [
         'id',
+        'anime_themes_id',
         'version_number',
         'song_id',
         'views',
