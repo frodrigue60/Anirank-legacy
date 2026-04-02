@@ -21,6 +21,8 @@ class Artist extends Model
         'avatar',
         'status',
         'favorites_count',
+        'enabled_songs',
+        'disabled_songs',
     ];
 
     protected $casts = [
