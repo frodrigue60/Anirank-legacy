@@ -11,7 +11,11 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Song extends Model
 {
+<<<<<<< HEAD
     use HasFactory, HasUuids, \App\Traits\Auditable, \App\Traits\PublishedScope;
+=======
+    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope, \App\Traits\HasUuid;
+>>>>>>> origin/main
 
     protected $appends = [
         'name',
@@ -31,6 +35,10 @@ class Song extends Model
         'song_en',
         'theme_num',
         'type',
+        'slug',
+        'anime_id',
+        'season_id',
+        'year_id',
         'prev_seasonal_rank',
         'status',
         'favorites_count',

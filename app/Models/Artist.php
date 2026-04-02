@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Artist extends Model
 {
-    use HasFactory, HasUuids, \App\Traits\Auditable, \App\Traits\PublishedScope;
+    use HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope, \App\Traits\HasUuid;
+
     protected $appends = ['avatar_url'];
 
     protected $fillable = [

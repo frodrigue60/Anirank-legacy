@@ -7,8 +7,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Tournament extends Model
 {
+<<<<<<< HEAD
     use HasUuids;
 
+=======
+    use \App\Traits\HasUuid;
+>>>>>>> origin/main
     protected $fillable = [
         'uuid', 'name', 'slug', 'description', 'size', 'type_filter', 'status', 'current_round',
         'winner_song_id', 'started_at', 'completed_at'

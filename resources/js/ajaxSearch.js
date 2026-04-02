@@ -2,7 +2,7 @@ import { API, csrfToken } from "@/app.js";
 
 const formSearch = document.querySelector("#form-search");
 const modalSearch = document.querySelector("#modal-search");
-const postsDiv = document.querySelector("#posts");
+const animesDiv = document.querySelector("#animes");
 const artistsDiv = document.querySelector("#artists");
 const usersDiv = document.querySelector("#users");
 const input = formSearch.querySelector("#searchInputModal");
@@ -64,14 +64,14 @@ async function apiSearch() {
         resetDivs();
 
         if (
-            response.posts.length === 0 &&
+            response.animes.length === 0 &&
             response.artists.length === 0 &&
             response.users.length === 0
         ) {
             nullValueInput();
         } else {
-            response.posts.forEach((post) => {
-                let url = baseUrl + "/anime/" + post.slug;
+            response.animes.forEach((anime) => {
+                let url = baseUrl + "/anime/" + anime.slug;
                 let resultDiv = document.createElement("div");
                 resultDiv.className =
                     "group p-3 hover:bg-white/5 rounded-xl transition-all truncate border border-transparent hover:border-white/5";
@@ -80,10 +80,10 @@ async function apiSearch() {
                 a.href = url;
                 a.className =
                     "text-white/80 group-hover:text-primary font-bold transition-colors flex items-center gap-3";
-                a.innerHTML = `<span class="material-symbols-outlined text-white/20 text-[18px]">movie</span> ${post.title}`;
+                a.innerHTML = `<span class="material-symbols-outlined text-white/20 text-[18px]">movie</span> ${anime.title}`;
 
                 resultDiv.appendChild(a);
-                postsDiv.appendChild(resultDiv);
+                animesDiv.appendChild(resultDiv);
             });
 
             response.artists.forEach((artist) => {
@@ -126,13 +126,13 @@ async function apiSearch() {
 }
 
 function resetDivs() {
-    postsDiv.innerHTML = "";
+    animesDiv.innerHTML = "";
     artistsDiv.innerHTML = "";
     usersDiv.innerHTML = "";
 }
 
 function nullValueInput() {
-    postsDiv.appendChild(createResultDiv("No results matched your search"));
+    animesDiv.appendChild(createResultDiv("No results matched your search"));
     artistsDiv.appendChild(createResultDiv("No results matched your search"));
     usersDiv.appendChild(createResultDiv("No results matched your search"));
 }
@@ -161,6 +161,6 @@ function createLoadingElement() {
 }
 
 function insertLoader() {
-    postsDiv.innerHTML = ""; // Clear before loading
-    postsDiv.appendChild(createLoadingElement());
+    animesDiv.innerHTML = ""; // Clear before loading
+    animesDiv.appendChild(createLoadingElement());
 }

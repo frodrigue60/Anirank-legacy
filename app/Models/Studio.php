@@ -10,7 +10,11 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Studio extends Model
 {
+<<<<<<< HEAD
     use HasFactory, HasUuids, \App\Traits\Auditable;
+=======
+    use HasFactory, \App\Traits\Auditable, \App\Traits\HasUuid;
+>>>>>>> origin/main
     protected $appends = ['logo_url'];
 
     protected $fillable = [
@@ -42,7 +46,7 @@ class Studio extends Model
     {
         if (!$this->logo) return null;
         if (filter_var($this->logo, FILTER_VALIDATE_URL)) return $this->logo;
-        return \Illuminate\Support\Facades\Storage::disk(env('FILESYSTEM_DISK', 'public'))->url($this->logo);
+        return \Illuminate\Support\Facades\Storage::url($this->logo);
     }
 
     // Keep avatar_url for backward compatibility if needed

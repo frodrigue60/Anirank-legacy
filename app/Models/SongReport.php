@@ -25,6 +25,10 @@ class SongReport extends Model
         'status' => 'boolean',
     ];
 
+    protected $casts = [
+        'status' => 'boolean',
+    ];
+
     public function song()
     {
         return $this->belongsTo(Song::class);
@@ -37,7 +41,11 @@ class SongReport extends Model
 
     public function toggle()
     {
+<<<<<<< HEAD
         $this->status = ! $this->status;
+=======
+        $this->status = !$this->status;
+>>>>>>> origin/main
         return $this->save();
     }
 }

@@ -9,7 +9,7 @@ use App\Models\Reaction;
 
 class Comment extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\HasUuid;
 
     protected $fillable = ['content', 'user_id', 'parent_id', 'song_id'];
 

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\SongController;
 use App\Http\Controllers\Api\SongVariantController;
 use App\Http\Controllers\Api\StudioController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserReportController;
 use App\Http\Controllers\Api\UserRequestController;
 use Illuminate\Support\Facades\Route;
 
@@ -119,6 +120,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Comment Reports
     Route::controller(CommentReportController::class)->group(function () {
         Route::post('comments/reports', 'store')->name('api.comments.reports.store');
+    });
+
+    // User Reports
+    Route::controller(UserReportController::class)->group(function () {
+        Route::post('users/reports', 'store')->name('api.users.reports.store');
     });
 
     // Comments

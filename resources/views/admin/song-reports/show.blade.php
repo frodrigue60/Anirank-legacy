@@ -45,7 +45,7 @@
                     </h3>
 
                     <div class="space-y-3">
-                        @if ($report->status == 'pending')
+                        @if (!$report->status)
                             <a href="{{ route('admin.song-reports.toggle', $report->id) }}"
                                 class="w-full inline-flex items-center justify-center px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-900/20">
                                 <span class="material-symbols-outlined mr-2">check_circle</span> MARK AS READ

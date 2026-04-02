@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Traits\HasUuid;
 
 class Anime extends Model
 {
-    use HasFactory, HasUuids, \App\Traits\Auditable, \App\Traits\PublishedScope;
+    use HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope, HasUuid;
 
     protected $appends = ['cover_url', 'banner_url'];
 

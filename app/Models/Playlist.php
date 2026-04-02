@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 
 class Playlist extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, \App\Traits\HasUuid;
 
     protected $fillable = ['uuid', 'name', 'description', 'user_id', 'is_public'];
 

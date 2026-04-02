@@ -12,6 +12,9 @@ class Year extends Model
 
     protected $fillable = [
         'name',
+        'slug',
+        'year',
+        'current',
     ];
 
     public function animes()
