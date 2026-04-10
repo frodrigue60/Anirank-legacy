@@ -7,12 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Song;
 use App\Models\Video;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 class SongVariant extends Model
 {
-    use \Illuminate\Database\Eloquent\Factories\HasFactory, \App\Traits\Auditable, \App\Traits\PublishedScope;
+    use HasFactory, HasUuids, \App\Traits\Auditable, \App\Traits\PublishedScope;
 
     protected $fillable = [
         'id',
+        'uuid',
         'anime_themes_id',
         'version_number',
         'song_id',

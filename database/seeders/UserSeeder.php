@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
@@ -40,10 +39,28 @@ class UserSeeder extends Seeder
                 ->where('role_id', $ownerRole->id)
                 ->exists();
 
-            if (!$hasRole) {
+            if (! $hasRole) {
                 DB::table('role_user')->insert([
                     'user_id' => $user->id,
                     'role_id' => $ownerRole->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        // assign score format
+        $scoreFormat = DB::table('score_formats')->where('slug', 'POINT_100')->first();
+        if ($user && $scoreFormat) {
+            $hasScoreFormat = DB::table('score_format_user')
+                ->where('user_id', $user->id)
+                ->where('score_format_id', $scoreFormat->id)
+                ->exists();
+
+            if (! $hasScoreFormat) {
+                DB::table('score_format_user')->insert([
+                    'user_id' => $user->id,
+                    'score_format_id' => $scoreFormat->id,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);

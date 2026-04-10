@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Reaction;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
 class Comment extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUuids;
 
-    protected $fillable = ['content', 'user_id', 'parent_id', 'song_id'];
+    protected $fillable = ['uuid', 'content', 'user_id', 'parent_id', 'song_id'];
 
     protected static function boot()
     {

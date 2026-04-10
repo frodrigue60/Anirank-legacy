@@ -43,6 +43,14 @@ return new class extends Migration
                 ->update(['score_format_id' => $format->id]);
         }
 
+        // Asignar formato por defecto (100 Point) a quienes no tengan uno definido
+        $defaultFormat = DB::table('score_formats')->where('slug', 'POINT_100')->first();
+        if ($defaultFormat) {
+            DB::table('users')
+                ->whereNull('score_format_id')
+                ->update(['score_format_id' => $defaultFormat->id]);
+        }
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('score_format');
             $table->foreign('score_format_id')->references('id')->on('score_formats')->onDelete('restrict');
